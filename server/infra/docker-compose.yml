@@ -1,0 +1,92 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: infra/.dev.api.dockerfile
+    container_name: backend_api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ..:/app
+    env_file:
+      - ../internal/shared/config/.env
+
+    depends_on:
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  worker:
+    build:
+      context: ..
+      dockerfile: infra/.dev.worker.dockerfile
+    container_name: infra-layer
+    env_file:
+      - ../internal/shared/config/.env
+    volumes:
+      - ..:/app
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+    # volumes:
+    #   - transcoder_tmp:/tmp/transcoding
+
+    depends_on:
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+    networks:
+      - app-network
+  redis:
+    image: redis:latest
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+    networks:
+      - app-network
+
+  database:
+    image: postgres:16
+    container_name: pgdata
+    restart: always
+
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+
+    volumes:
+      - pgdata:/var/lib/postgressql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  transcoder_tmp:
+  redis-data:

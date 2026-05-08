@@ -1,0 +1,16 @@
+CONTAINER ID   IMAGE                                COMMAND                  CREATED          STATUS                      PORTS                                            NAMES
+4c574d530ae0   infra-api                            "./server"               38 minutes ago   Up 38 minutes               0.0.0.0:6000->6000/tcp, [::]:6000->6000/tcp      backend_api
+43825bb4e96a   infra-worker                         "./worker"               38 minutes ago   Exited (0) 38 minutes ago                                                    infra-layer
+a9b9d3984dc1   postgres:16                          "docker-entrypoint.s…"   20 hours ago     Up 39 minutes (healthy)     5432/tcp                                         pgdata
+7ab4a0f4ba7c   redis:latest                         "docker-entrypoint.s…"   20 hours ago     Up 38 minutes (healthy)     6379/tcp                                         infra-redis-1
+9cc43623980c   secure/video:latest                  "/usr/local/bin/dock…"   44 hours ago     Exited (255) 24 hours ago   0.0.0.0:3000->3000/tcp, 0.0.0.0:5555->5555/tcp   backend-video-secure
+8f85d3ac6d05   postgres:16                          "docker-entrypoint.s…"   2 days ago       Up 39 minutes (healthy)     5432/tcp                                         postgres-database
+127e5bcb3aec   redis:latest                         "docker-entrypoint.s…"   2 days ago       Exited (255) 24 hours ago   6379/tcp                                         app-redis-1
+5531abf9c24e   ajaysingh24/vickyakku:latest         "/usr/local/bin/dock…"   4 days ago       Exited (255) 3 days ago     0.0.0.0:3000->3000/tcp, 0.0.0.0:5555->5555/tcp   backend
+b95395106086   postgres:16                          "docker-entrypoint.s…"   6 days ago       Up 39 minutes               0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp      postgres
+eee35d209f6a   infra-gateway                        "/docker-entrypoint.…"   8 days ago       Exited (255) 8 days ago     0.0.0.0:80->80/tcp                               infra-gateway-1
+1ac034d0b88c   infra-exchange-intigration-service   "./exchange-intigrat…"   8 days ago       Exited (2) 6 days ago                                                        infra-exchange-intigration-service-1
+ec4c68581f5f   infra-user-service                   "./user-service-serv…"   8 days ago       Exited (2) 6 days ago                                                        infra-user-service-1
+e713b4006ce5   postgres:16                          "docker-entrypoint.s…"   8 days ago       Exited (0) 6 days ago                                                        user-db
+bfb04a50e812   inngest/inngest:latest               "inngest dev -u http…"   13 days ago      Exited (255) 3 days ago     0.0.0.0:8288->8288/tcp                           backend-inngest-1
+276c950aa713   redis:latest                         "docker-entrypoint.s…"   13 days ago      Exited (255) 3 days ago     0.0.0.0:6379->6379/tcp                           backend-redis-1
