@@ -1,0 +1,123 @@
+package services
+
+import (
+	"context"
+	// "errors"
+	"log"
+
+	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
+	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
+	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+	// "gorm.io/gorm"
+)
+
+type UserServiceInterface interface {
+	Create(ctx context.Context, user *domain.User) (*domain.User, error)
+	Login(ctx context.Context,email string,password string) (*domain.User,error)
+	GetUser(ctx context.Context,id uuid.UUID) (*domain.User,error)
+}
+
+type userServiceRepo struct {
+	userRepo repository.UserRepository
+	jwtToken   *utils.JwtMaker
+	db *gorm.DB
+}
+
+
+func NewUserService(userRepo repository.UserRepository,jwtToken *utils.JwtMaker,db *gorm.DB)UserServiceInterface {
+	return &userServiceRepo{userRepo:userRepo,jwtToken:jwtToken,db: db}
+}
+
+
+func (r *userServiceRepo) Create (ctx context.Context,user *domain.User) ( *domain.User , error) {
+	_,err:=r.userRepo.GetByEmail(ctx,user.Email)
+
+	if  (err!=nil){
+		return nil, utils.New(409,err.Error());
+	}
+
+	// hashing the password
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, utils.New(500,err.Error());
+	}
+	if user.Role == "" {
+    	user.Role = "User"
+	}
+
+	userPayload := &domain.User{
+		Email:    user.Email,
+		Password: string(hashedPassword),
+		Role: user.Role,
+		ID: user.ID,
+		IsActive: true,
+	}
+
+	tx:=r.db
+
+
+
+	data,err:=r.userRepo.CreateTx(ctx,tx,userPayload)
+
+	if err!=nil{
+		tx.Rollback()
+		log.Println("User Create Error:", err.Error())
+		return  nil,err
+	}
+
+
+	
+	return data,nil
+}
+
+
+func (r *userServiceRepo) Login (ctx context.Context,email string,password string) (*domain.User,error) {
+
+	existing_user,err:=r.userRepo.GetByEmail(ctx,email)
+
+	if (err!=nil ) {
+		return nil,&utils.ApiError{
+			Code: 404,
+			Message: "User is not Found !",
+		}
+	}
+
+	if existing_user == nil {
+		return nil, &utils.ApiError{
+			Code:    404,
+			Message: "User not found",
+		}
+	}
+
+	if (existing_user.IsActive==false) {
+		return nil,&utils.ApiError{
+			Code: 403,
+			Message: "User is Not Active",
+		}
+	}
+	if bcrypt.CompareHashAndPassword([]byte(existing_user.Password), []byte(password)) != nil {
+		return nil,&utils.ApiError{
+			Code: 401,
+			Message: "Invalid Credentials!",
+		}
+	}
+
+	return existing_user,nil
+}
+
+
+func (r *userServiceRepo) GetUser (ctx context.Context ,id uuid.UUID) (*domain.User,error){
+
+	userData,err:=r.userRepo.GetByID(ctx,id)
+
+	if (err!=nil){
+		return nil, err;
+
+	}
+
+	return userData,nil
+}
