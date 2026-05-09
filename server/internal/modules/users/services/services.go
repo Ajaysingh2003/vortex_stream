@@ -4,7 +4,7 @@ import (
 	"context"
 	// "errors"
 	"log"
-
+	workspaceRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/repository"
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
@@ -23,6 +23,7 @@ type UserServiceInterface interface {
 type userServiceRepo struct {
 	userRepo repository.UserRepository
 	jwtToken   *utils.JwtMaker
+	workspaceRepo workspaceRepo.WorkshopRepository 
 	db *gorm.DB
 }
 
@@ -69,6 +70,23 @@ func (r *userServiceRepo) Create (ctx context.Context,user *domain.User) ( *doma
 		return  nil,err
 	}
 
+	workspacePayload:=&domain.Workspaces{
+		Name: "My Workspace",
+		UserID: user.ID,
+		IsDefault: true,
+
+	}
+
+	_,err=r.workspaceRepo.CreateTx(ctx, tx , workspacePayload)
+
+
+	if err != nil {
+
+		tx.Rollback()
+		log.Println("User Create Error:", err.Error())
+		return nil, err
+		
+	}
 
 	
 	return data,nil
