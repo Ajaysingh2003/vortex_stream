@@ -55,15 +55,17 @@ func InitDb() *gorm.DB {
     //     DROP TABLE IF EXISTS users CASCADE;
     // `).Error
 	
+	fmt.Print("starting database")
 
 	err = db.AutoMigrate(
 		&domain.Workspaces{},
 		&domain.User{},
 		&domain.Video{},
+		&domain.PlayerSettings{},
 		&domain.VideoResolution{},
 		&domain.VideoDomain{},
 	)
-		
+		  
 	if err != nil {
 		log.Fatal("❌ Migration failed: ", err)
 	}

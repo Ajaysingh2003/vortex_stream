@@ -45,7 +45,7 @@ func main() {
 	workspaceRepo:=workspaceRepository.NewPostgresWorkspaceRepository(database)
 	jwtToken := utils.NewJwtMaker(secretKey)
 
-	userService:=services.NewUserService(userRepo,jwtToken,database)
+	userService:=services.NewUserService(userRepo,jwtToken,workspaceRepo,database)
 	uploadService:=serviceUpload.NewUploadService(userRepo,videoRepo,workspaceRepo)
 	videoService:=videoService.NewVideoService(userRepo , videoRepo)
 	
@@ -57,7 +57,7 @@ func main() {
 		 UploadService: uploadService,
 		 UserRepo: userRepo,
 	}
-
+	
 	videohandler:=&videoHandler.VideoHandler{
 		VideoService:videoService,
 		UserRepo: userRepo,
