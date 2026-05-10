@@ -2,8 +2,8 @@ package domain
 
 import (
 	"time"
-
 	"github.com/google/uuid"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -38,6 +38,7 @@ const (
 
 
 type Workspaces struct {
+
 	ID uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
 	Name string   `gorm:"type:varchar(255);not null" json:"name"`
 	UserID uuid.UUID `gorm:"type:uuid;index" json:"userId"`
@@ -47,9 +48,28 @@ type Workspaces struct {
     UpdatedAt time.Time      `json:"updatedAt"`
     DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 	Videos []Video `gorm:"foreignKey:WorkspaceId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
+	PlayerSettings *PlayerSettings `gorm:"foreignKey:WorkspaceId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"playerSettings"`
+
+
 }
 
 
+type PlayerSettings struct{
+
+	ID uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+
+	WorkspaceId uuid.UUID `gorm:"type:uuid;uniqueIndex" json:"workspaceId"`
+
+	GeneralSettings  datatypes.JSON `json:"general_settings" gorm:"type:jsonb;default:'{}'"`
+	ControlSettings  datatypes.JSON `json:"control_settings" gorm:"type:jsonb;default:'{}'"`
+	BrandingSettings datatypes.JSON `json:"branding_settings" gorm:"type:jsonb;default:'{}'"`
+	SecuritySettings datatypes.JSON `json:"security_settings" gorm:"type:jsonb;default:'{}'"`
+	AdvancedSettings datatypes.JSON `json:"advanced_settings" gorm:"type:jsonb;default:'{}'"`
+	
+	CreatedAt time.Time      `json:"createdAt"`
+    UpdatedAt time.Time      `json:"updatedAt"`
+	
+}
 
 
 
@@ -74,8 +94,8 @@ type Video struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	Title     string    `gorm:"type:varchar(255);not null" json:"title"`
 	
-	WorkspaceId uuid.UUID `gorm:"type:uuid;index" json:"workspaceId"`
-	Workspaces *Workspaces       `gorm:"foreginKey:workspaceId;references:ID" json:"workspace.omitempty"`
+	WorkspaceId uuid.UUID `gorm:"type:uuid;index" json:"WorkspaceId"`
+	Workspace *Workspaces       `gorm:"foreginKey:WorkspaceId;references:ID" json:"workspace.omitempty"`
 	// Paths in S3/MinIO
 	VideoKey  string    `gorm:"not null" json:"videoKey"`
 	MasterKey string    `gorm:"not null" json:"masterKey"`
