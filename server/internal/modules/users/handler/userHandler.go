@@ -75,7 +75,7 @@ func (h *UserHandler) Register (c *gin.Context) {
 	true,          // HttpOnly
 	)
 
-	c.JSON(http.StatusOK, gin.H{"success":false,"message": "User Registed Successfully","access_token":access_token})
+	c.JSON(http.StatusOK, gin.H{"success":true,"message": "User Registed Successfully","access_token":access_token})
 }
 
 func (h *UserHandler) Login (c *gin.Context){

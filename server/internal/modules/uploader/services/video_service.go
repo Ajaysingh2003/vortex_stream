@@ -68,7 +68,7 @@ func (r *VideoServiceRepo) ProcessVideo (ctx context.Context,videoID uuid.UUID ,
 	}
 	
 	payload:=&domain.Video{
-		Workspaces: &domain.Workspaces{
+		Workspace: &domain.Workspaces{
 			UserID: userID,
 		},
 		ID: data.ID,

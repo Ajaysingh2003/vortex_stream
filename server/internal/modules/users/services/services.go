@@ -28,70 +28,69 @@ type userServiceRepo struct {
 }
 
 
-func NewUserService(userRepo repository.UserRepository,jwtToken *utils.JwtMaker,db *gorm.DB)UserServiceInterface {
-	return &userServiceRepo{userRepo:userRepo,jwtToken:jwtToken,db: db}
+func NewUserService(userRepo repository.UserRepository,jwtToken *utils.JwtMaker,workspaceRepo workspaceRepo.WorkshopRepository,db *gorm.DB)UserServiceInterface {
+	return &userServiceRepo{userRepo:userRepo,jwtToken:jwtToken,workspaceRepo: workspaceRepo,db: db}
 }
 
+func (r *userServiceRepo) Create(ctx context.Context, user *domain.User) (*domain.User, error) {
 
-func (r *userServiceRepo) Create (ctx context.Context,user *domain.User) ( *domain.User , error) {
-	_,err:=r.userRepo.GetByEmail(ctx,user.Email)
+    existing, _ := r.userRepo.GetByEmail(ctx, user.Email)
+    if existing != nil {
+        return nil, utils.New(409, "Email already exists")
+    }
 
-	if  (err!=nil){
-		return nil, utils.New(409,err.Error());
-	}
+    // hash password
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+    if err != nil {
+        return nil, utils.New(500, err.Error())
+    }
 
-	// hashing the password
+    if user.Role == "" {
+        user.Role = "User"
+    }
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, utils.New(500,err.Error());
-	}
-	if user.Role == "" {
-    	user.Role = "User"
-	}
+    userPayload := &domain.User{
+        Email:    user.Email,
+        Password: string(hashedPassword),
+        Role:     user.Role,
+        ID:       uuid.New(),
+        IsActive: true,
+    }
 
-	userPayload := &domain.User{
-		Email:    user.Email,
-		Password: string(hashedPassword),
-		Role: user.Role,
-		ID: user.ID,
-		IsActive: true,
-	}
+    var createdUser *domain.User
 
-	tx:=r.db
+    err = r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
+        // create user
+        data, err := r.userRepo.CreateTx(ctx, tx, userPayload)
+        if err != nil {
+            return err // auto rollback
+        }
 
+        // create default workspace
+        workspace := &domain.Workspaces{
+            ID:        uuid.New(),
+            Name:      "My Workspace",
+            UserID:    data.ID,
+            IsDefault: true,
+        }
 
-	data,err:=r.userRepo.CreateTx(ctx,tx,userPayload)
+        _, err = r.workspaceRepo.CreateTx(ctx, tx, workspace)
+        if err != nil {
+            return err // auto rollback
+        }
 
-	if err!=nil{
-		tx.Rollback()
-		log.Println("User Create Error:", err.Error())
-		return  nil,err
-	}
+        createdUser = data
+        return nil // auto commit
+    })
 
-	workspacePayload:=&domain.Workspaces{
-		Name: "My Workspace",
-		UserID: user.ID,
-		IsDefault: true,
+    if err != nil {
+        log.Println("Create user error:", err.Error())
+        return nil, utils.New(500, err.Error())
+    }
 
-	}
-
-	_,err=r.workspaceRepo.CreateTx(ctx, tx , workspacePayload)
-
-
-	if err != nil {
-
-		tx.Rollback()
-		log.Println("User Create Error:", err.Error())
-		return nil, err
-		
-	}
-
-	
-	return data,nil
+    return createdUser, nil
 }
-
 
 func (r *userServiceRepo) Login (ctx context.Context,email string,password string) (*domain.User,error) {
 
