@@ -1,13 +1,13 @@
 package handler
 
 import (
-	// "encoding/json"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
-
-	"github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/services"
+	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
+	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/services"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -18,6 +18,59 @@ type VideoHandler struct {
 	UserRepo      repository.UserRepository
 }
 
+
+
+func (h *VideoHandler) CreateVideo(c *gin.Context) {
+	var req struct {
+		Title    string `json:"title" binding:"required"`
+		VideoKey string `json:"videoKey" binding:"required"`
+		Status     domain.VideoStatus `json:"status" binding:"required"`
+		WorkshopId     string `json:"workshopId" binding:"required"`
+		Size   string    `json:"size" binding:"required"`
+		// WorkshopId string `json:""`
+	}
+	
+	
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(),"success":false})
+		return
+	}
+
+	reqData,_:=json.MarshalIndent(req, " ","");
+	
+	// fmt.Print(String(reqData),"test from aj");
+	fmt.Print(string(reqData),"test data from ajy")
+
+	workshopId, err := uuid.Parse(req.WorkshopId)
+		if err!=nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration","success":false})
+			return
+	}
+
+	payload:=&domain.Video{
+		ID: uuid.New() ,
+		WorkspaceId: workshopId ,
+		Title: req.Title,
+		VideoKey: req.VideoKey,
+	}
+
+	datas,err:=json.Marshal(payload)
+
+	if err!=nil{
+		c.JSON(http.StatusInternalServerError,gin.H{"message":utils.ErrMsg(err),"success":false})
+		return
+	}
+
+	fmt.Print(datas,"from datas","going and gone")
+	data,err:=h.VideoService.CreateVideo(c.Request.Context(),payload)
+
+		if err!=nil{
+			c.JSON(http.StatusInternalServerError,gin.H{"message":utils.ErrMsg(err),"success":false})
+			return
+		}
+
+	c.JSON(http.StatusAccepted,gin.H{"message":"Video Updated SuccessFuly","data":data})
+}
 
 func (h *VideoHandler) ListVideo (c *gin.Context) {
 
@@ -111,4 +164,5 @@ func (h *VideoHandler) Process (c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"success":true,"data":data})
 }
+
 

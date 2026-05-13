@@ -14,12 +14,19 @@ func SetupRouter(r *gin.Engine,userhandler *handler.UserHandler)*gin.Engine{
 	// user api
 	api := r.Group("/api/v1")
 	user:=api.Group("/users")
+	oAuthApi:=user.Group("/oauth")
 
 	 {
-		 user.POST("/register",userhandler.Register)
-		 user.POST("/login",userhandler.Login)
-		 user.GET("/profile",middleware.AuthMiddleware(),userhandler.Profile)
+		user.POST("/register",userhandler.Register)
+		user.POST("/login",userhandler.Login)
+		user.GET("/profile",middleware.AuthMiddleware(),userhandler.Profile)
+		user.GET("/workspaces",middleware.AuthMiddleware(),userhandler.GetWorkspaces)
+		user.POST("/workspaces/create",middleware.AuthMiddleware(),userhandler.CreateWorkspace)
+		user.GET("/workspaces/:id", middleware.AuthMiddleware(),userhandler.GetWorkspace)
 	 }
-	 
+	 {
+		oAuthApi.GET("/google",userhandler.GoogleLogin)
+		oAuthApi.GET("/google/callback",userhandler.GoogleCallback)
+	 }
 	return r
 }

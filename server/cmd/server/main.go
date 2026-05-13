@@ -8,12 +8,13 @@ import (
 	"time"
 
 	uploadHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/handler"
-	videoHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/handler"
-	videoRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/repository"
-	workspaceRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/repository"
+	videoHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/handler"
+	videoRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/repository"
+	workspaceRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	uploadRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/routes"
+	videosRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/routes"
 	serviceUpload "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/services"
-	videoService "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/services"
+	videoService "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/services"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/handler"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	router "github.com/ajaysingh2003/vortex-stream/internal/modules/users/routes"
@@ -41,16 +42,19 @@ func main() {
 	}
 	
 	userRepo:=repository.NewPostgresUserRepository(database)
+	accountRepo:=repository.NewAccountRepo(database)
 	videoRepo:=videoRepository.NewPostgresVideoRepository(database)
 	workspaceRepo:=workspaceRepository.NewPostgresWorkspaceRepository(database)
 	jwtToken := utils.NewJwtMaker(secretKey)
+	userService:=services.NewUserService(userRepo,jwtToken,workspaceRepo,database,accountRepo)
 
-	userService:=services.NewUserService(userRepo,jwtToken,workspaceRepo,database)
-	uploadService:=serviceUpload.NewUploadService(userRepo,videoRepo,workspaceRepo)
-	videoService:=videoService.NewVideoService(userRepo , videoRepo)
+	workspaceService:=services.NewWorkspaceService(userRepo,workspaceRepo);
+	uploadService:=serviceUpload.NewUploadService(userRepo)
+	videoService:=videoService.NewVideoService(userRepo,videoRepo,workspaceRepo)
 	
 	userhandler:=&handler.UserHandler{
 		UserService :userService,
+		WorkspacesService: workspaceService,
 		JwtToken : jwtToken,
 	}
 	uploadhandler:=&uploadHandler.UploadHandler{
@@ -75,7 +79,9 @@ func main() {
 	}))
 
 	router.SetupRouter(r,userhandler)
-	uploadRoutes.SetupRouter(r,uploadhandler,videohandler)
+	uploadRoutes.SetupRouter(r,uploadhandler)
+	videosRoutes.SetupRouter(r,videohandler)
+
 
 	if err := r.Run(":3000"); err != nil {
 		log.Fatal("Failed to start server:", err)

@@ -44,6 +44,21 @@ export default function SignInAdmin() {
     }));
   };
 
+  const googleSignIn = useMutation(trpc.user.googleSignIn.mutationOptions(
+   
+  ));
+  const handleGoogleSignIn = () => {
+  googleSignIn.mutate(undefined, {
+    onSuccess: (data) => {
+      console.log("Redirecting to Google OAuth:", data.url);
+      window.location.href = data.url; 
+    },
+    onError: (err:any) => {
+      console.error("Error from tRPC:", err);
+    },
+  });
+};
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -62,6 +77,11 @@ export default function SignInAdmin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+
+      <Button onClick={handleGoogleSignIn} className=" cursor-pointer outline-0 w-full focus:oultine-0 btn-main px-2 py-1 text-xs tracking-wide">
+             
+              Continue with Google
+            </Button>
       <div className="w-full max-w-md space-y-6 p-8 bg-white rounded-2xl shadow-lg">
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900">
