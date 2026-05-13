@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
+	// "github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -63,7 +64,7 @@ func (r *postgresUserRepository) GetByEmail(ctx context.Context, email string) (
 	var user domain.User
 	if err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil 
+			return nil, nil
 		}
 		return nil, err
 	}

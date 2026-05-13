@@ -15,9 +15,8 @@ export function Settings({children}:{children:React.ReactNode}){
     const [selectedOption,setSelectOption]=useState<string>("general")
 
     return <settingContext.Provider value={{selectedOption,setSelectOption}}>
-        <section className='setting-control h-full   grid grid-cols-1 gap-2 md:gap-4 lg:gap-8 md:grid-cols-6'>{children}</section>
+        <section className='setting-control h-full grid grid-cols-1 gap-2 md:gap-4 lg:gap-8 md:grid-cols-6'>{children}</section>
     </settingContext.Provider>
-
 
 }
 
@@ -35,12 +34,8 @@ const Menu=()=>{
             icon:<Bolt className='size-4'/>
         },
         {
-            label:"customization",
+            label:"branding",
             icon:<FilePenLine className='size-4'/>
-        },
-        {
-            label:"subtitle",
-            icon:<Subtitles className='size-4'/>
         },
         {
             label:"security",
@@ -56,12 +51,12 @@ const Menu=()=>{
 
     const handleChange=(label:string)=>menuContext?.setSelectOption(label)
 
-    return <div className='w-full col-span-2'>
-        <div className='flex flex-row md:flex-col  flex-1'>
+    return <div className='w-full h-full col-span-2 border-[1px]a rounded-lg'>
+        <div className='flex flex-row md:flex-col  gap-2 flex-1'>
             {
             items.map((e)=>(
                 <div>
-                    <Button onClick={()=>handleChange(e.label)} variant={"outline"} className={`w-full rounded-lg ${isActive(e.label)?"bg-[#c2adf242] text-violet-500":"bg-transparent"} px-2 py-2 md:py-6 border-none outline-none font-medium tracking-wide flex font-heading hover:bg-[#bca3f612] hover:text-violet-500 justify-start md:px-4 gap-2 md:gap-6 cursor-pointer`}>
+                    <Button onClick={()=>handleChange(e.label)} variant={"outline"} className={`w-full rounded-lg ${isActive(e.label)?"bg-[#bca3f612] text-black":"bg-transparent"} px-2 py-2 md:py-2 border-none outline-none font-medium tracking-wide flex font-headinga hover:bg-[#bca3f612] hover:text-stone-800 justify-start md:px-4 gap-2 md:gap-6 cursor-pointer`}>
                         {e.icon}
                         <span className=' capitalize text-sm md:text-md '>{e.label}</span>
                     </Button>
@@ -69,14 +64,16 @@ const Menu=()=>{
             ))
         }
         </div>
-    </div>
+        </div>
     
 }
 
 const Content=()=>{
     const context=useContext(settingContext)
-    return <div className='col-span-4 w-full min-h-full border-[0.0001px] border-[#000000b0] rounded-xl'>
+    return <div className='col-span-4    w-full h-full max-h-156  rounded-md'>
+        
         <SettingsContent activeOption={context?.selectedOption}/>
+       
     </div>
 }
 

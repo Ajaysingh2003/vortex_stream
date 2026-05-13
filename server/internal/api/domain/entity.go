@@ -36,19 +36,27 @@ const (
 
 )
 
+type OAuthProvider string
+
+const (
+    ProviderGoogle OAuthProvider = "GOOGLE"
+    ProviderGitHub OAuthProvider = "GITHUB"
+    ProviderEmail OAuthProvider = "Email"
+)
+
 
 type Workspaces struct {
 
 	ID uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
 	Name string   `gorm:"type:varchar(255);not null" json:"name"`
 	UserID uuid.UUID `gorm:"type:uuid;index" json:"userId"`
-	User *User       `gorm:"foreignKey:UserID;references:ID" json:"user.omitempty"`
+	User *User       `gorm:"foreignKey:UserID;references:ID" json:"user,omitempty"`
 	IsDefault bool  `gorm:"default:false" json:"isDefault"`
 	CreatedAt time.Time      `json:"createdAt"`
     UpdatedAt time.Time      `json:"updatedAt"`
     DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 	Videos []Video `gorm:"foreignKey:WorkspaceId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
-	PlayerSettings *PlayerSettings `gorm:"foreignKey:WorkspaceId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"playerSettings"`
+	PlayerSettings *PlayerSettings `gorm:"foreignKey:WorkspaceId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"playerSettings,omitempty"`
 
 
 }
@@ -71,8 +79,6 @@ type PlayerSettings struct{
 	
 }
 
-
-
 // UserRole and VideoStatus remain exactly as you wrote them - they are perfect.
 
 type User struct {
@@ -80,14 +86,25 @@ type User struct {
 	ID        uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
 	Email     string         `gorm:"uniqueIndex;not null" json:"email"`
 	Password  string         `gorm:"not null" json:"-"`
+	Name *string             `gorm:"type:varchar(255)" json:"name"`
+	Avatar *string            `gorm:"type:varchar(255)" json:"avatar"`
 	Role      UserRole       `gorm:"type:varchar(20);default:'User'" json:"role"`
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 	IsActive bool      `gorm:"default:true" json:"isActive"`
 	// Videos []Video `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
-
 	Workspaces []Workspaces     `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"workspaces,omitempty"`
+	Accounts []Account `gorm:"foreignKey:UserID" json:"accounts,omitempty"`
+}
+
+type Account struct {
+	ID           uuid.UUID     `gorm:"type:uuid;primaryKey" json:"id"`
+    UserID       uuid.UUID     `gorm:"type:uuid;index" json:"userId"`
+    Provider     OAuthProvider `gorm:"type:varchar(20);not null" json:"provider"`
+    ProviderID   string        `gorm:"uniqueIndex:idx_provider_user;not null" json:"providerId"`
+
+	CreatedAt time.Time
 }
 
 type Video struct {
