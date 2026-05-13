@@ -101,7 +101,7 @@ export const uploadsRouter = createTRPCRouter({
         const access_token = cookieStore.get("access_token")?.value;
         console.log(input,"testing form video");
         const res = await axios.post(
-          `${process.env.BASE_API}/v1/video/upload`,
+          `${process.env.BASE_API}/v1/video/create`,
           {
             ...input,
           },

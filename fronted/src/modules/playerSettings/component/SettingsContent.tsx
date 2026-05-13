@@ -2,7 +2,7 @@ import React from 'react'
 import GeneralSetting from './GeneralSetting'
 import ControlsSettings from './ControlsSettings'
 import Branding from './Branding'
-import SubTitle from './SubTitle'
+// import SubTitle from './SubTitle'
 import Security from './Security'
 import Advance from './Advance'
 
@@ -15,8 +15,6 @@ function SettingsContent({activeOption}:{activeOption:string | undefined}) {
         return <ControlsSettings/>
     case 'branding':
         return <Branding/>
-    case 'subtitle':
-        return <SubTitle/>
     case 'security':
         return <Security/>
     case 'advanced':

@@ -10,17 +10,23 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarHeader,
 } from "@/components/ui/sidebar";
 
 import { Home, BarChart, Settings, Video, Library, Import } from "lucide-react";
 import Link from "next/link";
+import ProfileMenu from "./ProfileMenu";
 
 export function AppSidebar() {
   return (
-    <Sidebar className="max-w-56 font-content  tracking-tight" collapsible="icon">
-      <SidebarContent>
+    <Sidebar className="max-w-56 border-r-[0.5px] border-stone-200  font-content  tracking-tight" collapsible="icon">
+      
+      <SidebarHeader>
+        <ProfileMenu/>
+      </SidebarHeader>
+      <SidebarContent className="bg-[#f9f9fd]">
         <SidebarGroup>
-          <SidebarGroupContent className="pt-4 md:pt-10">
+          <SidebarGroupContent className="pt-4 md:pt-2">
             <SidebarMenu className="pl-2 space-y-1">
               <SidebarMenuItem>
                 <SidebarMenuButton>
@@ -68,6 +74,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
     </Sidebar>
   );
 }

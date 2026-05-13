@@ -15,7 +15,7 @@ function layout({ children }: { children: React.ReactNode }) {
         }
 
         <div className="w-full">
-          <div className="w-full py-1 px-1 md:px-2 md:py-2 boder-[#eee] border-b">
+          <div className="w-full py-1 px-1 md:px-2 md:py-2 border-stone-200 border-b">
             <SidebarTrigger />
           </div>
           {children}
