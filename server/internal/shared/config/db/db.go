@@ -44,7 +44,7 @@ func InitDb() *gorm.DB {
 	if err != nil {
 		log.Fatal("Connection to DB failed:", err)
 	}
-
+	fmt.Print("starting the database")
 	// pkg.ResetDatabase(db)
 
 	// err = db.Exec(`
@@ -61,6 +61,7 @@ func InitDb() *gorm.DB {
 		&domain.Workspaces{},
 		&domain.User{},
 		&domain.Video{},
+		&domain.Account{},
 		&domain.PlayerSettings{},
 		&domain.VideoResolution{},
 		&domain.VideoDomain{},

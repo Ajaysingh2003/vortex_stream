@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(r *gin.Engine,uploadHandler *handler.UploadHandler,videohandler *handler.VideoHandler)*gin.Engine{
+func SetupRouter(r *gin.Engine,uploadHandler *handler.UploadHandler)*gin.Engine{
 	// r := gin.Default()
 	
 	r.Use(cors.New(cors.Config{
@@ -24,14 +24,11 @@ func SetupRouter(r *gin.Engine,uploadHandler *handler.UploadHandler,videohandler
 	// user api
 	api := r.Group("/api/v1")
 	upload:=api.Group("/upload")
-	video:=api.Group("/video")
+	// video:=api.Group("/video")
 	 {
 
 		 upload.POST("/presigned-url",middleware.AuthMiddleware(),uploadHandler.GetSignedUrl)
 		 upload.POST("/health",uploadHandler.Health)
-		 video.POST("/upload",middleware.AuthMiddleware(),uploadHandler.CreateVideo)
-		 video.GET("/list",middleware.AuthMiddleware(),videohandler.ListVideo)
-		 video.POST("/process/:videoId",middleware.AuthMiddleware(),videohandler.Process)
 
 	 }
 	 

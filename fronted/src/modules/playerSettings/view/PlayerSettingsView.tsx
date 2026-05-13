@@ -20,11 +20,11 @@ function PlayerSettingsView() {
                 <Button className='rounded-lg font-heading font-bold text-sm md:text-sm tracking-wide md:-tracking-wider bg-[#7067f3] bg-primary-btn'> <Save className='size-4'/>  Save Changes</Button>
             </div>
         </div>
-        <div className=' grid grid-cols-1 md:grid-cols-12 h-full w-full'>
-            <div className=' col-span-7 h-full   w-full'>
+        <div className=' grid grid-cols-1 md:grid-cols-12 gap-3  h-full w-full'>
+            <div className=' col-span-7 h-full     w-full'>
                 <Settings>
-                    <Settings.Menu></Settings.Menu>
-                    <Settings.Content></Settings.Content>
+                    <Settings.Menu/>
+                    <Settings.Content/>
                 </Settings>
             </div>
             <div className=' col-span-5 w-full'>

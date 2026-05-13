@@ -84,3 +84,15 @@ pending task in this project
         "dynamic_watermark_type": "ip"
     }
 }
+
+
+
+now our main source will be importing video from many video sources like wistia,dropbox or many other
+
+key platform which offer there api :
+
+1 google drive
+2 wistia
+3 dropbox
+4 s3
+5
