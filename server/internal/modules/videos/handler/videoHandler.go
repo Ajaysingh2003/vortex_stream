@@ -27,6 +27,7 @@ func (h *VideoHandler) CreateVideo(c *gin.Context) {
 		Status     domain.VideoStatus `json:"status" binding:"required"`
 		WorkshopId     string `json:"workshopId" binding:"required"`
 		Size   string    `json:"size" binding:"required"`
+		Duration int     `json:"duration" binding:required"`
 		// WorkshopId string `json:""`
 	}
 	
@@ -52,6 +53,7 @@ func (h *VideoHandler) CreateVideo(c *gin.Context) {
 		WorkspaceId: workshopId ,
 		Title: req.Title,
 		VideoKey: req.VideoKey,
+		Duration: req.Duration,
 	}
 
 	datas,err:=json.Marshal(payload)
@@ -90,16 +92,14 @@ func (h *VideoHandler) ListVideo (c *gin.Context) {
 
 	user,err:=h.UserRepo.GetByID(c.Request.Context(),id)
 
-	if (err!=nil || user==nil ||user.IsActive==false){
+	if (err!=nil || user==nil || user.IsActive==false){
 		c.JSON(http.StatusBadRequest, gin.H{"message": "You don't have access"})
 		return
 	}
 	
 
 
-	testUUid:=uuid.New()
 
-	fmt.Println(testUUid,"leah jaye")
 
 	
 	data,err:=h.VideoService.ListVideo(c.Request.Context(), id)

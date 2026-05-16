@@ -18,6 +18,7 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	IsOwned(ctx context.Context,workspaceID uuid.UUID,userID uuid.UUID) (bool,error)
 }
 
 
@@ -78,4 +79,22 @@ func (r *postgresUserRepository) Update(ctx context.Context, user *domain.User) 
 func (r *postgresUserRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	
 	return r.db.WithContext(ctx).Delete(&domain.User{}, "id = ?", id).Error
+}
+
+func (r *postgresUserRepository) IsOwned(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID) (bool, error) {
+    var exists bool
+
+   
+    err := r.db.WithContext(ctx).
+        Table("workspaces").
+        Select("count(1) > 0").
+        Where("user_id = ? AND id = ?", userID, workspaceID). // Adjusted to typical 'id' if checking 
+        Row().
+        Scan(&exists)
+
+    if err != nil {
+        return false, err
+    }
+
+    return exists, nil
 }

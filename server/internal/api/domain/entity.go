@@ -13,7 +13,6 @@ type UserRole string
 type VideoStatus string
 
 
-
 const (
 
     StatusPending    VideoStatus = "PENDING"
@@ -38,6 +37,18 @@ const (
 
 type OAuthProvider string
 
+type Folder struct {
+    ID          uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
+    WorkspaceID uuid.UUID      `gorm:"type:uuid;index;not null" uniqueIndex:idx_folder_workspace_name  json:"workspaceId"` 
+	ParentID    *uuid.UUID     `gorm:"type:uuid;index;uniqueIndex:idx_folder_parent_name" json:"parentId"`
+	Position    int        		`gorm:"default:0" json:"position"`
+    Name        string         `gorm:"type:varchar(255);not null" uniqueIndex:idx_folder_workspace_name json:"name"`
+    Children    []Folder       `gorm:"foreignKey:ParentID" json:"children,omitempty"`
+    Videos      []Video        `gorm:"foreignKey:FolderID" json:"videos,omitempty"`
+    CreatedAt   time.Time      `json:"createdAt"`
+    UpdatedAt   time.Time      `json:"updatedAt"`
+}
+
 const (
     ProviderGoogle OAuthProvider = "GOOGLE"
     ProviderGitHub OAuthProvider = "GITHUB"
@@ -49,13 +60,18 @@ type Workspaces struct {
 
 	ID uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
 	Name string   `gorm:"type:varchar(255);not null" json:"name"`
+
 	UserID uuid.UUID `gorm:"type:uuid;index" json:"userId"`
 	User *User       `gorm:"foreignKey:UserID;references:ID" json:"user,omitempty"`
+	
 	IsDefault bool  `gorm:"default:false" json:"isDefault"`
 	CreatedAt time.Time      `json:"createdAt"`
     UpdatedAt time.Time      `json:"updatedAt"`
     DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 	Videos []Video `gorm:"foreignKey:WorkspaceId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
+
+	Folders   []Folder   `gorm:"foreignKey:WorkspaceID" json:"folders,omitempty"`
+	
 	PlayerSettings *PlayerSettings `gorm:"foreignKey:WorkspaceId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"playerSettings,omitempty"`
 
 
@@ -103,14 +119,13 @@ type Account struct {
     UserID       uuid.UUID     `gorm:"type:uuid;index" json:"userId"`
     Provider     OAuthProvider `gorm:"type:varchar(20);not null" json:"provider"`
     ProviderID   string        `gorm:"uniqueIndex:idx_provider_user;not null" json:"providerId"`
-
 	CreatedAt time.Time
 }
 
 type Video struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	Title     string    `gorm:"type:varchar(255);not null" json:"title"`
-	
+	FolderID  *uuid.UUID `gorm:"type:uuid;index" json:"folderId"`
 	WorkspaceId uuid.UUID `gorm:"type:uuid;index" json:"WorkspaceId"`
 	Workspace *Workspaces       `gorm:"foreginKey:WorkspaceId;references:ID" json:"workspace.omitempty"`
 	// Paths in S3/MinIO
@@ -119,6 +134,7 @@ type Video struct {
 	
 	Size      int64     `json:"size"`
 	Thumbnail string    `json:"thumbnail"`
+	Duration int    	`json:"duration"`
 	IsPrivate bool      `gorm:"default:true" json:"isPrivate"`
 
 	// Relationships
@@ -160,9 +176,3 @@ type VideoDomain struct {
 	
 	CreatedAt time.Time `json:"createdAt"`
 }
-
-
-// func (vd *VideoDomain) BeforeCreate(tx *gorm.DB) (err error) {
-// 	vd.ID = uuid.New()
-// 	return
-// }
