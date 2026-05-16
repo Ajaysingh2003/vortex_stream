@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import UploadFile from "../component/UploadFile";
+import ImportVideos from "@/modules/upload/component/ImportVideos";
 function VideoPlayerView() {
  
   return (
@@ -16,7 +17,7 @@ function VideoPlayerView() {
           <div>
             <UploadFile/>
           </div>
-
+          <ImportVideos/>
         </div>
       </div>
     </div>
