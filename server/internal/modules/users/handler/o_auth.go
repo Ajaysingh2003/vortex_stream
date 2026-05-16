@@ -151,6 +151,5 @@ func (h *UserHandler) GoogleCallback(c *gin.Context) {
 	true,          // HttpOnly
 	)
 
-
 	c.Redirect(http.StatusTemporaryRedirect,fronted_url)
 }

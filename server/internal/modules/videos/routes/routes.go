@@ -1,4 +1,3 @@
-
 package router
 
 import (
@@ -6,11 +5,12 @@ import (
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/middleware"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/handler"
+	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(r *gin.Engine, videohandler *handler.VideoHandler)*gin.Engine{
+func SetupRouter(r *gin.Engine, videohandler *handler.VideoHandler,jwtMaker *utils.JwtMaker)*gin.Engine{
 	// r := gin.Default()
 	
 	r.Use(cors.New(cors.Config{
@@ -27,9 +27,9 @@ func SetupRouter(r *gin.Engine, videohandler *handler.VideoHandler)*gin.Engine{
 	video:=api.Group("/video")
 	 {
 		
-		 video.POST("/create",middleware.AuthMiddleware(),videohandler.CreateVideo)
-		 video.GET("/list",middleware.AuthMiddleware(),videohandler.ListVideo)
-		 video.POST("/process/:videoId",middleware.AuthMiddleware(),videohandler.Process)
+		 video.POST("/create",middleware.AuthMiddleware(jwtMaker),videohandler.CreateVideo)
+		 video.GET("/list",middleware.AuthMiddleware(jwtMaker),videohandler.ListVideo)
+		 video.POST("/process/:videoId",middleware.AuthMiddleware(jwtMaker),videohandler.Process)
 		
 	 }
 	 

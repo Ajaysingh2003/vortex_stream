@@ -9,12 +9,16 @@ import (
 
 	uploadHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/handler"
 	videoHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/handler"
+	folderHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/handler"
 	videoRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/repository"
 	workspaceRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
+	folderRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/repository"
 	uploadRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/routes"
 	videosRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/routes"
+	folderRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/routes"
 	serviceUpload "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/services"
 	videoService "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/services"
+	folderService "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/services"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/handler"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	router "github.com/ajaysingh2003/vortex-stream/internal/modules/users/routes"
@@ -40,18 +44,19 @@ func main() {
 	if secretKey == "" {
 		log.Fatal("JWT_SECRET_KEY is missing")
 	}
+	jwtToken := utils.NewJwtMaker(secretKey)
 	
 	userRepo:=repository.NewPostgresUserRepository(database)
 	accountRepo:=repository.NewAccountRepo(database)
 	videoRepo:=videoRepository.NewPostgresVideoRepository(database)
 	workspaceRepo:=workspaceRepository.NewPostgresWorkspaceRepository(database)
-	jwtToken := utils.NewJwtMaker(secretKey)
+	folderRepo:=folderRepository.NewFolderRepo(database)
+	
 	userService:=services.NewUserService(userRepo,jwtToken,workspaceRepo,database,accountRepo)
-
+	folderService:=folderService.NewFolderService(folderRepo, userRepo, workspaceRepo, videoRepo)
 	workspaceService:=services.NewWorkspaceService(userRepo,workspaceRepo);
 	uploadService:=serviceUpload.NewUploadService(userRepo)
 	videoService:=videoService.NewVideoService(userRepo,videoRepo,workspaceRepo)
-	
 	userhandler:=&handler.UserHandler{
 		UserService :userService,
 		WorkspacesService: workspaceService,
@@ -67,6 +72,12 @@ func main() {
 		UserRepo: userRepo,
 	}
 
+	folderhandler:=&folderHandler.FolderHandler{
+		FolderService:folderService,
+		UserService: userService,
+	}
+
+
 	r := gin.Default()
 	
 	r.Use(cors.New(cors.Config{
@@ -78,9 +89,10 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	router.SetupRouter(r,userhandler)
-	uploadRoutes.SetupRouter(r,uploadhandler)
-	videosRoutes.SetupRouter(r,videohandler)
+	router.SetupRouter(r,userhandler,jwtToken)
+	uploadRoutes.SetupRouter(r,uploadhandler,jwtToken)
+	videosRoutes.SetupRouter(r,videohandler,jwtToken)
+	folderRoutes.SetupRouter(r,folderhandler,jwtToken)
 
 
 	if err := r.Run(":3000"); err != nil {

@@ -59,6 +59,7 @@ func InitDb() *gorm.DB {
 
 	err = db.AutoMigrate(
 		&domain.Workspaces{},
+		&domain.Folder{},
 		&domain.User{},
 		&domain.Video{},
 		&domain.Account{},
