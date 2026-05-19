@@ -55,7 +55,7 @@ func InitDb() *gorm.DB {
     //     DROP TABLE IF EXISTS users CASCADE;
     // `).Error
 	
-	fmt.Print("starting database")
+	fmt.Print("hii")
 
 	err = db.AutoMigrate(
 		&domain.Workspaces{},
