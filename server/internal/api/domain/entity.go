@@ -39,10 +39,13 @@ type OAuthProvider string
 
 type Folder struct {
     ID          uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
-    WorkspaceID uuid.UUID      `gorm:"type:uuid;index;not null" uniqueIndex:idx_folder_workspace_name  json:"workspaceId"` 
-	ParentID    *uuid.UUID     `gorm:"type:uuid;index;uniqueIndex:idx_folder_parent_name" json:"parentId"`
-	Position    int        		`gorm:"default:0" json:"position"`
-    Name        string         `gorm:"type:varchar(255);not null" uniqueIndex:idx_folder_workspace_name json:"name"`
+    // Part 1 of the unique workspace-parent-name composite index
+    WorkspaceID uuid.UUID      `gorm:"type:uuid;not null;uniqueIndex:idx_workspace_parent_name" json:"workspaceId"` 
+    // Part 2 of the composite index (Pointer allows NULL for root folders)
+    ParentID    *uuid.UUID     `gorm:"type:uuid;uniqueIndex:idx_workspace_parent_name" json:"parentId"`
+    Position    int            `gorm:"default:0" json:"position"`
+    // Part 3 of the composite index
+    Name        string         `gorm:"type:varchar(255);not null;uniqueIndex:idx_workspace_parent_name" json:"name"`
     Children    []Folder       `gorm:"foreignKey:ParentID" json:"children,omitempty"`
     Videos      []Video        `gorm:"foreignKey:FolderID" json:"videos,omitempty"`
     CreatedAt   time.Time      `json:"createdAt"`

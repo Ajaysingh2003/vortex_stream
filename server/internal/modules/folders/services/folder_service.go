@@ -19,10 +19,11 @@ type FolderServiceInterface interface {
 	Create (ctx context.Context,folder *domain.Folder) (*domain.Folder , error)
 	GetByID (ctx context.Context,ID uuid.UUID,workspaceID uuid.UUID) (*domain.Folder,error)
 	GetRootFolders (ctx context.Context,workspaceID uuid.UUID,userID uuid.UUID) ([]domain.Folder,error)
-	GetChildren (ctx context.Context,parentID uuid.UUID,workspaceID uuid.UUID) ([]domain.Folder,error)
+	GetChildren (ctx context.Context,parentID uuid.UUID,workspaceID uuid.UUID,userID uuid.UUID) ([]domain.Folder,error)
 	Relocate (ctx context.Context,folderID uuid.UUID,newParentID *uuid.UUID,workspaceID uuid.UUID) (error)
 	UpdatePosition (ctx context.Context,folderID uuid.UUID,position int) (error)
 	GetContent (ctx context.Context,folderID uuid.UUID,workspaceID uuid.UUID,userID uuid.UUID,cursor string,limit int) (*dto.FolderContentsDTO,error)
+	GetFolderBreadcrumbs (ctx context.Context, folderID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID) ([]domain.Folder, error)
 }
 
 type FolderServiceRepository struct {
@@ -38,7 +39,20 @@ func NewFolderService(folderRepo repository.FolderRepository,userRepo userRepo.U
 }
 
 func (s *FolderServiceRepository) Create (ctx context.Context,folder *domain.Folder) (*domain.Folder,error) {
-	
+	exist ,err :=s.folderRepo.CheckDuplicateName(ctx, folder.Name, folder.ParentID, folder.WorkspaceID)
+
+	if err != nil {
+    // 1. Catch database connection or syntax errors
+    return nil, err
+	}
+
+	if exist {
+    // 2. Catch business logic validation errors explicitly
+    return nil, &utils.ApiError{
+        Code:    400, 
+        Message: "A Folder With This Name Already Exists In This Location",
+    }
+}
 	if folder.ParentID !=nil{
 		parent,err:=s.folderRepo.GetByID(ctx ,*folder.ParentID)
 
@@ -105,18 +119,28 @@ func (s *FolderServiceRepository) GetRootFolders (ctx context.Context,workspaceI
 
 }
 
-func (s *FolderServiceRepository) GetChildren (ctx context.Context,parentID uuid.UUID,workspaceID uuid.UUID) ([]domain.Folder,error) {
+func (s *FolderServiceRepository) GetChildren (ctx context.Context,parentID uuid.UUID,workspaceID uuid.UUID,userID uuid.UUID) ([]domain.Folder,error) {
 
-	worksapce,err:=s.workspaceRepo.GetByID(ctx, workspaceID)
+	workspace,err:=s.workspaceRepo.GetByID(ctx, workspaceID)
 
 	if err != nil {
 		return nil, err
 	}
 
+		if workspace.UserID!=userID {
+		return  nil,&utils.ApiError{Code:403,Message:"unauthorised access to this workspace"}
+	}
+	
+	
+	
 	parent,err:=s.folderRepo.GetByID(ctx , parentID)
-
-	if err != nil || parent.WorkspaceID==worksapce.ID {
+	
+	if err != nil {
 		return nil, err
+	}
+	
+	if parent.WorkspaceID!=workspace.ID {
+		return  nil,&utils.ApiError{Code:403,Message:"This folder does not belong to this workspace"}
 	}
 
 	foldersChildren,err:=s.folderRepo.GetChildren(ctx , parentID)
@@ -124,6 +148,8 @@ func (s *FolderServiceRepository) GetChildren (ctx context.Context,parentID uuid
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Print("leah goti",foldersChildren)
 
 	return  foldersChildren,nil
 
@@ -311,3 +337,34 @@ func (s *FolderServiceRepository) GetContent (ctx context.Context,folderID uuid.
 }
 
 
+func (s *FolderServiceRepository) GetFolderBreadcrumbs(ctx context.Context, folderID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID) ([]domain.Folder, error) {
+    
+    // 1. Validate Workspace existence and user authorization
+    workspace, err := s.workspaceRepo.GetByID(ctx, workspaceID)
+    if err != nil {
+        return nil, err
+    }
+
+    if workspace.UserID != userID {
+        return nil, &utils.ApiError{Code: 403, Message: "unauthorised access to this workspace"}
+    }
+
+    // 2. Fetch the recursive ancestor line from the repository
+    ancestors, err := s.folderRepo.GetAncestors(ctx, folderID)
+    if err != nil {
+        return nil, err
+    }
+
+    // 3. Double-check that the target chain actually belongs to this workspace
+    // (Protects against cross-tenant ID injection attacks)
+    if len(ancestors) > 0 && ancestors[0].WorkspaceID != workspace.ID {
+        return nil, &utils.ApiError{Code: 400, Message: "folder sequence does not belong to this workspace"}
+    }
+
+    // 4. Force empty slice declaration instead of returning nil if data array is empty
+    if ancestors == nil {
+        ancestors = []domain.Folder{}
+    }
+
+    return ancestors, nil
+}

@@ -37,8 +37,10 @@ type FolderRepository interface {
 
 	UpdatePosition(ctx context.Context, id uuid.UUID, position int) error
 
-	CountChildren(ctx context.Context,parentID uuid.UUID) (int64 , error)
+	CountChildren (ctx context.Context,parentID uuid.UUID) (int64 , error)
 
+	CheckDuplicateName (ctx context.Context,name string,parentID *uuid.UUID,workspaceID uuid.UUID) (bool , error)
+	GetAncestors (ctx context.Context,folderID uuid.UUID) ([]domain.Folder, error)
 	// ExistsByNameAndParent(ctx context.Context, name string, workspaceID uuid.UUID, parentID *uuid.UUID) (bool, error)
 
 }
@@ -61,7 +63,31 @@ func (r *postgresFolderRepository) Create (ctx context.Context,folder *domain.Fo
 
 	return folder,nil
 }
+func (r *postgresFolderRepository) CheckDuplicateName(ctx context.Context, name string, parentID *uuid.UUID, workspaceID uuid.UUID) (bool, error) {
+    var exists bool
 
+    // 1. Explicitly target the "folders" table so GORM builds the query correctly
+    query := r.db.WithContext(ctx).
+        Table("folder").
+        Select("1").
+        Where("name = ? AND workspace_id = ?", name, workspaceID)
+
+    // 2. FIXED: Inverted logic check
+    if parentID == nil {
+        // If parentID is nil, we are checking the root level
+        query = query.Where("parent_id IS NULL")
+    } else {
+        // If parentID is not nil, it is safe to dereference it for a sub-folder check
+        query = query.Where("parent_id = ?", *parentID)
+    }
+
+    err := query.Limit(1).Scan(&exists).Error
+    if err != nil {
+        return false, err
+    }
+
+    return exists, nil
+}
 
 func (r *postgresFolderRepository)  GetByID (ctx context.Context,id uuid.UUID) (*domain.Folder,error) {
 	var folder domain.Folder
@@ -88,7 +114,10 @@ func (r *postgresFolderRepository)  GetRootFolders (ctx context.Context,workspac
 }
 
 func (r *postgresFolderRepository) GetChildren (ctx context.Context, parentID uuid.UUID) ([]domain.Folder, error) {
+	
 	var folders []domain.Folder
+
+	fmt.Print(parentID,"parentIDTest")
 	err := r.db.WithContext(ctx).
 		Where("parent_id = ?", parentID).
 		Order("position ASC, created_at ASC").
@@ -164,7 +193,7 @@ func (r *postgresFolderRepository) GetChildrenPaginated(
         Where("parent_id = ? AND workspace_id = ?", parentID, workspaceID).
         Order("position ASC, created_at ASC").
         Limit(limit)
-
+		
     if afterID != nil {
         var cursorFolder domain.Folder
         err := r.db.WithContext(ctx).
@@ -202,4 +231,37 @@ func (r *postgresFolderRepository) CountChildren(ctx context.Context,parentID uu
 
 	return count, nil
 
+}
+
+
+func (r *postgresFolderRepository) GetAncestors(ctx context.Context, folderID uuid.UUID) ([]domain.Folder, error) {
+    var ancestors []domain.Folder
+
+    // Recursive Common Table Expression (CTE) to climb UP the folder tree
+    query := `
+        WITH RECURSIVE folder_tree AS (
+            SELECT id, workspace_id, parent_id, position, name, created_at, updated_at
+            FROM folder
+            WHERE id = ?
+            
+            UNION ALL
+            
+            SELECT f.id, f.workspace_id, f.parent_id, f.position, f.name, f.created_at, f.updated_at
+            FROM folder f
+            INNER JOIN folder_tree ft ON f.id = ft.parent_id
+        )
+        SELECT * FROM folder_tree;
+    `
+
+    err := r.db.WithContext(ctx).Raw(query, folderID).Scan(&ancestors).Error
+    if err != nil {
+        return nil, err
+    }
+
+	// Reverse the slice so it reads from Root -> Subfolder instead of Current -> Root
+	for i, j := 0, len(ancestors)-1; i < j; i, j = i+1, j-1 {
+		ancestors[i], ancestors[j] = ancestors[j], ancestors[i]
+	}
+
+    return ancestors, nil
 }
