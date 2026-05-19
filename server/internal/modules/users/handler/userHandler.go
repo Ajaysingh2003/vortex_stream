@@ -116,7 +116,7 @@ func (h *UserHandler) Login (c *gin.Context){
 	Id:    data.ID,
 	Email: data.Email,
 	Role:  data.Role,
-	Duration:   24 * 90 * time.Minute,
+	Duration:   24 * 90,
 	}
 
 	access_token,access_claims,err:=h.JwtToken.GenerateJwt(payload)
@@ -129,12 +129,13 @@ func (h *UserHandler) Login (c *gin.Context){
 	c.SetCookie(
 	"access_token",
 	access_token,
-	60*90,    // 90 minutes
+	60*90,    
 	"/",
 	"localhost",
-	false,         // set true in production (HTTPS)
-	true,          // HttpOnly
+	false,         
+	true,          
 	)
+
 	c.SetCookie(
 	"workspace_id",
 	activeWorkspace.ID.String(),

@@ -67,8 +67,6 @@ func (h *UserHandler) GoogleLogin(c *gin.Context) {
 	
 }
 
-
-
 func (h *UserHandler) GoogleCallback(c *gin.Context) {
 	code := c.Query("code")
 	if code == "" {
@@ -133,14 +131,13 @@ func (h *UserHandler) GoogleCallback(c *gin.Context) {
 	c.SetCookie(
 	"access_token",
 	access_token,
-	7*24*60*60,
+	60*90,
 	"/",
 	"localhost",
 	false,         // set true in production (HTTPS)
 	true,          // HttpOnly
 	)
 	
-
 	c.SetCookie(
 	"workspace_id",
 	activeWorkspace.ID.String(),
