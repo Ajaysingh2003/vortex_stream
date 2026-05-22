@@ -1,43 +1,17 @@
 "use client";
+
 import { Upload } from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
 import { useTRPC } from "@/trpc/client";
-import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
-// import UploadUI from "@/modules/upload/component/UploadManager";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import UploadMangager from "@/modules/upload/component/UploadManager";
 import { generateId } from "@/utils/utils";
 import toast from "react-hot-toast";
-
-type UploadStatus =
-  | "queued"
-  | "uploading"
-  | "paused"
-  | "done"
-  | "error"
-  | "cancelled"
-  | "TRANSCODING"
-
-interface UploadItem {
-  id: string;
-  file: File;
-  status: UploadStatus;
-  progress: number;
-  uploadedBytes: number;
-  speed: number;
-  eta: number;
-  errorMessage?: string;
-  key?: string;
-  startedAt?: number;
-  xhr?: XMLHttpRequest;
-  chunkOffset: number;
-}
-
-interface UserDataType {
-  id : string
-  email:string
-  role:string
-  createdAt:string
-}
+import { useConsoleContext } from "../context/ConsoleContext";
+import { googleAbortMap } from "@/modules/upload/component/ConnectGoogleDrive";
+import { UploadItem } from "@/modules/types";
+import { startUpload as startUploadFn } from "@/modules/upload/funcions/upload";
+import axios from "axios";
 
 function uploadFileXHR(
   file: File,
@@ -45,7 +19,7 @@ function uploadFileXHR(
   offset: number,
   onProgress: (loaded: number, speed: number, eta: number) => void,
   onDone: () => void,
-  onError: (msg: string) => void
+  onError: (msg: string) => void,
 ): XMLHttpRequest {
   const xhr = new XMLHttpRequest();
   let lastLoaded = 0;
@@ -59,7 +33,7 @@ function uploadFileXHR(
     const speed = dt > 0 ? (e.loaded - lastLoaded) / dt : 0;
     const remaining = file.size - loaded;
     const eta = speed > 0 ? remaining / speed : Infinity;
-    
+
     lastLoaded = e.loaded;
     lastTime = now;
     onProgress(loaded, speed, eta);
@@ -77,49 +51,41 @@ function uploadFileXHR(
 
   const blob = file.slice(offset);
   xhr.open("PUT", uploadUrl);
-  
   xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
-
   xhr.send(blob);
   return xhr;
 }
 
 function UploadFile() {
-    const trpc = useTRPC();
-
-    const {data:user}=useSuspenseQuery(trpc.user.profile.queryOptions())
-   
-  const [items, setItems] = useState<UploadItem[]>([]);
-  
+  const trpc = useTRPC();
+  const { data: user } = useSuspenseQuery(trpc.user.profile.queryOptions());
+  const { items, setItems } = useConsoleContext()!;
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const xhrMapRef = useRef<Map<string, XMLHttpRequest>>(new Map());
 
-  const startProcessing=useMutation(trpc.upload.startProcessing.mutationOptions({
-    onSuccess:()=>{
-      toast.success("Video is in Queue.")
-    },
-    onError:(err)=>{
-      toast.error(err.message)
-    }
-  }))
-  const updateVideo=useMutation(trpc.upload.updateMetaData.mutationOptions({
-    onSuccess:async(data)=>{
-      console.log(data,"leah-jaye");
-      await startProcessing.mutateAsync({id:data.data.id})
-    }
-  }))
-    const updateItem = useCallback(
-      (id: string, patch: Partial<UploadItem>) => {
-        setItems((prev) =>
-          prev.map((item) => (item.id === id ? { ...item, ...patch } : item))
-        );
+  const startProcessing = useMutation(
+    trpc.upload.startProcessing.mutationOptions({
+      onSuccess: () => toast.success("Video is in Queue."),
+      onError: (err) => toast.error(err.message),
+    }),
+  );
+
+  const updateVideo = useMutation(
+    trpc.upload.updateMetaData.mutationOptions({
+      onSuccess: async (data) => {
+        await startProcessing.mutateAsync({ id: data.data.id });
       },
-      []
+    }),
+  );
+
+  const updateItem = useCallback((id: string, patch: Partial<UploadItem>) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...patch } : item)),
     );
+  }, [setItems]);
 
-    console.log(user,454545)
-
-    const   startUpload = useCallback(
+  const startUpload = useCallback(
     (item: UploadItem, uploadUrl: string, key: string, offset = 0) => {
       updateItem(item.id, {
         status: "uploading",
@@ -127,7 +93,7 @@ function UploadFile() {
         key,
         chunkOffset: offset,
       });
-
+      
       const xhr = uploadFileXHR(
         item.file,
         uploadUrl,
@@ -141,7 +107,7 @@ function UploadFile() {
             eta,
           });
         },
-       async () => {
+        async () => {
           xhrMapRef.current.delete(item.id);
           updateItem(item.id, {
             status: "TRANSCODING",
@@ -150,19 +116,16 @@ function UploadFile() {
             speed: 0,
             eta: 0,
           });
-          console.log(user,"logs before item")
 
-          if (key){
-
+          if (key) {
             await updateVideo.mutateAsync({
-              videoKey:key,
-              title:item.file.name,
-              status:"PENDING",
-              userId:user?.id,
-              size:String(item.file.size)
-            })
+              videoKey: key,
+              title: item.file.name,
+              status: "PENDING",
+              userId: user?.id,
+              size: String(item.file.size),
+            });
           }
-
         },
         (msg) => {
           xhrMapRef.current.delete(item.id);
@@ -171,114 +134,118 @@ function UploadFile() {
             errorMessage: msg,
             speed: 0,
           });
-        }
+        },
       );
 
       xhrMapRef.current.set(item.id, xhr);
-      updateItem(item.id, { xhr });
     },
-    [updateItem]
-    );
+    [updateItem, user?.id, updateVideo],
+  );
+  
 
-  const mutate = useMutation(trpc.upload.getSignedUrl.mutationOptions({
-    onSuccess:(data)=>{
-      console.log(data)
-    },onError:(err)=>{
-      console.log(err)
-    }
-  }));
+  const mutate = useMutation(
+    trpc.upload.getSignedUrl.mutationOptions()
+  );
 
   const addFiles = useCallback(
-      async (fileList: FileList) => {
-        setGlobalError(null);
-        const incoming = Array.from(fileList);
-        const existingNames = new Set(
-          items.map((i) => `${i.file.name}-${i.file.size}`)
-        );
-        const newFiles = incoming.filter(
-          (f) => !existingNames.has(`${f.name}-${f.size}`)
-        );
-        if (newFiles.length === 0) return;
-  
-        const newItems: UploadItem[] = newFiles.map((file) => ({
-          id: generateId(),
-          file,
-          status: "queued",
-          progress: 0,
-          uploadedBytes: 0,
-          speed: 0,
-          eta: Infinity,
-          chunkOffset: 0,
+    async (fileList: FileList) => {
+      setGlobalError(null);
+      const incoming = Array.from(fileList);
+      
+      // Filter out files that are already actively processing in our UI array list 
+      const existingNames = new Set(
+        items.map((i) => `${i.file.name}-${i.file.size}`),
+      );
+      const newFiles = incoming.filter(
+        (f) => !existingNames.has(`${f.name}-${f.size}`),
+      );
+      
+      if (newFiles.length === 0) {
+        // 💡 CRITICAL RESET: Clear the file value out even if no files pass the validation filter
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+      
+      const newItems: UploadItem[] = newFiles.map((file) => ({
+        id: generateId(),
+        file,
+        status: "queued",
+        progress: 0,
+        uploadedBytes: 0,
+        speed: 0,
+        eta: Infinity,
+        chunkOffset: 0,
+        uploadType: "google-drive"
+      }));
+
+      setItems((prev) => [...prev, ...newItems]);
+
+      // 💡 THE GOLDEN FIX: Reset the input element's tracker string to empty right after pushing to state!
+      // This forces the DOM to read future duplicate selections as an authentic change event sequence.
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      let urls;
+      try {
+        const payload = newFiles.map((f) => ({
+          name: f.name,
+          type: f.type,
+          size: f.size,
         }));
-  
-        setItems((prev) => [...prev, ...newItems]);
-  
-        // Get signed URLs
-        let urls;
-        try {
-          const payload = newFiles.map((f) => ({
-            name: f.name,
-            type: f.type,
-            size: f.size,
-          }));
-          const res = await mutate.mutateAsync(payload);
-          urls = res.files;
-        } catch (err: any) {
-          newItems.forEach((item) =>
-            updateItem(item.id, {
-              status: "error",
-              errorMessage: "Failed to get upload URL. Please retry.",
-            })
-          );
-          setGlobalError("Could not connect to the server. Check your connection.");
-          return;
-        }
-  
-        // Start each upload
-        newItems.forEach((item, idx) => {
-          const urlResult = urls[idx];
-          if (!urlResult) {
-            updateItem(item.id, {
-              status: "error",
-              errorMessage: "No upload URL returned for this file.",
-            });
-            return;
-          }
-          startUpload(item, urlResult.UploadUrl, urlResult.Key);
-        });
-      },
-      [items, mutate, startUpload, updateItem]
-    );
+        const res = await mutate.mutateAsync(payload);
+        urls = res.files;
+      } catch (err: any) {
+        newItems.forEach((item) =>
+          updateItem(item.id, {
+            status: "error",
+            errorMessage: "Failed to get upload URL. Please retry.",
+          }),
+        );
+        setGlobalError("Could not connect to the server. Check your connection.");
+        return;
+      }
+
+      newFiles.forEach((item, idx) => {
+        const urlResult = urls[idx];
+        const correspondingCreatedItem = newItems[idx];
+        if (!urlResult || !correspondingCreatedItem) return;
+        
+        startUpload(correspondingCreatedItem, urlResult.UploadUrl, urlResult.Key);
+      });
+    },
+    [items, mutate, startUpload, updateItem, setItems],
+  );
 
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  
-
-   e.target.files && addFiles(e.target.files)
-   
-
+    e.target.files && addFiles(e.target.files);
   };
 
-
   const handlePause = useCallback((id: string) => {
+    const googleController = googleAbortMap.get(id);
+    if (googleController) {
+      googleController.abort();
+      googleAbortMap.delete(id);
+    }
+    
     const xhr = xhrMapRef.current.get(id);
     if (xhr) {
       xhr.abort();
       xhrMapRef.current.delete(id);
     }
+
     setItems((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, status: "paused", speed: 0 } : item
-      )
+        item.id === id ? { ...item, status: "paused", speed: 0, eta: 0 } : item,
+      ),
     );
-  }, []);
+  }, [setItems]);
 
-  // ── Resume ──
   const handleResume = useCallback(
     async (id: string) => {
       const item = items.find((i) => i.id === id);
       if (!item || !item.key) return;
 
-      // Re-request signed URL for resume
       let urls;
       try {
         const res = await mutate.mutateAsync([
@@ -293,17 +260,71 @@ function UploadFile() {
         return;
       }
 
-      startUpload(item, urls[0].UploadUrl, urls[0].Key, item.uploadedBytes);
+      const freshController = new AbortController();
+      googleAbortMap.set(id, freshController);
+
+      try {
+        updateItem(item.id, { status: "uploading" });
+
+        await startUploadFn({
+          trackID: id,
+          item: item,
+          uploadUrl: urls[0].UploadUrl,
+          offset: item.uploadedBytes,
+          controller: freshController,
+          onProgressThrottled: ({ progress, uploadedBytes, speed, eta }) => {
+            updateItem(item.id, {
+              uploadedBytes,
+              progress,
+              speed,
+              eta,
+            });
+          },
+        });
+
+        googleAbortMap.delete(id);
+
+        updateItem(item.id, {
+          status: "TRANSCODING",
+          progress: 100,
+          uploadedBytes: item.file.size,
+          speed: 0,
+          eta: 0,
+        });
+        
+        if (urls[0].Key) {
+          await updateVideo.mutateAsync({
+            videoKey: urls[0].Key,
+            title: item.file.name,
+            status: "PENDING",
+            userId: user?.id,
+            size: String(item.file.size),
+          });
+        }
+
+      } catch (error: any) {
+        googleAbortMap.delete(id);
+        if (axios.isCancel(error) || freshController.signal.aborted) {
+          console.log("Upload cleanly interrupted via pause.");
+          return;
+        }
+        
+        updateItem(item.id, {
+          status: "error",
+          errorMessage: error?.message || "R2 stream connection rejected.",
+          speed: 0,
+          eta: 0
+        });
+      }
     },
-    [items, mutate, startUpload, updateItem]
+    [items, mutate, updateItem, user?.id, updateVideo],
   );
 
-  // ── Retry ──
   const handleRetry = useCallback(
     async (id: string) => {
       const item = items.find((i) => i.id === id);
       if (!item) return;
-
+      
       updateItem(id, {
         status: "queued",
         progress: 0,
@@ -328,32 +349,38 @@ function UploadFile() {
 
       startUpload(item, urls[0].UploadUrl, urls[0].Key, 0);
     },
-    [items, mutate, startUpload, updateItem]
+    [items, mutate, startUpload, updateItem],
   );
 
-  const handleCancel = useCallback((id: string) => {
-    const xhr = xhrMapRef.current.get(id);
-    if (xhr) {
-      xhr.abort();
-      xhrMapRef.current.delete(id);
-    }
-    updateItem(id, {
-      status: "cancelled",
-      speed: 0,
-      progress: 0,
-      uploadedBytes: 0,
-    });
-  }, [updateItem]);
+  const handleCancel = useCallback(
+    (id: string) => {
+      const googleController = googleAbortMap.get(id);
+      if (googleController) {
+        googleController.abort();
+        googleAbortMap.delete(id);
+      }
 
-  // ── Remove ──
-  const handleRemove = useCallback((id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-  }, []);
-
+      const xhr = xhrMapRef.current.get(id);
+      if (xhr) {
+        xhr.abort();
+        xhrMapRef.current.delete(id);
+      }
+      
+      setItems((prev) => prev.filter((i) => i.id !== id));
+    },
+    [setItems],
+  );
 
   return (
     <div className="w-full h-full">
-      <UploadMangager items={items} onPause={handlePause} onRemove={handleRemove} onCancel={handleCancel} onRetry={handleRetry} onResume={handleResume}/>
+      <UploadMangager
+        items={items}
+        onPause={handlePause}
+        onRemove={handleCancel} // Wired up to cancel structural connections safely
+        onCancel={handleCancel}
+        onRetry={handleRetry}
+        onResume={handleResume}
+      />
       <label htmlFor="upload-file">
         <div className="max-w-64 bg-[#f4f4f4] rounded-lg px-4 py-1 flex items-center gap-4 cursor-pointer hover:bg-blue-100/30">
           <Upload className="bg-[#edeff2] size-8 px-2 rounded-lg" />
@@ -363,6 +390,7 @@ function UploadFile() {
         </div>
       </label>
       <input
+        ref={fileInputRef}
         onChange={handleFilesChange}
         accept="video/*"
         multiple

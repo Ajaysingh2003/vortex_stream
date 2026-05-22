@@ -31,6 +31,7 @@ func (h *FolderHandler) Create (c *gin.Context){
 
 	var req dto.CreateFolderReqest
 
+	fmt.Print(req,"lol")
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return

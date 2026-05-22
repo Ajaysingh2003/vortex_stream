@@ -40,7 +40,7 @@ function GeneralSetting() {
         <div className='w-full flex flex-col gap-2 md:gap-3'>
           {
             item.map((e)=>(
-              <ItemRow label={e.label} description={e.description} onChange={e.onChange} icon={e.icon}/>
+              <ItemRow key={e.label} label={e.label} description={e.description} onChange={e.onChange} icon={e.icon}/>
             ))
           }
         </div>
