@@ -87,7 +87,6 @@ function ProfileMenu() {
 
   const activeWorkspace = data as WorkspaceType;
 
-  console.log(activeWorkspace, "leah jaye xxx");
   const queryClient = useQueryClient();
   const mutate = useMutation(
     trpc.user.createWorkspace.mutationOptions({

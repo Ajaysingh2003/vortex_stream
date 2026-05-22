@@ -19,12 +19,12 @@ import ProfileMenu from "./ProfileMenu";
 
 export function AppSidebar() {
   return (
-    <Sidebar className="max-w-56 border-r-[0.5px] border-stone-200  font-content  tracking-tight" collapsible="icon">
+    <Sidebar className="max-w-56 border-r-[0.5px] border-stone-200  font-content bg-surface tracking-tight" collapsible="icon">
       
-      <SidebarHeader>
+      <SidebarHeader className="bg-surface">
         <ProfileMenu/>
       </SidebarHeader>
-      <SidebarContent className="bg-[#f9f9fd]">
+      <SidebarContent className="bg-surface">
         <SidebarGroup>
           <SidebarGroupContent className="pt-4 md:pt-2">
             <SidebarMenu className="pl-2 space-y-1">
