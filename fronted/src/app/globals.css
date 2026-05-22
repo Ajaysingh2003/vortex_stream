@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-surface:var(--bg-surface);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -49,6 +50,20 @@
 }
 
 :root {
+  /* brand */
+  --brand-primary:#B499FF;
+  --brand-secondary:#EDECFF;
+  --brand-accent:#fff;
+  /* background */
+  --bg-main:#ffff;
+  --bg-surface:rgba(237, 236, 255, 0.4);
+  --bg-secondary:#EDECFF;
+  --bg-muted: #e5e7eb;
+/* 
+  --text-main: #111827;           
+  --text-muted: #4b5563;         
+  --text-on-brand: #ffffff; */
+  
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -142,9 +157,14 @@ body{
   font-family: var(--font-content);
 }
 
+
+.brand-primary{
+  background: red;
+}
+
 .bg-primary-btn {
   /* background-image: linear-gradient(90.48deg, rgb(250, 195, 210) 0%, #0a485f 100%); */
-  background-image: linear-gradient(110.48deg, rgba(205, 146, 245, 0.963) 0%, #15118b 100%);
+  background-image: linear-gradient(110.48deg, rgba(205, 146, 245, 0.963) 0%, #350c5f 100%);
   font-weight: 700;
   padding: 12px 24px;
   /* border-radius: 10px; */
@@ -152,4 +172,19 @@ body{
   /* box-shadow: 0 4px 15px rgba(157, 150, 201, 0.2); */
   transition: all 0.3s ease;
   cursor: pointer;
+}
+
+.folder-bg-linear{
+  background: radial-gradient(circle at center, #F1AEFF 0%, #ffffff 100%);
+}
+
+.active-folder-btn{
+  background: rgba(237, 236, 255,0.7);
+  color: #151516;
+}
+
+
+.bg-progress-gradient {
+  background: linear-gradient(90.48deg,   #0c185f 0% , #92bff5f6 100%);
+  /* background-color: red; */
 }

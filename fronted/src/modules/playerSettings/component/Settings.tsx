@@ -55,7 +55,7 @@ const Menu=()=>{
         <div className='flex flex-row md:flex-col  gap-2 flex-1'>
             {
             items.map((e)=>(
-                <div>
+                <div key={e.label}>
                     <Button onClick={()=>handleChange(e.label)} variant={"outline"} className={`w-full rounded-lg ${isActive(e.label)?"bg-[#bca3f612] text-black":"bg-transparent"} px-2 py-2 md:py-2 border-none outline-none font-medium tracking-wide flex font-headinga hover:bg-[#bca3f612] hover:text-stone-800 justify-start md:px-4 gap-2 md:gap-6 cursor-pointer`}>
                         {e.icon}
                         <span className=' capitalize text-sm md:text-md '>{e.label}</span>

@@ -195,7 +195,7 @@ export const userRouter = createTRPCRouter({
     
     try {
       const cookieStore = await cookies();
-
+      cookieStore.delete("workspace_id");
         cookieStore.set("workspace_id", input.workspaceId, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",

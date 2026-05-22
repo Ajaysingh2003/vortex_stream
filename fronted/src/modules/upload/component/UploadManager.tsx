@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { UploadCard } from "@/modules/console/component/UploadCard";
 import { generateId } from "@/utils/utils";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronUp } from "lucide-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 
 type UploadStatus =
@@ -38,12 +38,12 @@ interface UploadTypes{
 }
 
 function UploadMangager({items,onCancel,onPause,onRemove,onResume,onRetry}:UploadTypes) {
-  console.log(items,5566)
+
   const [open, setOpen] = useState<boolean>(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
   const activeItems = items.filter(
-    (i) => !["done", "cancelled"].includes(i.status)
+    (i) => !["done", "cancelled","TRANSCODING"].includes(i.status)
   );
   
   const overallPercentage = useMemo(() => {
@@ -54,15 +54,18 @@ function UploadMangager({items,onCancel,onPause,onRemove,onResume,onRetry}:Uploa
   const totalSize = items.reduce((acc, item) => acc + item.file.size, 0);
 
   if (totalSize === 0) return 0;
-
+  
   return Math.round((totalUploaded / totalSize) * 100);
-}, [items]);
+  }, [items]);
 
-const isCurrentlyUploading=items.find((e)=>e.status!="done")
-console.log(isCurrentlyUploading)
+  const isCurrentlyUploading=items.find((e)=>e.status!="done")
+
+  // console.log(isCurrentlyUploading)
+
   return (
-    <>
-   { isCurrentlyUploading && <div className=" absolute w-full max-w-82  shadow-sm rounded-[12px] shadow-black/28 bg-[#fafafa]  bottom-56 right-18">
+      <>
+    { activeItems.length>0 && <div className="  fixed  w-full max-w-sm lg:max-w-128  shadow-sm rounded-[10px] shadow-black/28 bg-[#fafafa]  bottom-6 -translate-x-1/2 left-[50%]  overflow-hidden">
+
       <div className="bg-[#f7f7f7] border-b border-[#eee] py-2 px-4 w-full flex justify-between items-center">
         <p className=" capitalize text-md font-normal text-[#040404] leading-6  text-nowrap   tracking-wide">
           Uploading - <span className="font-semibold text-sm">{overallPercentage}%</span>
@@ -71,9 +74,8 @@ console.log(isCurrentlyUploading)
           onClick={() => setOpen((e) => !e)}
           className="w-fit bg-transparent text-black border-none outline-none hover:bg-transparent"
           >
-          {!open ? <ChevronDown /> : <ChevronUp />}
+          {open ? <ArrowDown /> : <ArrowUp />}
         </Button>
-
       </div>
 
       {open && (
@@ -95,7 +97,8 @@ console.log(isCurrentlyUploading)
           )}
         </div>
       )}
-    </div>}
+    </div>
+    }
       </>
   );
 }
