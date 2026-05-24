@@ -31,7 +31,6 @@ export interface FolderDataType{
 
 export type ProviderType = "wistia" | "vimeo" | "dropbox" | "onedrive" | "google_drive";
 
-
 export type GooglePickerFile = {
     id: string
     name: string

@@ -32,11 +32,12 @@ function ConnectGoogleDrive() {
   const [pickedFile, setPickedFile] = useState<GooglePickerFile | null>(null);
 
   const { openPicker } = useGooglePicker(async (file, access_token) => {
+
     try {
       setPickedFile(file);
     console.log("picked:", file);
     const controller = new AbortController();
-  
+    
     googleAbortMap.set(trackId, controller);
 
     console.log("Generated trackId for upload:", trackId,googleAbortMap.get(trackId));
@@ -101,6 +102,7 @@ function ConnectGoogleDrive() {
       const downloadStartaTime = performance.now();
 
       await axios.put(uploadUrl, nativeFileObject, {
+        
         headers: {
           "Content-Type": file.mimeType,
         },

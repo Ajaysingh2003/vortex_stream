@@ -51,12 +51,13 @@
 
 :root {
   /* brand */
-  --brand-primary:hsl(256, 100%, 80%);
-  --brand-secondary:hsl(256, 100%, 90%);
-  --brand-accent:hsl(256, 100%, 100%);
-  --bg-main:hsl(256, 100%, 100%);
+  --brand-primary:#B499FF;
+  --brand-secondary:#EDECFF;
+  --brand-accent:#fff;
+  /* background */
+  --bg-main:#ffff;
   --bg-surface:rgba(237, 236, 255, 0.4);
-  --bg-secondary:hsl(256, 100%, 90%);
+  --bg-secondary:#EDECFF;
   --bg-muted: #e5e7eb;
 /* 
   --text-main: #111827;           

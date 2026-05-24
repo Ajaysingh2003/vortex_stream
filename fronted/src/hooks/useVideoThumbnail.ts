@@ -163,3 +163,4 @@ export const useVideoThumbnail = () => {
 
     return { thumbnail, loading, generateThumbnail, reset }
 }
+
