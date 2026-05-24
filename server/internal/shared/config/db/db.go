@@ -69,7 +69,7 @@ func InitDb() *gorm.DB {
 	)
 		  
 	if err != nil {
-		log.Fatal("❌ Migration failed: ", err)
+		log.Fatal("❌ Migration  failed: for db ", err)
 	}
 
 	DB = db

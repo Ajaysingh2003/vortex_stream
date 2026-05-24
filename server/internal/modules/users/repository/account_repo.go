@@ -5,11 +5,13 @@ import (
 	"errors"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type AccountRepository interface {
 	Create (tx *gorm.DB, account *domain.Account) error
+	GetByUserID (ctx context.Context, userID uuid.UUID) (*domain.Account, error)
 	FindByProviderAndID (provider string, providerID string) (*domain.Account, error)
 	FindByUserAndProvider (userID, provider string) (*domain.Account, error)
 	DeleteByUserAndProvider (tx *gorm.DB, userID, provider string) error
@@ -82,4 +84,18 @@ func (r *accountRepo) CreateTx (ctx context.Context,tx *gorm.DB,account *domain.
 	
     return account, nil
 
+}
+
+
+func  (r *accountRepo) GetByUserID (ctx context.Context,userID uuid.UUID) (*domain.Account,error){
+
+	var acc domain.Account
+	err := r.db.WithContext(ctx).
+		Where("user_id = ?", userID).
+		First(&acc).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &acc, err
 }
