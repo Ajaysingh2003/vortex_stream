@@ -165,12 +165,12 @@ export async function startUpload({
       const currentSpeed = timeElapsed > 0 ? progressEvent.loaded / timeElapsed : 0;
       const bytesRemaining = totalOriginalFileSize - absoluteLoadedBytes;
       const currentEta = currentSpeed > 0 ? bytesRemaining / currentSpeed : 0;
-
+      console.log(`testID-777`,item);
       // 💡 FIX 3: Throttle UI update cycles to once every 150ms to prevent frame drops
       // Always let the absolute final packet tick (100%) bypass the timing constraint
       if (now - lastCommittedTime > 150 || absoluteLoadedBytes === totalOriginalFileSize) {
         lastCommittedTime = now;
-        
+        console.log(item,"leah jaye")
         onProgressThrottled({
           progress,
           uploadedBytes: absoluteLoadedBytes,

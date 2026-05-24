@@ -88,6 +88,7 @@ function buildPicker(
         .setCallback((data: any) => {
             if (data.action === window.google.picker.Action.PICKED) {
                 const file = data.docs[0]
+                console.log('File picked from Google Drive:', file);
                 onFilePicked({
                     id: file.id,
                     name: file.name,

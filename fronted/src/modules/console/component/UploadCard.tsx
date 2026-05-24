@@ -69,12 +69,15 @@ export const UploadCard = ({
 
   const { thumbnail , generateThumbnail ,loading} = useVideoThumbnail();
 
-  useEffect(() => {
-    if (item.file){
 
+  useEffect(() => {
+    if (item.file && item.file.size > 0){
+      console.log("Generating thumbnail for", item.file);
       generateThumbnail(item.file,2)
+
     }
-  }, [item.file]);
+
+  }, [item.file,generateThumbnail]);
 
   console.log(item,thumbnail, "item")
   
@@ -100,7 +103,7 @@ export const UploadCard = ({
         
 
 <div className="flex items-start gap-3">
-       {/* { thumbnail && <Image height={100} width={100} src={thumbnail} alt="Thumbnail" className="flex-shrink-0 size-11 rounded-md object-cover" />} */}
+       { thumbnail && <Image height={100} width={100} src={thumbnail} alt="Thumbnail" className="flex-shrink-0 size-11 rounded-md object-cover" />}
 
         <div className="flex items-center justify-center size-10 bg-slate-100 border border-slate-200/30 text-violet-600 rounded-lg">
   <Film className="size-5" strokeWidth={1.5} />
