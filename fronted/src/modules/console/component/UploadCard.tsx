@@ -6,17 +6,6 @@ import { useEffect } from "react";
 import { error } from "console";
 import Image from "next/image";
 
-
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-
 type UploadStatus =
   | "queued"
   | "uploading"

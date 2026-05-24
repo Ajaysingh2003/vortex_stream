@@ -114,7 +114,7 @@ type User struct {
 	IsActive bool      `gorm:"default:true" json:"isActive"`
 	// Videos []Video `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
 	Workspaces []Workspaces     `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"workspaces,omitempty"`
-	Accounts []Account `gorm:"foreignKey:UserID" json:"accounts,omitempty"`
+	Accounts []Account `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"accounts,omitempty"`
 }
 
 type Account struct {

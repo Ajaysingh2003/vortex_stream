@@ -2,12 +2,18 @@ package services
 
 import (
 	"context"
-	"log"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"time"
+
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
+	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/dto"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	workspaceRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
+	config "github.com/ajaysingh2003/vortex-stream/internal/shared/config/redis"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
+	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -15,7 +21,8 @@ import (
 
 type UserServiceInterface interface {
 
-	Create (ctx context.Context, user *domain.User) (*domain.User, error)
+	Register (ctx context.Context, user *domain.User) (error)
+	verifyOTP (ctx context.Context, email string, otp string) (*domain.User, error)
 	Login (ctx context.Context,email string,password string) (*domain.User,error)
 	GetUser (ctx context.Context,id uuid.UUID) (*domain.User,error)
 	FindOrCreateGoogleUser (ctx context.Context, email string, name string,picture string,googleSub string)(*domain.User,error)
@@ -36,64 +43,135 @@ func NewUserService(userRepo repository.UserRepository,jwtToken *utils.JwtMaker,
 	return &userServiceRepo{userRepo:userRepo,jwtToken:jwtToken,workspaceRepo: workspaceRepo,db: db,accountRepo :accountRepo}
 }
 
-func (r *userServiceRepo) Create (ctx context.Context, user *domain.User) (*domain.User, error) {
+func (r *userServiceRepo) Register (ctx context.Context, user *domain.User) (error) {
 
     existing, _ := r.userRepo.GetByEmail(ctx, user.Email)
     if existing != nil {
-        return nil, utils.New(409, "Email already exists")
+        return utils.New(409, "Email already exists")
     }
+
 
     // hash password
     hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
     if err != nil {
-        return nil, utils.New(500, err.Error())
+        return utils.New(500, err.Error())
     }
 
     if user.Role == "" {
         user.Role = "User"
     }
 
-    userPayload := &domain.User{
+   
+	dataKey:=fmt.Sprintf("otp_%s", user.Email)
+
+	attemptKey:=fmt.Sprintf("otp_attempt_%s", user.Email)
+	
+	attempt, err := config.RedisClient.Get(ctx, attemptKey).Int()
+    if err != nil {
+        if errors.Is(err, redis.Nil) {
+            attempt = 0 
+        } else {
+            fmt.Println("Real Redis Connection Error:", err)
+            return &utils.ApiError{
+                Code:    500,
+                Message: "Internal cache lookup failure",
+            }
+        }
+    }
+
+    // Now your print statement will print 0 for new users instead of crashing
+    fmt.Println(attempt, "lol")
+	
+
+	if attempt>5{
+		return &utils.ApiError{
+			Code: 429,
+			Message: "Too many OTP attempts. Please try again later.",
+		}
+	}
+
+	
+	
+	otp, err := utils.GenerateSecureOTP(6)
+	if err != nil {
+		fmt.Sprintf("OTP generation error:", err)
+		return &utils.ApiError{
+			Code: 500,
+			Message: err.Error(),
+		}
+	}
+
+	 userPayload := &dto.OTPRequest{
+        ID:       uuid.New(),
         Email:    user.Email,
         Password: string(hashedPassword),
-        Role:     user.Role,
-        ID:       uuid.New(),
-        IsActive: true,
+        Role:     string(user.Role),
+		OTP: otp,
     }
 
-    var createdUser *domain.User
+	jsonData, err := json.Marshal(userPayload)
 
-    err = r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	if err != nil {
+		return err
+	}
 
-        // create user
-        data, err := r.userRepo.CreateTx(ctx, tx, userPayload)
-        if err != nil {
-            return err // auto rollback
-        }
+	err=config.RedisClient.SetEX(ctx, dataKey, jsonData,90*time.Minute).Err()
 
-        // create default workspace
-        workspace := &domain.Workspaces{
-            ID:        uuid.New(),
-            Name:      "My Workspace",
-            UserID:    data.ID,
-            IsDefault: true,
-        }
+	if err != nil {
+		// fmt.Sprintf("Redis set error:", err)	
+		return &utils.ApiError{
+			Code: 500,
+			Message: err.Error(),
+		}
+	}
 
-        _, err = r.workspaceRepo.CreateTx(ctx, tx, workspace)
-        if err != nil {
-            return err // auto rollback
-        }
+	err = utils.SendEmail(user.Email, userPayload.OTP)
+	if err != nil {
+		fmt.Sprintf("Email sending error:", err)
+		return &utils.ApiError{
+			Code: 500,
+			Message: err.Error(),
+		}
+	}
+	
+	return  nil
 
-        createdUser = data
-        return nil // auto commit
-    })
 
-    if err != nil {
-        log.Println("Create user error:", err.Error())
-        return nil, utils.New(500, err.Error())
-    }
+    // var createdUser *domain.User
 
-    return createdUser, nil
+    // err = r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+
+    //     // create user
+    //     data, err := r.userRepo.CreateTx(ctx, tx, userPayload)
+    //     if err != nil {
+    //         return err // auto rollback
+    //     }
+
+    //     // create default workspace
+    //     workspace := &domain.Workspaces{
+    //         ID:        uuid.New(),
+    //         Name:      "My Workspace",
+    //         UserID:    data.ID,
+    //         IsDefault: true,
+    //     }
+
+    //     _, err = r.workspaceRepo.CreateTx(ctx, tx, workspace)
+    //     if err != nil {
+    //         return err // auto rollback
+    //     }
+
+    //     createdUser = data
+    //     return nil // auto commit
+    // })
+
+    // if err != nil {
+    //     log.Println("Create user error:", err.Error())
+    //     return nil, utils.New(500, err.Error())
+    // }
+
+    // return createdUser, nil
+
+
 }
 
 func (r *userServiceRepo) Login (ctx context.Context,email string,password string) (*domain.User,error) {
@@ -120,6 +198,25 @@ func (r *userServiceRepo) Login (ctx context.Context,email string,password strin
 			Message: "User is Not Active",
 		}
 	}
+	if existing_user.Password == "" {
+		account,err:=r.accountRepo.GetByUserID(ctx, existing_user.ID)
+		if err != nil {
+			return nil, utils.New(500, err.Error())
+		}
+		if account == nil {
+			return nil, utils.New(404, "Account not found")
+		}
+
+		if account.Provider != "email" {
+			errorMessage := "Please login using " + account.Provider + " Sign-In"
+			return nil, &utils.ApiError{
+				Code:    400,
+				Message: string(errorMessage),
+			}
+		}
+
+	}
+	
 	if bcrypt.CompareHashAndPassword([]byte(existing_user.Password), []byte(password)) != nil {
 		return nil,&utils.ApiError{
 			Code: 401,
@@ -241,4 +338,10 @@ func (r userServiceRepo) GetUserByEmail (ctx context.Context,email string) (*dom
 
 	return userData,nil
 
+}
+
+func (r *userServiceRepo) verifyOTP(ctx context.Context, email string, otp string) (*domain.User, error) {
+	// Implement OTP verification logic here
+	// This is a placeholder implementation and should be replaced with actual OTP verification logic
+	return nil, utils.New(501, "OTP verification not implemented")
 }
