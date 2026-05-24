@@ -24,7 +24,7 @@ function LoginView() {
     },
   });
 };
-
+console.log("test")
   return (
     <div className='w-full  min-h-screen flex flex-col'>
         <div className='flex flex-1 w-full h-full items-center justify-center'>
