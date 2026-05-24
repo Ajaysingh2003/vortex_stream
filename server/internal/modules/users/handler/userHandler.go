@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"time"
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/services"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
@@ -21,9 +20,9 @@ type UserHandler struct {
 
 func (h *UserHandler) Register (c *gin.Context) {
 	var req struct {
+		Name string `json:"name" binding:"required"`
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required,min=6"`
-		Role     string `json:"role" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -33,13 +32,16 @@ func (h *UserHandler) Register (c *gin.Context) {
 	testUUid:=uuid.New()
 	fmt.Println(testUUid,"leah jaye")
 
-	data,err:=h.UserService.Create(c.Request.Context(), &domain.User{
+	err:=h.UserService.Register(c.Request.Context(), &domain.User{
+		Name: &req.Name,
 		Email:    req.Email,
 		Password: req.Password,
 		ID: testUUid,
-		Role: domain.UserRole(req.Role),
+		Role: "User",
 	})
 
+	
+	
 	
 	if  err!=nil{
 		if appErr, ok := err.(*utils.ApiError); ok {
@@ -50,35 +52,41 @@ func (h *UserHandler) Register (c *gin.Context) {
 		return
 	}
 
-	if data == nil {
-	c.JSON(http.StatusInternalServerError, gin.H{"message": "User creation failed","success":false})
-	return
-	}
-	payload := &utils.Claims{
-		Id: data.ID,
-		Email: data.Email,
-		Role:  data.Role,
-		Duration: 24*90*time.Hour,
-	}
 
-	access_token,_,err:=h.JwtToken.GenerateJwt(payload)
+	// if data == nil {
+	// c.JSON(http.StatusInternalServerError, gin.H{"message": "User creation failed","success":false})
+	// return
+	// }
+	// payload := &utils.Claims{
+	// 	Id: data.ID,
+	// 	Email: data.Email,
+	// 	Role:  data.Role,
+	// 	Duration: 24*90*time.Hour,
+	// }
+
+	// access_token,_,err:=h.JwtToken.GenerateJwt(payload)
 	
-	if (err!=nil){
-		c.JSON(http.StatusInternalServerError,gin.H{"message":"Something went wrong!"})
-		return
-	}
+	// if (err!=nil){
+	// 	c.JSON(http.StatusInternalServerError,gin.H{"message":"Something went wrong!"})
+	// 	return
+	// }
 
-	c.SetCookie(
-	"access_token",
-	access_token,
-	60*90,    // 90 minutes
-	"/",
-	"localhost",
-	false,         // set true in production (HTTPS)
-	true,          // HttpOnly
-	)
+	// c.SetCookie(
+	// "access_token",
+	// access_token,
+	// 60*90,    // 90 minutes
+	// "/",
+	// "localhost",
+	// false,         // set true in production (HTTPS)
+	// true,          // HttpOnly
+	// )
 
-	c.JSON(http.StatusOK, gin.H{"success":true,"message": "User Registed Successfully","access_token":access_token})
+	// c.JSON(http.StatusOK, gin.H{"success":true,"message": "User Registed Successfully","access_token":access_token})
+
+	
+	c.JSON(http.StatusOK, gin.H{"success":true,"message": "OTP sent Successfully"})
+
+
 }
 
 func (h *UserHandler) Login (c *gin.Context){

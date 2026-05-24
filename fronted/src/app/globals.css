@@ -51,13 +51,12 @@
 
 :root {
   /* brand */
-  --brand-primary:#B499FF;
-  --brand-secondary:#EDECFF;
-  --brand-accent:#fff;
-  /* background */
-  --bg-main:#ffff;
+  --brand-primary:hsl(256, 100%, 80%);
+  --brand-secondary:hsl(256, 100%, 90%);
+  --brand-accent:hsl(256, 100%, 100%);
+  --bg-main:hsl(256, 100%, 100%);
   --bg-surface:rgba(237, 236, 255, 0.4);
-  --bg-secondary:#EDECFF;
+  --bg-secondary:hsl(256, 100%, 90%);
   --bg-muted: #e5e7eb;
 /* 
   --text-main: #111827;           
@@ -76,7 +75,7 @@
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: #181818bb;
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -173,6 +172,17 @@ body{
   transition: all 0.3s ease;
   cursor: pointer;
 }
+.bg-primary-btn-import {
+  /* background-image: linear-gradient(90.48deg, rgb(250, 195, 210) 0%, #0a485f 100%); */
+  background-image: linear-gradient(110.48deg, rgba(205, 146, 245, 0.299) 0%, #350c5f 70%);
+  font-weight: 700;
+  padding: 12px 24px;
+  /* border-radius: 10px; */
+  /* border: 1px solid rgba(157, 150, 201, 0.3); */
+  /* box-shadow: 0 4px 15px rgba(157, 150, 201, 0.2); */
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
 
 .folder-bg-linear{
   background: radial-gradient(circle at center, #F1AEFF 0%, #ffffff 100%);
@@ -187,4 +197,57 @@ body{
 .bg-progress-gradient {
   background: linear-gradient(90.48deg,   #0c185f 0% , #92bff5f6 100%);
   /* background-color: red; */
+}
+
+.bg-background-btn {
+  /* background: rgb(94, 36, 180); */
+  background: black;
+  position: relative;
+  overflow: hidden; 
+}
+
+.bg-background-btn::after {
+  position: absolute;
+  content: "";
+  border-radius: inherit;
+  z-index: 1; 
+  inset: 0px;
+  opacity: 1;
+  pointer-events: none;
+  transition-property: background-color, background, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 100ms;
+  /* background-image: linear-gradient(rgba(255, 255, 255, 0.184) 0%, rgba(255, 255, 255, 0.058) 100%); */
+  background-image: linear-gradient(rgba(255, 255, 255, 0.309) 0%, rgba(255, 255, 255, 0.132) 100%);
+}
+
+
+
+.hidden-overlap{
+  position: relative;
+}
+
+.hidden-overlap::after{
+  position: absolute;
+  content: "";
+  z-index: 2;
+  width: 100%;
+  height: 70%;
+  bottom: 0;
+  background: linear-gradient(transparent 20%, rgb(255, 255, 255) 88%);
+  /* background-color: black; */
+}
+
+.overlap-card{
+  position: relative;
+}
+
+
+.overlap-card::after{
+   position: absolute;
+  content: "";
+  z-index: 2;
+  width: 100%;
+  height: 50%;
+  bottom: 0;
+  background: linear-gradient(transparent 20%, rgb(255, 255, 255) 98%);
 }
