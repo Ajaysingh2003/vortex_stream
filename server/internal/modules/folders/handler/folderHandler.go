@@ -337,7 +337,7 @@ func (r *FolderHandler) GetContent (c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data":data,"success":true})
 }
 
-func (h *FolderHandler) GetBreadcrumbsHandler(c *gin.Context) {
+func (h *FolderHandler) GetBreadcrumbsHandler (c *gin.Context) {
 	// 1. Extract raw parameters from path or query string
 	workspaceIDRaw := c.Param("workspaceID")
 	folderIDRaw := c.Param("id") // Or c.Query("id") if passed as a query param
@@ -394,4 +394,66 @@ func (h *FolderHandler) GetBreadcrumbsHandler(c *gin.Context) {
 		"success": true,
 		"data":    breadcrumbs,
 	})
+}
+
+func (h *FolderHandler) GetRootData (c *gin.Context){
+
+	userIDRaw,exists:=c.Get("user_id") 
+
+	if !exists{
+		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":true})
+		return
+	}
+
+	userId,ok:=userIDRaw.(uuid.UUID)
+
+	if !ok {
+		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":false})
+		return
+	}
+
+	workspaceId,err:=uuid.Parse(c.Param("workspaceID"))
+
+	if err!=nil{
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Workspace ID","success":false})
+		return
+	}
+	// id,err:=uuid.Parse(c.Param("id"))
+
+	// if err!=nil{
+	// 	c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Folder ID","success":false})
+	// 	return
+	// }
+
+	cursor := c.Query("cursor")
+
+	limit:=10
+	if l := c.Query("limit"); l != "" {
+    parsed, err := strconv.Atoi(l)
+    if err == nil && parsed > 0 && parsed <= 100 {
+        limit = parsed
+    }
+	}
+
+	data,err:=h.FolderService.GetRootData(c.Request.Context(),workspaceId,userId,cursor,limit)
+
+
+	if err != nil {
+
+    var appErr *utils.ApiError
+    if errors.As(err, &appErr) {
+        c.JSON(appErr.Code, gin.H{
+            "success": false,
+            "message": utils.ErrMsg(err),
+        })
+		return
+		
+    }
+	fmt.Print(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Internal server error"})
+    
+        return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data":data,"success":true})
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
@@ -22,7 +23,7 @@ import (
 type UserServiceInterface interface {
 
 	Register (ctx context.Context, user *domain.User) (error)
-	verifyOTP (ctx context.Context, email string, otp string) (*domain.User, error)
+	VerifyOTP (ctx context.Context, email string, otp string) (*domain.User, error)
 	Login (ctx context.Context,email string,password string) (*domain.User,error)
 	GetUser (ctx context.Context,id uuid.UUID) (*domain.User,error)
 	FindOrCreateGoogleUser (ctx context.Context, email string, name string,picture string,googleSub string)(*domain.User,error)
@@ -103,6 +104,7 @@ func (r *userServiceRepo) Register (ctx context.Context, user *domain.User) (err
 
 	 userPayload := &dto.OTPRequest{
         ID:       uuid.New(),
+		Name: *user.Name,
         Email:    user.Email,
         Password: string(hashedPassword),
         Role:     string(user.Role),
@@ -137,39 +139,6 @@ func (r *userServiceRepo) Register (ctx context.Context, user *domain.User) (err
 	return  nil
 
 
-    // var createdUser *domain.User
-
-    // err = r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-
-    //     // create user
-    //     data, err := r.userRepo.CreateTx(ctx, tx, userPayload)
-    //     if err != nil {
-    //         return err // auto rollback
-    //     }
-
-    //     // create default workspace
-    //     workspace := &domain.Workspaces{
-    //         ID:        uuid.New(),
-    //         Name:      "My Workspace",
-    //         UserID:    data.ID,
-    //         IsDefault: true,
-    //     }
-
-    //     _, err = r.workspaceRepo.CreateTx(ctx, tx, workspace)
-    //     if err != nil {
-    //         return err // auto rollback
-    //     }
-
-    //     createdUser = data
-    //     return nil // auto commit
-    // })
-
-    // if err != nil {
-    //     log.Println("Create user error:", err.Error())
-    //     return nil, utils.New(500, err.Error())
-    // }
-
-    // return createdUser, nil
 
 
 }
@@ -340,8 +309,99 @@ func (r userServiceRepo) GetUserByEmail (ctx context.Context,email string) (*dom
 
 }
 
-func (r *userServiceRepo) verifyOTP(ctx context.Context, email string, otp string) (*domain.User, error) {
-	// Implement OTP verification logic here
-	// This is a placeholder implementation and should be replaced with actual OTP verification logic
-	return nil, utils.New(501, "OTP verification not implemented")
+func (r *userServiceRepo) VerifyOTP (ctx context.Context, email string, otp string) (*domain.User, error) {
+
+	existing_user,err:=r.userRepo.GetByEmail(ctx, email)
+
+	if err != nil || existing_user !=nil {
+		return nil, &utils.ApiError{
+			Code: 400,
+			Message: "User already exist !",
+		}
+	}
+
+	dataKey:=fmt.Sprintf("otp_%s", email)
+
+
+	// data:= config.RedisClient.Get(ctx, dataKey)
+	
+
+	cachedBytes, err := config.RedisClient.Get(ctx, dataKey).Bytes()
+	
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return nil, errors.New("verification token has expired or is invalid")
+		}
+		return nil, err
+	}
+
+	var mappedData dto.OTPRequest
+
+	err = json.Unmarshal(cachedBytes, &mappedData)
+	if err != nil {
+		log.Printf("Failed to unmarshal data payload structure: %v", err)
+		return nil, err
+	}
+
+	if otp!=mappedData.OTP{
+		return  nil,&utils.ApiError{
+			Code: 403,
+			Message: "The verification code provided is invalid or has expired.",
+		}
+	}
+
+	userPayload:=&domain.User{
+		Email: mappedData.Email,
+		Password: mappedData.Password,
+		Role: domain.UserRole(mappedData.Role),
+		ID: mappedData.ID,
+		Name: &mappedData.Name,
+	}
+	
+    var createdUser *domain.User
+
+    err = r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+
+        // create user
+        data, err := r.userRepo.CreateTx(ctx, tx, userPayload)
+        if err != nil {
+            return err
+        }
+
+        // create default workspace
+        workspace := &domain.Workspaces{
+            ID:        uuid.New(),
+            Name:      "My Workspace",
+            UserID:    data.ID,
+            IsDefault: true,
+        }
+
+        _, err = r.workspaceRepo.CreateTx(ctx, tx, workspace)
+        if err != nil {
+            return err // auto rollback
+        }
+
+		accountPayload:=&domain.Account{
+			ID: uuid.New(),
+			UserID: data.ID,
+			Provider: "email",
+			ProviderID: data.Email,
+		}
+
+		_,err=r.accountRepo.CreateTx(ctx, tx, accountPayload)
+
+		if err != nil {
+			return err
+		}
+
+        createdUser = data
+        return nil
+    })
+
+    if err != nil {
+        log.Println("Create user error:", err.Error())
+        return nil, utils.New(500, err.Error())
+    }
+
+    return createdUser, nil
 }

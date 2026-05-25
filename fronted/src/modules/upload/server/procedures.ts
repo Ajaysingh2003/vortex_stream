@@ -78,9 +78,10 @@ export const uploadsRouter = createTRPCRouter({
       }
     }),
 
-  updateMetaData: baseProcedure
+  createVideo: baseProcedure
     .input(
       z.object({
+        workspace_id:z.string(),
         title: z.string(),
         userId: z.string(),
         videoKey: z.string(),
@@ -96,6 +97,7 @@ export const uploadsRouter = createTRPCRouter({
         input.videoKey,
         input.size,
         input.status,
+        "wizard"
       );
 
       try {
