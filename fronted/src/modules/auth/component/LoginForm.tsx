@@ -24,13 +24,15 @@ import { Eye, EyeClosed, EyeOff } from "lucide-react";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 function LoginForm() {
 
     const trpc=useTRPC()
-
+    const router=useRouter()
     const mutate=useMutation(trpc.user.login.mutationOptions({
         onSuccess:()=>{
             toast.success("Logged in successfully")
+            router.push(`/console/video-library`)
         },
         onError:(err)=>{
             toast.error( err.message || "Failed to login")

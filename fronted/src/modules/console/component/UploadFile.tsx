@@ -9,7 +9,7 @@ import { generateId } from "@/utils/utils";
 import toast from "react-hot-toast";
 import { useConsoleContext } from "../context/ConsoleContext";
 import { googleAbortMap } from "@/modules/upload/component/ConnectGoogleDrive";
-import { UploadItem } from "@/modules/types";
+import { UploadItem, UserType, WorkspaceType } from "@/modules/types";
 import { startUpload as startUploadFn } from "@/modules/upload/funcions/upload";
 import axios from "axios";
 
@@ -56,9 +56,14 @@ function uploadFileXHR(
   return xhr;
 }
 
+
+
 function UploadFile() {
   const trpc = useTRPC();
   const { data: user } = useSuspenseQuery(trpc.user.profile.queryOptions());
+
+  const userDataType=user as UserType
+  console.log(user,"hogrider")
   const { items, setItems } = useConsoleContext()!;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [globalError, setGlobalError] = useState<string | null>(null);
@@ -71,14 +76,18 @@ function UploadFile() {
     }),
   );
 
-  const updateVideo = useMutation(
-    trpc.upload.updateMetaData.mutationOptions({
+  const createVideo = useMutation(
+    trpc.upload.createVideo.mutationOptions({
       onSuccess: async (data) => {
         await startProcessing.mutateAsync({ id: data.data.id });
       },
     }),
   );
 
+  const {data:workspace}=useSuspenseQuery(trpc.user.getWorkspaces.queryOptions())
+  const workspaceData=workspace as WorkspaceType
+
+  console.log(workspaceData,"jsw999")
   const updateItem = useCallback((id: string, patch: Partial<UploadItem>) => {
     setItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, ...patch } : item)),
@@ -118,11 +127,12 @@ function UploadFile() {
           });
 
           if (key) {
-            await updateVideo.mutateAsync({
+            await createVideo.mutateAsync({
+              workspace_id:workspaceData.id,
               videoKey: key,
               title: item.file.name,
               status: "PENDING",
-              userId: user?.id,
+              userId: userDataType?.id,
               size: String(item.file.size),
             });
           }
@@ -139,10 +149,9 @@ function UploadFile() {
 
       xhrMapRef.current.set(item.id, xhr);
     },
-    [updateItem, user?.id, updateVideo],
+    [updateItem, userDataType?.id, createVideo],
   );
   
-
   const mutate = useMutation(
     trpc.upload.getSignedUrl.mutationOptions()
   );
@@ -293,11 +302,12 @@ function UploadFile() {
         });
         
         if (urls[0].Key) {
-          await updateVideo.mutateAsync({
+          await createVideo.mutateAsync({
+            workspace_id:workspaceData.id,
             videoKey: urls[0].Key,
             title: item.file.name,
             status: "PENDING",
-            userId: user?.id,
+            userId: userDataType?.id,
             size: String(item.file.size),
           });
         }
@@ -317,7 +327,7 @@ function UploadFile() {
         });
       }
     },
-    [items, mutate, updateItem, user?.id, updateVideo],
+    [items, mutate, updateItem, userDataType?.id, createVideo],
   );
 
   const handleRetry = useCallback(

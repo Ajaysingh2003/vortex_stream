@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface ProfileType {
   email: string;
@@ -129,6 +130,12 @@ function ProfileMenu() {
     console.log(id, "from test case 1");
     setHoverWorkspace(id);
   };
+
+  
+  const sidebarState=useSidebar()
+
+
+
   return (
     <DropdownMenu open={open} onOpenChange={(e) => setOpen(e)}>
       <DropdownMenuTrigger className=" cursor-pointer hover:bg-black/5" asChild>
@@ -136,13 +143,14 @@ function ProfileMenu() {
           className="
           py-2 rounded-lg
           text-black
-          w-full h-full px-2 gap-2 text-xs flex items-center
+          w-full h-full px-2 gap-2 text-xs
           shadow-none
           focus:outline-none
           focus:ring-0
           focus-visible:outline-none
           focus-visible:ring-0
           focus-visible:ring-offset-0
+          flex items-center justify-center
           "
         >
           <GenerateAvartar
@@ -151,7 +159,9 @@ function ProfileMenu() {
             seed={profileData.email}
             variant="initials"
           />
-          <div className="flex flex-col gap-[2px]">
+          {
+            sidebarState.open &&  <>
+            <div className="flex flex-col gap-[2px]">
             <h3 className="truncate flex-1 max-w-[120px] font-semibold text-[14px]">
               {profileData.email}
             </h3>
@@ -166,6 +176,8 @@ function ProfileMenu() {
           >
             <ChevronDown className="size-4" />
           </div>
+            </>
+          }
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
