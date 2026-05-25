@@ -18,14 +18,19 @@ func SetupRouter(r *gin.Engine,folderHandler *handler.FolderHandler,jwtMaker *ut
 		workspaces.GET("/:workspaceID/folders",middleware.AuthMiddleware(jwtMaker),folderHandler.GetRootFolders)
 
 		workspaces.GET("/:workspaceID/folder/:id",middleware.AuthMiddleware(jwtMaker),folderHandler.GetByID)
+
 		workspaces.GET("/:workspaceID/folder/:id/breadcumb",middleware.AuthMiddleware(jwtMaker),folderHandler.GetBreadcrumbsHandler)
+
 		workspaces.GET("/:workspaceID/folder/:id/children",middleware.AuthMiddleware(jwtMaker),folderHandler.GetChildren)
 
 		workspaces.POST("/:workspaceID/folder/create",middleware.AuthMiddleware(jwtMaker),folderHandler.Create)
 
 		workspaces.GET("/:workspaceID/folder/:id/content",middleware.AuthMiddleware(jwtMaker),folderHandler.GetContent)
 
+		workspaces.GET("/:workspaceID/content-library/",middleware.AuthMiddleware(jwtMaker),folderHandler.GetRootData)
+
 		workspaces.PATCH("/:workspaceID/folder/:id/move",middleware.AuthMiddleware(jwtMaker),folderHandler.Move) //will be taking new_parent_id as a req
+
 	 }
 
 	return r

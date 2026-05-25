@@ -65,3 +65,15 @@ export interface UploadItem {
   uploadType: UPLOADPROVIDER,
   googleToken?:string
 }
+
+
+export interface UserType{
+  id : string
+  avatar:string
+  name:string
+  email:string
+  createdAt:string
+  updatedAt:string
+  role:string
+  isActive:boolean
+}
