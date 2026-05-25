@@ -125,6 +125,7 @@ type Account struct {
 	CreatedAt time.Time
 }
 
+
 type Video struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	Title     string    `gorm:"type:varchar(255);not null" json:"title"`

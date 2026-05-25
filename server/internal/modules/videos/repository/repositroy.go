@@ -21,7 +21,7 @@ type VideoRepository interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetByFolderIdPaginated(ctx context.Context,folderID *uuid.UUID , afterID *uuid.UUID,remaining int) ([]domain.Video,error)
 
-	CountByFolderID(ctx context.Context,folderID uuid.UUID) (int64 , error)
+	CountByFolderID(ctx context.Context,folderID *uuid.UUID) (int64 , error)
 
 }
 
@@ -133,7 +133,7 @@ func (r *postgresVideoRepository) GetByFolderIdPaginated (ctx context.Context,fo
 
 	var videos []domain.Video
 
-	if err:=query.Find(videos).Error ; err!=nil{
+	if err:=query.Find(&videos).Error ; err!=nil{
 		return nil,err
 	}
 
@@ -141,18 +141,22 @@ func (r *postgresVideoRepository) GetByFolderIdPaginated (ctx context.Context,fo
 }
 
 
-func (r *postgresVideoRepository) CountByFolderID (ctx context.Context,folderID uuid.UUID) (int64 ,error) {
-	var count int64
+func (r *postgresVideoRepository) CountByFolderID(ctx context.Context, folderID *uuid.UUID) (int64, error) {
+    var count int64
 
-	err := r.db.WithContext(ctx).
-        Model(&domain.Folder{}).
-        Where("folder_id = ?", folderID).
-        Count(&count).Error
+    query := r.db.WithContext(ctx).Model(&domain.Video{})
 
-		if err != nil {
+    if folderID == nil {
+        query = query.Where("folder_id IS NULL")
+    } else {
+        query = query.Where("folder_id = ?", folderID)
+    }
+
+    // 3. Execute the database payload calculation
+    err := query.Count(&count).Error
+    if err != nil {
         return 0, err
     }
 
-	return count, nil
-
+    return count, nil
 }

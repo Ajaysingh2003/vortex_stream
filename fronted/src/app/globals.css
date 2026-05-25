@@ -56,7 +56,8 @@
   --brand-accent:#fff;
   /* background */
   --bg-main:#ffff;
-  --bg-surface:#ead0fd1c;
+  /* --bg-surface:#ead0fd1c; */
+  --bg-surface:#f5f5f5;
   --bg-secondary:#EDECFF;
   --bg-muted: #e5e7eb;
 /* 

@@ -22,7 +22,7 @@ type FolderRepository interface {
 	GetChildren(ctx context.Context, parentID uuid.UUID) ([]domain.Folder, error)
 
 	GetChildrenPaginated(ctx  context.Context,
-    parentID uuid.UUID,
+    parentID *uuid.UUID,
     workspaceID uuid.UUID,
     afterID  *uuid.UUID,
     limit    int) ([]domain.Folder,error)
@@ -37,7 +37,7 @@ type FolderRepository interface {
 
 	UpdatePosition(ctx context.Context, id uuid.UUID, position int) error
 
-	CountChildren (ctx context.Context,parentID uuid.UUID) (int64 , error)
+	CountChildren (ctx context.Context,parentID *uuid.UUID) (int64 , error)
 
 	CheckDuplicateName (ctx context.Context,name string,parentID *uuid.UUID,workspaceID uuid.UUID) (bool , error)
 	GetAncestors (ctx context.Context,folderID uuid.UUID) ([]domain.Folder, error)
@@ -183,16 +183,23 @@ func (r *postgresFolderRepository) UpdatePosition(ctx context.Context, id uuid.U
 
 func (r *postgresFolderRepository) GetChildrenPaginated(
     ctx      context.Context,
-    parentID uuid.UUID,
+    parentID *uuid.UUID,
     workspaceID uuid.UUID,
     afterID  *uuid.UUID,
     limit    int,
 ) ([]domain.Folder, error) {
 
-    query := r.db.WithContext(ctx).
-        Where("parent_id = ? AND workspace_id = ?", parentID, workspaceID).
-        Order("position ASC, created_at ASC").
-        Limit(limit)
+	query := r.db.WithContext(ctx).
+    Where("workspace_id = ?", workspaceID).
+    Order("position ASC, created_at ASC").
+    Limit(limit)
+
+	if parentID != nil {
+    query = query.Where("parent_id = ?", parentID)
+} else {
+    query = query.Where("parent_id IS NULL")
+}
+    
 		
     if afterID != nil {
         var cursorFolder domain.Folder
@@ -217,22 +224,24 @@ func (r *postgresFolderRepository) GetChildrenPaginated(
     return folders, nil
 }
 
-func (r *postgresFolderRepository) CountChildren(ctx context.Context,parentID uuid.UUID) (int64 ,error) {
-	var count int64
+func (r *postgresFolderRepository) CountChildren(ctx context.Context, parentID *uuid.UUID) (int64, error) {
+    var count int64
 
-	err := r.db.WithContext(ctx).
-        Model(&domain.Folder{}).
-        Where("parent_id = ?", parentID).
-        Count(&count).Error
+    query := r.db.WithContext(ctx).Model(&domain.Folder{})
 
-		if err != nil {
+    if parentID != nil {
+        query = query.Where("parent_id = ?", parentID)
+    } else {
+        query = query.Where("parent_id IS NULL")
+    }
+
+    err := query.Count(&count).Error
+    if err != nil {
         return 0, fmt.Errorf("failed to count children: %w", err)
     }
 
-	return count, nil
-
+    return count, nil
 }
-
 
 func (r *postgresFolderRepository) GetAncestors(ctx context.Context, folderID uuid.UUID) ([]domain.Folder, error) {
     var ancestors []domain.Folder

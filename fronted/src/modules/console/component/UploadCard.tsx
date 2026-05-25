@@ -2,9 +2,12 @@ import { formatBytes, formatTime, getFileExtension } from "@/utils/utils";
 import { AlertCircle, CheckCircle2, CirclePause, Clock, Film, Pause, Play, PlayCircle, RotateCcw, Trash2, TvMinimalPlay, Video, Wifi, WifiOff, X } from "lucide-react";
 import { ProgressBar } from "./ProgressBar";
 import { useVideoThumbnail } from "@/hooks/useVideoThumbnail";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { error } from "console";
 import Image from "next/image";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+import { file } from "zod";
 
 type UploadStatus =
   | "queued"
@@ -78,6 +81,50 @@ export const UploadCard = ({
     }
 
   }, [item.file,generateThumbnail]);
+  const [hasUploadedThumbnail, setHasUploadedThumbnail] = useState(false);
+
+  const trpc=useTRPC()
+
+  const presignedUrlMutate=useMutation(trpc.upload.getSignedUrl.mutationOptions())
+  
+  useEffect(()=>{
+    if (!thumbnail || !hasUploadedThumbnail) return
+    console.log("blob started")
+    const handleThumbnailUpload = async () => {
+    try {
+      setHasUploadedThumbnail(true)
+
+      const response = await fetch(thumbnail);
+      const blobData = await response.blob();
+      
+      // Convert to a formal file metadata construct
+      const thumbnailFile = new File([blobData], "thumbnail.jpg", { type: "image/jpeg" });
+
+      const payload=[{name:item.file.name,type:blobData.type,size:blobData.size}]
+      
+      const presignedUrl =await presignedUrlMutate.mutateAsync(payload)
+      const uploadResult = await fetch(presignedUrl.files[0].UploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": "image/jpeg" },
+        body: thumbnailFile,
+      });
+
+      console.log("log23",uploadResult)
+
+      if (!uploadResult.ok) throw new Error("Failed to upload assets to bucket storage engine");
+
+      console.log("Thumbnail permanently stored! Public URL ->", uploadResult);
+      
+
+    } catch (error) {
+      console.error("Critical thumbnail synchronization fallback loop triggered:", error);
+    }
+  };
+
+
+  handleThumbnailUpload()
+
+  },[thumbnail,hasUploadedThumbnail,item.file.name])
 
   console.log(item,thumbnail, "item")
   

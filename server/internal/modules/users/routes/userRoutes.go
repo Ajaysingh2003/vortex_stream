@@ -20,6 +20,7 @@ func SetupRouter(r *gin.Engine,userhandler *handler.UserHandler,jwtMaker *utils.
 
 	 {
 		user.POST("/register",userhandler.Register)
+		user.POST("/verify-otp",userhandler.VerifyOTP)
 		user.POST("/login",userhandler.Login)
 		user.GET("/profile",middleware.AuthMiddleware(jwtMaker),userhandler.Profile)
 		user.GET("/workspaces",middleware.AuthMiddleware(jwtMaker),userhandler.GetWorkspaces)

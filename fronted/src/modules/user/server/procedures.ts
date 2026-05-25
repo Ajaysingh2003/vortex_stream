@@ -126,6 +126,68 @@ export const userRouter = createTRPCRouter({
   });
       }
     }),
+  verifyOTP: baseProcedure
+    .input(
+      z.object({
+        otp:z.string(),
+        email: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        console.log(input, "input");
+        // console.log();
+        const res = await axios.post(
+          `${process.env.BASE_API}/v1/users/verify-otp`,
+          {
+            ...input,
+          },
+          {
+            withCredentials: true,
+          },
+        );
+
+        const cookieStore = await cookies();
+        cookieStore.set("access_token", res.data.token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 60 * 90,
+        });
+        
+        cookieStore.set("workspace_id", res.data.workspace_id, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 60 * 90,
+        });
+
+        const sendData={
+          "message":res.data.message
+        }
+
+        return sendData;
+        
+      } catch (error: any) {
+        console.log(error.response)
+        console.log(error?.response?.data, "error occurred");
+
+  if (axios.isAxiosError(error)) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: error.response?.data?.message || "Login failed",
+      cause: error.response?.data,
+    });
+  }
+
+  throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: "Something went wrong",
+  });
+      }
+    }),
   googleSignIn:baseProcedure.mutation(async({ctx})=>{
     try {
       
