@@ -88,7 +88,7 @@ export function AppSidebar() {
 
       <SidebarContent className="bg-surface">
         <SidebarGroup>
-          <SidebarGroupContent className="pt-4 md:pt-2">
+          <SidebarGroupContent className="pt-4z md:pt-z2">
             <SidebarMenu className="space-y-1">
               
               {menuItems.map((item) => {
@@ -111,7 +111,7 @@ export function AppSidebar() {
                     >
                       <Link href={item.href}>
                         <Icon className={cn("size-4 text-slate-500", isActive && "text-slate-900")} />
-                        <span className="text-accent tracking-wide font-subheading">
+                        <span className="text-accent tracking-wide font-heading">
                           {item.title}
                         </span>
                       </Link>

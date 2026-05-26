@@ -88,7 +88,7 @@ function SelectProvider({intigration,selectedProvider,setSelectedProvider}:intig
                 Destination
             </label>
 
-        <Input  className='w-full rounded-md  focus-within:rounded-md data-[state=open]:border data-[state=open]:border-blue-500' value={path} />
+        <Input readOnly  className='w-full rounded-md  focus-within:rounded-md data-[state=open]:border data-[state=open]:border-blue-500' value={path} />
     </div>
     </div>
   )

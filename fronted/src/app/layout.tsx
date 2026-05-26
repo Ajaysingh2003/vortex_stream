@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Inter, Figtree,DM_Sans,Playfair_Display } from "next/font/google";
+import { Geist, Inter, Figtree,DM_Sans,Fraunces,Syne } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "react-hot-toast";
 import Script from "next/script";
+
 const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
 const fontContent = DM_Sans({
@@ -12,9 +13,10 @@ const fontContent = DM_Sans({
   subsets: ["latin"],
 });
 
-const fontHeading = Inter({
+const fontHeading = Syne({
   variable: "--font-heading",
-  weight:["500","700"],
+  // weight:["400"],
+  weight:["500","700","800"],
   subsets: ["latin"],
 });
 

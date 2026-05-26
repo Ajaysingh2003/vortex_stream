@@ -2,23 +2,19 @@
 import React from "react";
 import UploadFile from "../component/UploadFile";
 import ImportVideos from "@/modules/upload/component/ImportVideos";
+import TopHeader from "../component/TopHeader";
 function VideoPlayerView() {
- 
   return (
     <div className="w-full h-full min-h-screen relative">
-     
-      <div className="px-6 md:px-12 py-8">
-        <div className="w-full flex items-center justify-between ">
-          
-          <h3 className="font-semibold text-md md:text-xl lg:text-2xl">
-            Video Player
-          </h3>
-
-          <div>
-            <UploadFile/>
-          </div>
-          <ImportVideos/>
-        </div>
+      <div className="px-6 md:px-12 py-4 w-full">
+        <TopHeader
+          Header={"Content Library"}
+          Btnchild={
+            <div className="flex flex-row gap-3">
+              <UploadFile />
+            </div>
+          }
+        />
       </div>
     </div>
   );

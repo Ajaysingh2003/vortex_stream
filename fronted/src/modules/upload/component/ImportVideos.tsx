@@ -16,7 +16,7 @@ import SelectProvider from './SelectProvider'
 import SaveVideos from './SaveVideos'
 import { ProviderType } from '@/modules/types'
 import ConnectGoogleDrive from './ConnectGoogleDrive'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, CloudDownload } from 'lucide-react'
 
 
 function ImportVideos() {
@@ -56,7 +56,10 @@ function ImportVideos() {
    <Dialog>
       {/* <form> */}
         <DialogTrigger asChild>
-          <Button variant="outline">Open Dialog</Button>
+          <Button className='rounded-md text-accent capitalize text-sm md:text-md' variant="outline">
+            <CloudDownload/>
+            Import
+            </Button>
         </DialogTrigger>
           <DialogContent className="sm:max-w-sm pb-0 md:max-w-[650px] rounded-md px-0">
           <DialogHeader className='flex gap-3'>
