@@ -60,7 +60,7 @@ function UploadUI() {
                 </div>
               </div>
               <div className="flex justify-between">
-                <h2 className="font-semibold leading-relaxed tracking-wider text-2xl  font-subheading   text-black">
+                <h2 className="font-semibold leading-relaxed tracking-wider text-2xl  font-heading   text-black">
                   Library
                 </h2>
                 <div className="flex items-center gap-3">
@@ -138,9 +138,10 @@ function UploadUI() {
                           <tr className=" group text-accent transition-colors">
                             
                             <td className="py-3.5 px-5 flex items-center gap-3">
-                              <div className=" size-9 p-2 rounded-lg bg-[#6c66661f]  flex items-center justify-center">
+                              <div className=" size-9 p-1 rounded-lg  flex items-center justify-center">
                                
-                                <Clapperboard className="size-10 text-black"/>
+                                {/* <Clapperboard className="size-10 text-black"/> */}
+                                <Image src={"/video-player.png"} height={100} width={100} alt="player" />
                               </div>
                               <span className="font-medium text-accent">
                                 Everything i wanted.mp4

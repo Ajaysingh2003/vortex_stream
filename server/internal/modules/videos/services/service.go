@@ -29,10 +29,12 @@ func NewVideoService(userRepo userRpo.UserRepository,videoRepo repository.VideoR
 	return &VideoServiceRepo{userRepo:userRepo,videoRepo: videoRepo,workspaceRepo: workspaceRepo}
 }
 
-func (r * VideoServiceRepo) CreateVideo(ctx context.Context,video *domain.Video) (*domain.Video,error) {
+func (r * VideoServiceRepo) CreateVideo(ctx context.Context,video *domain.Video) (*domain.Video,error) {	
+
+	fmt.Print("data from video",video.Duration)
 
 	workspace,err:=r.workspaceRepo.GetByID(ctx, video.WorkspaceId)
-
+	
 	if err!=nil{
 		return  nil,err
 	}
@@ -49,6 +51,7 @@ func (r * VideoServiceRepo) CreateVideo(ctx context.Context,video *domain.Video)
 	}
 	
 	return vidData,nil
+
 }
 
 

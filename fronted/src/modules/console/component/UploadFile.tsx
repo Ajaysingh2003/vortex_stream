@@ -5,13 +5,14 @@ import React, { useCallback, useRef, useState } from "react";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import UploadMangager from "@/modules/upload/component/UploadManager";
-import { generateId } from "@/utils/utils";
+import { generateId, getVideoDuration } from "@/utils/utils";
 import toast from "react-hot-toast";
 import { useConsoleContext } from "../context/ConsoleContext";
 import { googleAbortMap } from "@/modules/upload/component/ConnectGoogleDrive";
 import { UploadItem, UserType, WorkspaceType } from "@/modules/types";
 import { startUpload as startUploadFn } from "@/modules/upload/funcions/upload";
 import axios from "axios";
+import { Button } from "@/components/ui/button";
 
 function uploadFileXHR(
   file: File,
@@ -56,14 +57,12 @@ function uploadFileXHR(
   return xhr;
 }
 
-
-
 function UploadFile() {
   const trpc = useTRPC();
   const { data: user } = useSuspenseQuery(trpc.user.profile.queryOptions());
 
-  const userDataType=user as UserType
-  console.log(user,"hogrider")
+  const userDataType = user as UserType;
+  // console.log(user,"hogrider")
   const { items, setItems } = useConsoleContext()!;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [globalError, setGlobalError] = useState<string | null>(null);
@@ -84,15 +83,20 @@ function UploadFile() {
     }),
   );
 
-  const {data:workspace}=useSuspenseQuery(trpc.user.getWorkspaces.queryOptions())
-  const workspaceData=workspace as WorkspaceType
+  const { data: workspace } = useSuspenseQuery(
+    trpc.user.getWorkspace.queryOptions(),
+  );
+  const workspaceData = workspace as WorkspaceType;
 
-  console.log(workspaceData,"jsw999")
-  const updateItem = useCallback((id: string, patch: Partial<UploadItem>) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...patch } : item)),
-    );
-  }, [setItems]);
+  // console.log(workspaceData,"jsw999")
+  const updateItem = useCallback(
+    (id: string, patch: Partial<UploadItem>) => {
+      setItems((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+      );
+    },
+    [setItems],
+  );
 
   const startUpload = useCallback(
     (item: UploadItem, uploadUrl: string, key: string, offset = 0) => {
@@ -102,7 +106,7 @@ function UploadFile() {
         key,
         chunkOffset: offset,
       });
-      
+
       const xhr = uploadFileXHR(
         item.file,
         uploadUrl,
@@ -127,13 +131,15 @@ function UploadFile() {
           });
 
           if (key) {
+            console.log(item, "leena");
             await createVideo.mutateAsync({
-              workspace_id:workspaceData.id,
+              WorkshopId: workspaceData.id,
               videoKey: key,
               title: item.file.name,
+              duration: item.file.duration ?? 0,
               status: "PENDING",
               userId: userDataType?.id,
-              size: String(item.file.size),
+              size: item.file.size,
             });
           }
         },
@@ -151,40 +157,38 @@ function UploadFile() {
     },
     [updateItem, userDataType?.id, createVideo],
   );
-  
-  const mutate = useMutation(
-    trpc.upload.getSignedUrl.mutationOptions()
-  );
+
+  const mutate = useMutation(trpc.upload.getSignedUrl.mutationOptions());
 
   const addFiles = useCallback(
-    async (fileList: FileList) => {
+    async (fileList: FileList, trackId: string) => {
       setGlobalError(null);
       const incoming = Array.from(fileList);
-      
-      // Filter out files that are already actively processing in our UI array list 
+
+      // Filter out files that are already actively processing in our UI array list
       const existingNames = new Set(
         items.map((i) => `${i.file.name}-${i.file.size}`),
       );
       const newFiles = incoming.filter(
         (f) => !existingNames.has(`${f.name}-${f.size}`),
       );
-      
+
       if (newFiles.length === 0) {
-        // 💡 CRITICAL RESET: Clear the file value out even if no files pass the validation filter
         if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
-      
+
       const newItems: UploadItem[] = newFiles.map((file) => ({
-        id: generateId(),
+        id: trackId,
         file,
+        duration: 0,
         status: "queued",
         progress: 0,
         uploadedBytes: 0,
         speed: 0,
         eta: Infinity,
         chunkOffset: 0,
-        uploadType: "google-drive"
+        uploadType: "google-drive",
       }));
 
       setItems((prev) => [...prev, ...newItems]);
@@ -211,7 +215,9 @@ function UploadFile() {
             errorMessage: "Failed to get upload URL. Please retry.",
           }),
         );
-        setGlobalError("Could not connect to the server. Check your connection.");
+        setGlobalError(
+          "Could not connect to the server. Check your connection.",
+        );
         return;
       }
 
@@ -219,36 +225,54 @@ function UploadFile() {
         const urlResult = urls[idx];
         const correspondingCreatedItem = newItems[idx];
         if (!urlResult || !correspondingCreatedItem) return;
-        
-        startUpload(correspondingCreatedItem, urlResult.UploadUrl, urlResult.Key);
+
+        startUpload(
+          correspondingCreatedItem,
+          urlResult.UploadUrl,
+          urlResult.Key,
+        );
       });
     },
     [items, mutate, startUpload, updateItem, setItems],
   );
 
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.target.files && addFiles(e.target.files);
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+    const targetFile = fileList[0] as any;
+    const trackID = generateId();
+    addFiles(fileList, trackID);
+    console.log("before duration");
+    console.log(fileList, targetFile, "sparkles");
+    const duration = await getVideoDuration(targetFile);
+    targetFile.duration = duration;
+    console.log(duration, "xlxl23");
   };
 
-  const handlePause = useCallback((id: string) => {
-    const googleController = googleAbortMap.get(id);
-    if (googleController) {
-      googleController.abort();
-      googleAbortMap.delete(id);
-    }
-    
-    const xhr = xhrMapRef.current.get(id);
-    if (xhr) {
-      xhr.abort();
-      xhrMapRef.current.delete(id);
-    }
+  const handlePause = useCallback(
+    (id: string) => {
+      const googleController = googleAbortMap.get(id);
+      if (googleController) {
+        googleController.abort();
+        googleAbortMap.delete(id);
+      }
 
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, status: "paused", speed: 0, eta: 0 } : item,
-      ),
-    );
-  }, [setItems]);
+      const xhr = xhrMapRef.current.get(id);
+      if (xhr) {
+        xhr.abort();
+        xhrMapRef.current.delete(id);
+      }
+
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? { ...item, status: "paused", speed: 0, eta: 0 }
+            : item,
+        ),
+      );
+    },
+    [setItems],
+  );
 
   const handleResume = useCallback(
     async (id: string) => {
@@ -300,30 +324,30 @@ function UploadFile() {
           speed: 0,
           eta: 0,
         });
-        
+
         if (urls[0].Key) {
           await createVideo.mutateAsync({
-            workspace_id:workspaceData.id,
+            WorkshopId: workspaceData.id,
+            duration: item.file.duration ?? 0,
             videoKey: urls[0].Key,
             title: item.file.name,
             status: "PENDING",
             userId: userDataType?.id,
-            size: String(item.file.size),
+            size: item.file.size,
           });
         }
-
       } catch (error: any) {
         googleAbortMap.delete(id);
         if (axios.isCancel(error) || freshController.signal.aborted) {
           console.log("Upload cleanly interrupted via pause.");
           return;
         }
-        
+
         updateItem(item.id, {
           status: "error",
           errorMessage: error?.message || "R2 stream connection rejected.",
           speed: 0,
-          eta: 0
+          eta: 0,
         });
       }
     },
@@ -334,7 +358,7 @@ function UploadFile() {
     async (id: string) => {
       const item = items.find((i) => i.id === id);
       if (!item) return;
-      
+
       updateItem(id, {
         status: "queued",
         progress: 0,
@@ -375,7 +399,7 @@ function UploadFile() {
         xhr.abort();
         xhrMapRef.current.delete(id);
       }
-      
+
       setItems((prev) => prev.filter((i) => i.id !== id));
     },
     [setItems],
@@ -392,11 +416,20 @@ function UploadFile() {
         onResume={handleResume}
       />
       <label htmlFor="upload-file">
-        <div className="max-w-64 bg-[#f4f4f4] rounded-lg px-4 py-1 flex items-center gap-4 cursor-pointer hover:bg-blue-100/30">
+        {/* <div className="max-w-64 bg-[#f4f4f4] rounded-lg px-4 py-1 flex items-center gap-4 cursor-pointer hover:bg-blue-100/30">
           <Upload className="bg-[#edeff2] size-8 px-2 rounded-lg" />
           <div className="flex flex-col gap-1 ">
             <h2 className="text-md text-black font-semibold">Upload</h2>
           </div>
+          
+        </div> */}
+
+        <div
+          // role="button"
+          className="bg-mutedz text-white border-black/30 border-[0.5px] bg-background-btn text-center rounded-md px-6 h-9 gap-2 flex items-center justify-center font-medium animate cursor-pointer"
+        >
+          <Upload className="size-4" />
+          Upload
         </div>
       </label>
       <input
