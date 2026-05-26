@@ -26,7 +26,7 @@ func (h *VideoHandler) CreateVideo(c *gin.Context) {
 		VideoKey string `json:"videoKey" binding:"required"`
 		Status     domain.VideoStatus `json:"status" binding:"required"`
 		WorkshopId     string `json:"workshopId" binding:"required"`
-		Size   string    `json:"size" binding:"required"`
+		Size   int64    `json:"size" binding:"required"`
 		Duration int     `json:"duration" binding:required"`
 		// WorkshopId string `json:""`
 	}
@@ -49,12 +49,14 @@ func (h *VideoHandler) CreateVideo(c *gin.Context) {
 	}
 
 	payload:=&domain.Video{
-		ID: uuid.New() ,
+		ID: uuid.New(),
+		Size: req.Size,
 		WorkspaceId: workshopId ,
 		Title: req.Title,
 		VideoKey: req.VideoKey,
 		Duration: req.Duration,
 	}
+
 
 	datas,err:=json.Marshal(payload)
 

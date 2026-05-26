@@ -37,7 +37,7 @@ function Folder() {
           <div className="grid grid-col-1 gap-4 w-full h-full md:grid-cols-12 ">
             <div className=" col-span-5  h-full bg-[#e2ebf93c] rounded-md md:rounded-lg pl-2 md:pl-3 py-3 overflow-scroll">
               
-                <RootFolderRow name="Content library" id={""}  rootFolder={rootFolderData} />
+                <RootFolderRow name="library" id={""}  rootFolder={rootFolderData} />
               
             </div>
             <div className=" col-span-7 hidden md:block h-full overflow-scroll">

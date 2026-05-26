@@ -51,7 +51,7 @@ type UploadStatus =
 
 export interface UploadItem {
   id: string;
-  file: File;
+  file: File & {duration?:number};
   status: UploadStatus;
   progress: number;
   uploadedBytes: number;

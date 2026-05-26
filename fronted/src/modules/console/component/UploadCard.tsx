@@ -1,5 +1,21 @@
 import { formatBytes, formatTime, getFileExtension } from "@/utils/utils";
-import { AlertCircle, CheckCircle2, CirclePause, Clock, Film, Pause, Play, PlayCircle, RotateCcw, Trash2, TvMinimalPlay, Video, Wifi, WifiOff, X } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  CirclePause,
+  Clock,
+  Film,
+  Pause,
+  Play,
+  PlayCircle,
+  RotateCcw,
+  Trash2,
+  TvMinimalPlay,
+  Video,
+  Wifi,
+  WifiOff,
+  X,
+} from "lucide-react";
 import { ProgressBar } from "./ProgressBar";
 import { useVideoThumbnail } from "@/hooks/useVideoThumbnail";
 import { useEffect, useState } from "react";
@@ -16,7 +32,7 @@ type UploadStatus =
   | "done"
   | "error"
   | "cancelled"
-  | "TRANSCODING"
+  | "TRANSCODING";
 
 interface UploadItem {
   id: string;
@@ -32,8 +48,6 @@ interface UploadItem {
   xhr?: XMLHttpRequest;
   chunkOffset: number;
 }
-
-
 
 export const UploadCard = ({
   item,
@@ -52,7 +66,6 @@ export const UploadCard = ({
 }) => {
   const ext = getFileExtension(item.file.name);
 
-
   const isActive = item.status === "uploading";
   const isPaused = item.status === "paused";
   const isDone = item.status === "done";
@@ -67,67 +80,65 @@ export const UploadCard = ({
     done: "Complete",
     error: "Failed",
     cancelled: "Cancelled",
-    TRANSCODING:  "TRANSCODING",
+    TRANSCODING: "TRANSCODING",
   };
 
-  const { thumbnail , generateThumbnail ,loading} = useVideoThumbnail();
+  // const { thumbnail , generateThumbnail ,loading} = useVideoThumbnail();
 
+  // useEffect(() => {
+  //   if (item.file && item.file.size > 0){
+  //     console.log("Generating thumbnail for", item.file);
+  //     generateThumbnail(item.file,2)
 
-  useEffect(() => {
-    if (item.file && item.file.size > 0){
-      console.log("Generating thumbnail for", item.file);
-      generateThumbnail(item.file,2)
+  //   }
 
-    }
+  // }, [item.file,generateThumbnail]);
+  // const [hasUploadedThumbnail, setHasUploadedThumbnail] = useState(false);
 
-  }, [item.file,generateThumbnail]);
-  const [hasUploadedThumbnail, setHasUploadedThumbnail] = useState(false);
+  // const trpc=useTRPC()
 
-  const trpc=useTRPC()
+  // const presignedUrlMutate=useMutation(trpc.upload.getSignedUrl.mutationOptions())
 
-  const presignedUrlMutate=useMutation(trpc.upload.getSignedUrl.mutationOptions())
-  
-  useEffect(()=>{
-    if (!thumbnail || !hasUploadedThumbnail) return
-    console.log("blob started")
-    const handleThumbnailUpload = async () => {
-    try {
-      setHasUploadedThumbnail(true)
+  // useEffect(()=>{
+  //   console.log("before check")
+  //   if (!thumbnail || hasUploadedThumbnail) return
+  //   console.log("blob started")
+  //   const handleThumbnailUpload = async () => {
+  //   try {
+  //     setHasUploadedThumbnail(true)
 
-      const response = await fetch(thumbnail);
-      const blobData = await response.blob();
-      
-      // Convert to a formal file metadata construct
-      const thumbnailFile = new File([blobData], "thumbnail.jpg", { type: "image/jpeg" });
+  //     const response = await fetch(thumbnail);
+  //     const blobData = await response.blob();
 
-      const payload=[{name:item.file.name,type:blobData.type,size:blobData.size}]
-      
-      const presignedUrl =await presignedUrlMutate.mutateAsync(payload)
-      const uploadResult = await fetch(presignedUrl.files[0].UploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": "image/jpeg" },
-        body: thumbnailFile,
-      });
+  //     // Convert to a formal file metadata construct
+  //     const thumbnailFile = new File([blobData], "thumbnail.jpg", { type: "image/jpeg" });
 
-      console.log("log23",uploadResult)
+  //     const payload=[{name:item.file.name,type:blobData.type,size:blobData.size}]
 
-      if (!uploadResult.ok) throw new Error("Failed to upload assets to bucket storage engine");
+  //     const presignedUrl =await presignedUrlMutate.mutateAsync(payload)
+  //     const uploadResult = await fetch(presignedUrl.files[0].UploadUrl, {
+  //       method: "PUT",
+  //       headers: { "Content-Type": "image/jpeg" },
+  //       body: thumbnailFile,
+  //     });
 
-      console.log("Thumbnail permanently stored! Public URL ->", uploadResult);
-      
+  //     console.log("log23",uploadResult)
 
-    } catch (error) {
-      console.error("Critical thumbnail synchronization fallback loop triggered:", error);
-    }
-  };
+  //     if (!uploadResult.ok) throw new Error("Failed to upload assets to bucket storage engine");
 
+  //     console.log("Thumbnail permanently stored! Public URL ->", uploadResult);
 
-  handleThumbnailUpload()
+  //   } catch (error) {
+  //     console.error("Critical thumbnail synchronization fallback loop triggered:", error);
+  //   }
+  //    };
 
-  },[thumbnail,hasUploadedThumbnail,item.file.name])
+  // handleThumbnailUpload()
 
-  console.log(item,thumbnail, "item")
-  
+  // },[thumbnail,hasUploadedThumbnail,item.file.name])
+
+  // console.log(item,thumbnail, "item")
+
   const statusColor: Record<UploadStatus, string> = {
     queued: "text-slate-400",
     uploading: "text-red-300",
@@ -135,26 +146,32 @@ export const UploadCard = ({
     done: "text-emerald-600",
     error: "text-red-500",
     cancelled: "text-slate-400",
-    TRANSCODING:"text-slate-600"
+    TRANSCODING: "text-slate-600",
   };
 
   return (
     <li
-    
       className={`
         group relative flex flex-col gap-2 p-4 rounded-2xl 
         transition-all duration-200
-      `}>
+      `}
+    >
       {/* <Card> */}
-  {/* <CardContent> */}
-        
+      {/* <CardContent> */}
 
-<div className="flex items-start gap-3">
-       { thumbnail && <Image height={100} width={100} src={thumbnail} alt="Thumbnail" className="flex-shrink-0 size-11 rounded-md object-cover" />}
-
-        <div className="flex items-center justify-center size-10 bg-slate-100 border border-slate-200/30 text-violet-600 rounded-lg">
-  <Film className="size-5" strokeWidth={1.5} />
-</div>
+      <div className="flex items-start gap-3">
+        <div className="flex items-center justify-center size-10z bg-slate-100a border border-slate-200/30 rounded-lg">
+          {
+            <Image
+              height={70}
+              width={70}
+              quality={100}
+              src={"/video-player.png"}
+              alt="Thumbnail"
+              className="flex-shrink-0 size-9 rounded-md object-cover"
+            />
+          }
+        </div>
         {/* File info */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-slate-800 truncate leading-tight">
@@ -247,7 +264,7 @@ export const UploadCard = ({
             </button>
           )}
         </div>
-    </div>
+      </div>
 
       {/* Progress */}
       {!isDone && !isCancelled && (
@@ -256,7 +273,8 @@ export const UploadCard = ({
           {(isActive || isPaused) && (
             <div className="flex justify-between">
               <span className="text-[10px] text-slate-400">
-                {formatBytes(item.uploadedBytes)} / {formatBytes(item.file.size)}
+                {formatBytes(item.uploadedBytes)} /{" "}
+                {formatBytes(item.file.size)}
               </span>
               <span className="text-[10px] text-slate-400 font-medium">
                 {Math.round(item.progress)}%
@@ -272,11 +290,10 @@ export const UploadCard = ({
           {item.errorMessage}
         </p>
       )}
-  {/* </CardContent>
+      {/* </CardContent>
   <CardFooter>
   </CardFooter> */}
-{/* </Card> */}
+      {/* </Card> */}
     </li>
   );
 };
-
