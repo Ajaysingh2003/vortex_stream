@@ -7,7 +7,7 @@ function SaveVideos() {
     const trpc=useTRPC()
     const {data:workspaces}=useSuspenseQuery(trpc.user.getWorkspace.queryOptions())
 
-    console.log(workspaces,"leah jaye")
+    // console.log(workspaces,"leah jaye")
     
   return (
     

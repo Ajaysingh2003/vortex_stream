@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
@@ -206,137 +207,134 @@ func (s *FolderServiceRepository) UpdatePosition (ctx context.Context,folderID u
 }
 
 
-func (s *FolderServiceRepository) GetContent (ctx context.Context,folderID uuid.UUID,workspaceID uuid.UUID,userID uuid.UUID,cursor string,limit int) (*dto.FolderContentsDTO,error) {
-	// checking ownershop of the user
-
-	isOwned,err:=s.userRepo.IsOwned(ctx , workspaceID, userID)
-
+func (s *FolderServiceRepository) GetContent(ctx context.Context, folderID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.FolderContentsDTO, error) {
+	// 1. Check workspace ownership parameters
+	isOwned, err := s.userRepo.IsOwned(ctx, workspaceID, userID)
 	if err != nil {
 		return nil, err
 	}
-
 	if !isOwned {
-		return  nil,&utils.ApiError{Code: 403,Message: "You Don't have Permission to Access the Content. "}
+		return nil, &utils.ApiError{Code: 403, Message: "You Don't have Permission to Access the Content."}
 	}
 
-	folder,err:=s.folderRepo.GetByID(ctx, folderID)
-
+	// 2. Fetch the current target folder metadata profile
+	folder, err := s.folderRepo.GetByID(ctx, folderID)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println("Error fetching folder ID metadata context:", err)
 		return nil, &utils.ApiError{Code: 404, Message: "Folder not found"}
 	}
 
-	if folder!=nil || folder.WorkspaceID!=workspaceID {
-			return nil, &utils.ApiError{Code: 403, Message: "Access Denied"}
+	// 💡 FIX 1: Correct pointer assessment rules to prevent unexpected security blocks or nil pointer panics
+	if folder == nil || folder.WorkspaceID != workspaceID {
+		return nil, &utils.ApiError{Code: 403, Message: "Access Denied"}
 	}
 
-	cursorType,cursorID,err:=utils.DecodeCursor(cursor)
+	// 3. Initialize and decode cursor tracking variables
+	var cursorType string
+	var cursorID *uuid.UUID
 
-	if err != nil {
-		fmt.Print(err)
-		return nil, &utils.ApiError{Code: 400, Message: "Invalid cursor"}
-	}
-
-	fetchLimit:=limit+1
-
-	var items []dto.ContentItemDTO
-	// first folder will be rendering first
-	if cursorType !="video"{
-		
-		var afterID *uuid.UUID
-
-		if cursorType=="folder"{
-			afterID=cursorID
-		}
-
-		//fetching folder children
-
-		folders,err:=s.folderRepo.GetChildrenPaginated(ctx, &folderID, workspaceID, afterID, fetchLimit)
-
+	// 💡 FIX 2: Guard rail against blank cursor decoding failures on first page initialization requests
+	if cursor != "" {
+		cursorType, cursorID, err = utils.DecodeCursor(cursor)
 		if err != nil {
-			 return nil, &utils.ApiError{Code: 500, Message: "Failed to fetch folders"}
+			fmt.Println("Cursor decoding error:", err)
+			return nil, &utils.ApiError{Code: 400, Message: "Invalid cursor format"}
+		}
+	} else {
+		cursorType = "root"
+		cursorID = nil
+	}
+
+	fetchLimit := limit + 1
+	var items []dto.ContentItemDTO
+
+	// 4. PHASE 1: Fetch nested directory sub-folders first
+	if cursorType != "video" {
+		var afterID *uuid.UUID
+		if cursorType == "folder" {
+			afterID = cursorID
 		}
 
-		for _,f := range folders {
-			f:=f
+		folders, err := s.folderRepo.GetChildrenPaginated(ctx, &folderID, workspaceID, afterID, fetchLimit)
+		if err != nil {
+			return nil, &utils.ApiError{Code: 500, Message: "Failed to fetch folders"}
+		}
+
+		for _, f := range folders {
+			f := f // Pin range scope variable safely
 
 			childCount, _ := s.folderRepo.CountChildren(ctx, &f.ID)
-
-			count:=int(childCount)
-
+			count := int(childCount)
 			pos := f.Position
 
-			items= append(items, dto.ContentItemDTO{
-				ID: f.ID,
-				Name: f.Name,
-				Type: "folder",
-				Position: &pos,
+			items = append(items, dto.ContentItemDTO{
+				ID:         f.ID,
+				Name:       f.Name,
+				Type:       "folder",
+				Position:   &pos,
 				ChildCount: &count,
-				CreatedAt: f.CreatedAt,
+				CreatedAt:  f.CreatedAt,
 			})
 		}
-
 	}
 
-	// fill remaining space with the videos
-
+	// 5. PHASE 2: Fill remaining page slots with folder videos
 	if len(items) < fetchLimit {
-		var afterID *uuid.UUID
-
-		if cursorType=="video"{
-			afterID=cursorID
+		afterIDStr := ""
+		if cursorType == "video" && cursorID != nil {
+			afterIDStr = cursorID.String()
 		}
 
 		remaining := fetchLimit - len(items)
 
-		videos,err:=s.videoRepo.GetByFolderIdPaginated(ctx, &folderID, afterID, remaining)
-		
+		// 💡 FIX 3: Pass your dynamically extracted afterIDStr variable down instead of hardcoding ""
+		videos, err := s.videoRepo.GetByFolderIdPaginated(ctx, &folderID, afterIDStr, remaining)
 		if err != nil {
-			fmt.Print(err)
+			fmt.Printf("Error querying nested folder video payloads: %v\n", err)
 			return nil, &utils.ApiError{Code: 500, Message: "Failed to fetch videos"}
 		}
 
-		for _ , v:= range videos{
-			v := v
-
+		for _, v := range videos {
 			items = append(items, dto.ContentItemDTO{
-				 ID:           v.ID,
-                Name:         v.Title,
-                Type:         "video",
-                ThumbnailURL: v.Thumbnail,
-                Duration:     &v.Duration,
-                CreatedAt:    v.CreatedAt,
+				ID:           v.ID,
+				Name:         v.Title,
+				Type:         "video",
+				ThumbnailURL: v.Thumbnail,
+				Duration:     &v.Duration,
+				CreatedAt:    v.CreatedAt,
 			})
 		}
 	}
 
-	hasNextPage:=len(items) > limit
+	// 6. PHASE 3: Calculate dynamic metadata page metrics
+	hasNextPage := len(items) > limit
+	if hasNextPage {
+		items = items[:limit]
+	}
 
-		if hasNextPage {
-        items = items[:limit]
-    	}
+	var nextCursor string
+	if hasNextPage && len(items) > 0 {
+		last := items[len(items)-1]
+		nextCursor = utils.EncodeCursor(last.Type, last.ID)
+	}
 
-		var nextCursor string
+	// Calculate child item volume metrics totals
+	folderCount, _ := s.folderRepo.CountChildren(ctx, &folderID)
+	
+	// 💡 FIX 4: Dereference folderID to plain uuid.UUID to match the repository method signature requirements
+	videoCount, _ := s.videoRepo.CountByFolderID(ctx, &folderID)
 
-		if hasNextPage && len(items) > 0 {
-			last := items[len(items)-1]
-			nextCursor = utils.EncodeCursor(last.Type, last.ID)
-		}
+	metaData := dto.Metadata{
+		HasNextPage: hasNextPage,
+		NextCursor:  nextCursor,
+		Total:       folderCount + videoCount,
+	}
 
-		folderCount, _ := s.folderRepo.CountChildren(ctx, &folderID)
-    	videoCount, _ := s.videoRepo.CountByFolderID(ctx, &folderID)
-
-		metaData:=dto.Metadata{
-			HasNextPage: hasNextPage,
-			NextCursor: nextCursor,	
-			Total: folderCount+videoCount,
-		}
-		return &dto.FolderContentsDTO{
-        Items:       items,
+	return &dto.FolderContentsDTO{
+		Items:    items,
 		Metadata: metaData,
-    }, nil
+	}, nil
 }
-
 
 func (s *FolderServiceRepository) GetFolderBreadcrumbs(ctx context.Context, folderID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID) ([]domain.Folder, error) {
     
@@ -371,153 +369,255 @@ func (s *FolderServiceRepository) GetFolderBreadcrumbs(ctx context.Context, fold
 }
 
 
-func (s *FolderServiceRepository) GetRootData (ctx context.Context,workspaceID uuid.UUID,userID uuid.UUID,cursor string,limit int) (*dto.FolderContentsDTO,error) {
-	// checking ownershop of the user
+// func (s *FolderServiceRepository) GetRootData (ctx context.Context,workspaceID uuid.UUID,userID uuid.UUID,cursor string,limit int) (*dto.FolderContentsDTO,error) {
+// 	// checking ownershop of the user
 
-	isOwned,err:=s.userRepo.IsOwned(ctx , workspaceID, userID)
+// 	isOwned,err:=s.userRepo.IsOwned(ctx , workspaceID, userID)
 
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	if !isOwned {
+// 		return  nil,&utils.ApiError{Code: 403,Message: "You Don't have Permission to Access the Content. "}
+// 	}
+
+	
+// 	var cursorType string
+// 	var cursorID *uuid.UUID
+	
+// 	if cursor != "" {
+//     cursorType, cursorID, err = utils.DecodeCursor(cursor)
+//     if err != nil {
+//         fmt.Println("Cursor decoding error:", err)
+//         return nil, &utils.ApiError{Code: 400, Message: "Invalid cursor format"}
+//     }
+// 		} else {
+    
+//     cursorType = "root" 
+//     cursorID = nil // or blank string depending on your types
+// 	}
+
+
+
+// 	fetchLimit:=limit+1
+
+// 	var items []dto.ContentItemDTO
+// 	// first folder will be rendering first
+// 	if cursorType !="video"{
+		
+// 		var afterID *uuid.UUID
+
+// 		if cursorType=="folder"{
+// 			afterID=cursorID
+// 		}
+
+// 		//fetching folder children
+
+// 		folders,err:=s.folderRepo.GetChildrenPaginated(ctx, nil, workspaceID, afterID, fetchLimit)
+
+// 		if err != nil {
+// 			 return nil, &utils.ApiError{Code: 500, Message: "Failed to fetch folders"}
+// 		}
+
+// 		for _,f := range folders {
+// 			f:=f
+
+// 			childCount, _ := s.folderRepo.CountChildren(ctx, &f.ID)
+
+// 			count:=int(childCount)
+
+// 			pos := f.Position
+
+// 			items= append(items, dto.ContentItemDTO{
+// 				ID: f.ID,
+// 				Name: f.Name,
+// 				Type: "folder",
+// 				Position: &pos,
+// 				ChildCount: &count,
+// 				CreatedAt: f.CreatedAt,
+// 			})
+// 		}
+
+// 	}
+
+// 	// fill remaining space with the videos
+
+// 	if len(items) < fetchLimit {
+// 		var afterID *uuid.UUID
+
+// 		if cursorType=="video"{
+// 			afterID=cursorID
+// 		}
+
+// 		remaining := fetchLimit - len(items)
+
+// 		videos,err:=s.videoRepo.GetByFolderIdPaginated(ctx, nil, afterID, remaining)
+		
+// 		if err != nil {
+// 			fmt.Print(err)
+// 			return nil, &utils.ApiError{Code: 500, Message: "Failed to fetch videos"}
+// 		}
+
+// 		for _ , v:= range videos{
+// 			v := v
+
+// 			items = append(items, dto.ContentItemDTO{
+// 				 ID:           v.ID,
+//                 Name:         v.Title,
+//                 Type:         "video",
+//                 ThumbnailURL: v.Thumbnail,
+//                 Duration:     &v.Duration,
+//                 CreatedAt:    v.CreatedAt,
+// 			})
+// 		}
+// 	}
+
+// 	hasNextPage:=len(items) > limit
+
+// 		if hasNextPage {
+//         items = items[:limit]
+//     	}
+
+// 		var nextCursor string
+
+// 		if hasNextPage && len(items) > 0 {
+// 			last := items[len(items)-1]
+// 			nextCursor = utils.EncodeCursor(last.Type, last.ID)
+// 		}
+
+// 		folderCount, _ := s.folderRepo.CountChildren(ctx, nil)
+//     	videoCount, _ := s.videoRepo.CountByFolderID(ctx, nil)
+
+// 		metaData:=dto.Metadata{
+// 			HasNextPage: hasNextPage,
+// 			NextCursor: nextCursor,	
+// 			Total: folderCount+videoCount,
+// 		}
+// 		return &dto.FolderContentsDTO{
+//         Items:       items,
+// 		Metadata: metaData,
+//     }, nil
+// }
+
+
+
+func (s *FolderServiceRepository) GetRootData(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.FolderContentsDTO, error) {
+	// 1. Verify workspace ownership permissions before loading any data records
+	isOwned, err := s.userRepo.IsOwned(ctx, workspaceID, userID)
 	if err != nil {
 		return nil, err
 	}
-
 	if !isOwned {
-		return  nil,&utils.ApiError{Code: 403,Message: "You Don't have Permission to Access the Content. "}
+		return nil, &utils.ApiError{
+			Code:    http.StatusForbidden,
+			Message: "You don't have permission to access this content.",
+		}
 	}
 
-	// folders,err:=s.folderRepo.GetRootFolders(ctx, workspaceID)
-
-	// if err != nil {
-	// 	fmt.Print(err)
-	// 	return nil, &utils.ApiError{Code: 404, Message: "Folderr not found"}
-	// }
-
-	
-	// if folders!=nil{
-	// 		return nil, &utils.ApiError{Code: 403, Message: "Access Denied"}
-	// }
-
-
-	// cursorType,cursorID,err:=utils.DecodeCursor(cursor)
-
-
-	// if err != nil {
-	// 	fmt.Print(err)
-	// 	return nil, &utils.ApiError{Code: 400, Message: "Invalid cursor"}
-	// }
-
+	// 2. Initialize and decode cursor tracking variables
 	var cursorType string
 	var cursorID *uuid.UUID
-	
+
 	if cursor != "" {
-    cursorType, cursorID, err = utils.DecodeCursor(cursor)
-    if err != nil {
-        fmt.Println("Cursor decoding error:", err)
-        return nil, &utils.ApiError{Code: 400, Message: "Invalid cursor format"}
-    }
-} else {
-    // 💡 First request behavior: Initialize defaults for root-level loading
-    cursorType = "root" 
-    cursorID = nil // or blank string depending on your types
-}
-
-
-
-	fetchLimit:=limit+1
-
-	var items []dto.ContentItemDTO
-	// first folder will be rendering first
-	if cursorType !="video"{
-		
-		var afterID *uuid.UUID
-
-		if cursorType=="folder"{
-			afterID=cursorID
-		}
-
-		//fetching folder children
-
-		folders,err:=s.folderRepo.GetChildrenPaginated(ctx, nil, workspaceID, afterID, fetchLimit)
-
+		cursorType, cursorID, err = utils.DecodeCursor(cursor)
 		if err != nil {
-			 return nil, &utils.ApiError{Code: 500, Message: "Failed to fetch folders"}
+			fmt.Println("Cursor decoding error:", err)
+			return nil, &utils.ApiError{Code: http.StatusBadRequest, Message: "Invalid cursor format"}
 		}
-
-		for _,f := range folders {
-			f:=f
-
-			childCount, _ := s.folderRepo.CountChildren(ctx, &f.ID)
-
-			count:=int(childCount)
-
-			pos := f.Position
-
-			items= append(items, dto.ContentItemDTO{
-				ID: f.ID,
-				Name: f.Name,
-				Type: "folder",
-				Position: &pos,
-				ChildCount: &count,
-				CreatedAt: f.CreatedAt,
-			})
-		}
-
+	} else {
+		// Default states for the first layout page initialization query
+		cursorType = "root"
+		cursorID = nil
 	}
 
-	// fill remaining space with the videos
+	// Request one extra item to check if a next page exists
+	fetchLimit := limit + 1
+	var items []dto.ContentItemDTO
 
-	if len(items) < fetchLimit {
+	// 3. PHASE 1: Fetch and append root folders first
+	if cursorType != "video" {
 		var afterID *uuid.UUID
+		if cursorType == "folder" {
+			afterID = cursorID
+		}
 
-		if cursorType=="video"{
-			afterID=cursorID
+		folders, err := s.folderRepo.GetChildrenPaginated(ctx, nil, workspaceID, afterID, fetchLimit)
+		if err != nil {
+			return nil, &utils.ApiError{Code: http.StatusInternalServerError, Message: "Failed to fetch folders"}
+		}
+
+		for _, f := range folders {
+			f := f // Pin range variable safely
+
+			childCount, _ := s.folderRepo.CountChildren(ctx, &f.ID)
+			count := int(childCount)
+			pos := f.Position
+
+			items = append(items, dto.ContentItemDTO{
+				ID:         f.ID,
+				Name:       f.Name,
+				Type:       "folder",
+				Position:   &pos,
+				ChildCount: &count,
+				CreatedAt:  f.CreatedAt,
+			})
+		}
+	}
+
+	// 4. PHASE 2: Fill remaining page capacity with root videos
+	if len(items) < fetchLimit {
+		afterIDStr := ""
+		if cursorType == "video" && cursorID != nil {
+			// Convert the decoded UUID pointer safely into a raw string value
+			afterIDStr = cursorID.String()
 		}
 
 		remaining := fetchLimit - len(items)
 
-		videos,err:=s.videoRepo.GetByFolderIdPaginated(ctx, nil, afterID, remaining)
-		
+		// Pass the correct string format to your video paginated repository hook
+		videos, err := s.videoRepo.GetByFolderIdPaginated(ctx, nil, afterIDStr, remaining)
 		if err != nil {
-			fmt.Print(err)
-			return nil, &utils.ApiError{Code: 500, Message: "Failed to fetch videos"}
+			fmt.Printf("Error fetching root videos: %v\n", err)
+			return nil, &utils.ApiError{Code: http.StatusInternalServerError, Message: "Failed to fetch videos"}
 		}
 
-		for _ , v:= range videos{
-			v := v
-
+		for _, v := range videos {
 			items = append(items, dto.ContentItemDTO{
-				 ID:           v.ID,
-                Name:         v.Title,
-                Type:         "video",
-                ThumbnailURL: v.Thumbnail,
-                Duration:     &v.Duration,
-                CreatedAt:    v.CreatedAt,
+				ID:           v.ID,
+				Name:         v.Title,
+				Type:         "video",
+				ThumbnailURL: v.Thumbnail,
+				Duration:     &v.Duration,
+				CreatedAt:    v.CreatedAt,
 			})
 		}
 	}
 
-	hasNextPage:=len(items) > limit
+	// 5. PHASE 3: Calculate Pagination Tracking Metadata Window Indicators
+	hasNextPage := len(items) > limit
+	if hasNextPage {
+		items = items[:limit]
+	}
 
-		if hasNextPage {
-        items = items[:limit]
-    	}
+	var nextCursor string
+	if hasNextPage && len(items) > 0 {
+		last := items[len(items)-1]
+		nextCursor = utils.EncodeCursor(last.Type, last.ID)
+	}
 
-		var nextCursor string
+	// Calculate total global assets sitting at the workspace root layer
+	folderCount, _ := s.folderRepo.CountChildren(ctx, nil)
+	videoCount, _ := s.videoRepo.CountByFolderID(ctx, nil) // Handles fallback checks correctly
 
-		if hasNextPage && len(items) > 0 {
-			last := items[len(items)-1]
-			nextCursor = utils.EncodeCursor(last.Type, last.ID)
-		}
+	metaData := dto.Metadata{
+		HasNextPage: hasNextPage,
+		NextCursor:  nextCursor,
+		Total:       folderCount + videoCount,
+	}
 
-		folderCount, _ := s.folderRepo.CountChildren(ctx, nil)
-    	videoCount, _ := s.videoRepo.CountByFolderID(ctx, nil)
-
-		metaData:=dto.Metadata{
-			HasNextPage: hasNextPage,
-			NextCursor: nextCursor,	
-			Total: folderCount+videoCount,
-		}
-		return &dto.FolderContentsDTO{
-        Items:       items,
+	return &dto.FolderContentsDTO{
+		Items:    items,
 		Metadata: metaData,
-    }, nil
+	}, nil
 }

@@ -3,7 +3,9 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
+
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -19,7 +21,7 @@ type VideoRepository interface {
 	AddResolution(ctx context.Context, res *domain.VideoResolution) error
 	AddAllowedDomain(ctx context.Context, dom *domain.VideoDomain) error
 	Delete(ctx context.Context, id uuid.UUID) error
-	GetByFolderIdPaginated(ctx context.Context,folderID *uuid.UUID , afterID *uuid.UUID,remaining int) ([]domain.Video,error)
+	GetByFolderIdPaginated(ctx context.Context,folderID *uuid.UUID , afterID string,remaining int) ([]domain.Video,error)
 
 	CountByFolderID(ctx context.Context,folderID *uuid.UUID) (int64 , error)
 
@@ -96,48 +98,102 @@ func (r *postgresVideoRepository) Delete (ctx context.Context, id uuid.UUID) err
 }
 
 
-func (r *postgresVideoRepository) GetByIdAndUserId (ctx context.Context,id uuid.UUID,userId uuid.UUID) (*domain.Video,error) {
-	var video domain.Video
+// func (r *postgresVideoRepository) GetByIdAndUserId (ctx context.Context,id uuid.UUID,userId uuid.UUID) (*domain.Video,error) {
+// 	var video domain.Video
 
-	err:=r.db.WithContext(ctx).Preload("Workspaces").Where("id = ? AND workspaces.user_id = ?",id,userId).First(&video).Error
+// 	err:=r.db.WithContext(ctx).Preload("Workspaces").Where("id = ? AND workspaces.user_id = ?",id,userId).First(&video).Error
 
-	if err!=nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return  nil,err
-	}
+// 	if err!=nil {
+// 		if errors.Is(err, gorm.ErrRecordNotFound) {
+// 			return nil, nil
+// 		}
+// 		return  nil,err
+// 	}
 
-	return  &video,nil
+// 	return  &video,nil
 
+// }
+
+func (r *postgresVideoRepository) GetByIdAndUserId(ctx context.Context, id uuid.UUID, userId uuid.UUID) (*domain.Video, error) {
+    var video domain.Video
+
+    err := r.db.WithContext(ctx).
+        Model(&domain.Video{}).
+        Joins("Workspace").
+        Where("video.id = ? AND \"Workspace\".user_id = ?", id, userId).
+        First(&video).Error
+
+    if err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, nil
+        }
+        return nil, err
+    }
+
+    return &video, nil
 }
 
-func (r *postgresVideoRepository) GetByFolderIdPaginated (ctx context.Context,folderID *uuid.UUID,afterID *uuid.UUID,remaining int) ([]domain.Video,error) {
+// func (r *postgresVideoRepository) GetByFolderIdPaginated (ctx context.Context,folderID *uuid.UUID,afterID *uuid.UUID,remaining int) ([]domain.Video,error) {
 
-	query:=r.db.WithContext(ctx).Where("folder_id = ?",folderID).Order("created_at ASC , id ASC").Limit(remaining)
+// 	query:=r.db.WithContext(ctx).Where("folder_id = ?",folderID).Order("created_at ASC , id ASC").Limit(remaining)
 
-	if afterID !=nil{
+// 	if afterID !=nil{
 
-		var cursorVideo domain.Video
+// 		var cursorVideo domain.Video
 
-		err:=r.db.WithContext(ctx).Select("created_at","id").First(&cursorVideo,"id = ?",*afterID).Error
+// 		err:=r.db.WithContext(ctx).Select("created_at","id").First(&cursorVideo,"id = ?",*afterID).Error
 
-		if err != nil {
-			return nil, err
-		}
+// 		if err != nil {
+// 			return nil, err
+// 		}
 
-		query=query.Where("(created_at , id::text) > (? , ?)",cursorVideo.CreatedAt,cursorVideo.ID)
+// 		query=query.Where("(created_at , id::text) > (? , ?)",cursorVideo.CreatedAt,cursorVideo.ID)
 
 
-	}
+// 	}
 
-	var videos []domain.Video
+// 	var videos []domain.Video
 
-	if err:=query.Find(&videos).Error ; err!=nil{
-		return nil,err
-	}
+// 	if err:=query.Find(&videos).Error ; err!=nil{
+// 		return nil,err
+// 	}
 
-	return videos,nil
+// 	return videos,nil
+// }
+
+func (r *postgresVideoRepository) GetByFolderIdPaginated(ctx context.Context, folderID *uuid.UUID, afterID string, remaining int) ([]domain.Video, error) {
+   
+    query := r.db.WithContext(ctx).Model(&domain.Video{})
+
+    if folderID != nil {
+        query = query.Where("folder_id = ?", folderID)
+    } else {
+        query = query.Where("folder_id IS NULL")
+    }
+
+    query = query.Order("created_at ASC, id ASC").Limit(remaining)
+
+    if afterID != "" {
+        var cursorVideo domain.Video
+
+        err := r.db.WithContext(ctx).
+            Select("created_at", "id").
+            First(&cursorVideo, "id = ?", afterID).Error
+        if err != nil {
+            return nil, fmt.Errorf("failed to locate pagination cursor anchor element: %w", err)
+        }
+
+        // This avoids forcing PostgreSQL to cast type values to text strings on millions of rows
+        query = query.Where("(created_at, id) > (?, ?)", cursorVideo.CreatedAt, cursorVideo.ID)
+    }
+
+    // 4. Execute the database retrieval using our pointer reference
+    var videos []domain.Video
+    if err := query.Find(&videos).Error; err != nil {
+        return nil, fmt.Errorf("error querying paginated videos table map: %w", err)
+    }
+
+	return videos, nil
 }
 
 
