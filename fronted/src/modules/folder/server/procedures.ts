@@ -275,5 +275,54 @@ console.log(body,"lol")
     });
       }
 
+  }),
+  getRootContent:getUserProcedure.input(z.object({
+    workspaceID:z.string(),
+    limit:z.number(),
+    cursor :z.string().nullable()
+
+  })).query(async({ctx ,input})=>{
+
+      try {
+        console.log("hitting the func")
+        const cookieStore = await cookies();
+
+        const access_token = cookieStore.get("access_token")?.value;
+        
+        const res = await axios.get(
+          `${process.env.BASE_API}/v1/workspaces/${input.workspaceID}/content-library?limit=${input.limit}&${input.cursor !="" && `cursor = ${input.cursor} `}`,
+          {
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          },
+        );
+
+
+        return res.data.data;
+        } catch (error: any) {
+        console.log(error?.response?.data, "error occurred");
+
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      let code: TRPCError["code"] = "BAD_REQUEST";
+
+      if (status === 401) code = "UNAUTHORIZED";
+      if (status === 403) code = "FORBIDDEN";
+      if (status === 404) code = "NOT_FOUND";
+
+      throw new TRPCError({
+        code: code,
+        message: error.response?.data?.message || "Operation failed",
+      });
+    }
+
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Something went wrong",
+    });
+      }
+
   })
 });
