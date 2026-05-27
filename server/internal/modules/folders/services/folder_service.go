@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -17,195 +18,189 @@ import (
 )
 
 type FolderServiceInterface interface {
-	Create (ctx context.Context,folder *domain.Folder) (*domain.Folder , error)
-	GetByID (ctx context.Context,ID uuid.UUID,workspaceID uuid.UUID) (*domain.Folder,error)
-	GetRootFolders (ctx context.Context,workspaceID uuid.UUID,userID uuid.UUID) ([]domain.Folder,error)
-	GetChildren (ctx context.Context,parentID uuid.UUID,workspaceID uuid.UUID,userID uuid.UUID) ([]domain.Folder,error)
-	Relocate (ctx context.Context,folderID uuid.UUID,newParentID *uuid.UUID,workspaceID uuid.UUID) (error)
-	UpdatePosition (ctx context.Context,folderID uuid.UUID,position int) (error)
-	GetContent (ctx context.Context,folderID uuid.UUID,workspaceID uuid.UUID,userID uuid.UUID,cursor string,limit int) (*dto.FolderContentsDTO,error)
-	GetRootData (ctx context.Context,workspaceID uuid.UUID,userID uuid.UUID,cursor string,limit int) (*dto.FolderContentsDTO,error)
-	GetFolderBreadcrumbs (ctx context.Context, folderID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID) ([]domain.Folder, error)
+	Create(ctx context.Context, folder *domain.Folder) (*domain.Folder, error)
+	GetByID(ctx context.Context, ID uuid.UUID, workspaceID uuid.UUID) (*domain.Folder, error)
+	GetRootFolders(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID) ([]domain.Folder, error)
+	GetChildren(ctx context.Context, parentID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID) ([]domain.Folder, error)
+	Relocate(ctx context.Context, folderID uuid.UUID, newParentID *uuid.UUID, workspaceID uuid.UUID) error
+	UpdatePosition(ctx context.Context, folderID uuid.UUID, position int) error
+	GetContent(ctx context.Context, folderID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.FolderContentsDTO, error)
+	GetRootData(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.FolderContentsDTO, error)
+	GetFolderBreadcrumbs(ctx context.Context, folderID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID) ([]domain.Folder, error)
 }
 
 type FolderServiceRepository struct {
-	folderRepo repository.FolderRepository
-	userRepo  userRepo.UserRepository
+	folderRepo    repository.FolderRepository
+	userRepo      userRepo.UserRepository
 	workspaceRepo userRepo.WorkshopRepository
-	videoRepo  videoRepo.VideoRepository
+	videoRepo     videoRepo.VideoRepository
 }
 
-func NewFolderService(folderRepo repository.FolderRepository,userRepo userRepo.UserRepository,workspaceRepo userRepo.WorkshopRepository,videoRepo videoRepo.VideoRepository) FolderServiceInterface {
+func NewFolderService(folderRepo repository.FolderRepository, userRepo userRepo.UserRepository, workspaceRepo userRepo.WorkshopRepository, videoRepo videoRepo.VideoRepository) FolderServiceInterface {
 
-	return  &FolderServiceRepository{folderRepo: folderRepo,userRepo: userRepo,workspaceRepo: workspaceRepo,videoRepo: videoRepo}
+	return &FolderServiceRepository{folderRepo: folderRepo, userRepo: userRepo, workspaceRepo: workspaceRepo, videoRepo: videoRepo}
 }
 
-func (s *FolderServiceRepository) Create (ctx context.Context,folder *domain.Folder) (*domain.Folder,error) {
-	exist ,err :=s.folderRepo.CheckDuplicateName(ctx, folder.Name, folder.ParentID, folder.WorkspaceID)
+func (s *FolderServiceRepository) Create(ctx context.Context, folder *domain.Folder) (*domain.Folder, error) {
+	exist, err := s.folderRepo.CheckDuplicateName(ctx, folder.Name, folder.ParentID, folder.WorkspaceID)
 
 	if err != nil {
-    // 1. Catch database connection or syntax errors
-    return nil, err
+		// 1. Catch database connection or syntax errors
+		return nil, err
 	}
 
 	if exist {
-    // 2. Catch business logic validation errors explicitly
-    return nil, &utils.ApiError{
-        Code:    400, 
-        Message: "A Folder With This Name Already Exists In This Location",
-    }
-}
-	if folder.ParentID !=nil{
-		parent,err:=s.folderRepo.GetByID(ctx ,*folder.ParentID)
+		// 2. Catch business logic validation errors explicitly
+		return nil, &utils.ApiError{
+			Code:    400,
+			Message: "A Folder With This Name Already Exists In This Location",
+		}
+	}
+	if folder.ParentID != nil {
+		parent, err := s.folderRepo.GetByID(ctx, *folder.ParentID)
 
-		if err != nil || parent.WorkspaceID !=folder.WorkspaceID {
-			return nil, &utils.ApiError{400,"invalid parent folder for this workspace"}
+		if err != nil || parent.WorkspaceID != folder.WorkspaceID {
+			return nil, &utils.ApiError{400, "invalid parent folder for this workspace"}
 		}
 	}
 
-	newFolder:=&domain.Folder{
-			ID: uuid.New(),
-			ParentID: folder.ParentID,
-			Name: folder.Name,
-			WorkspaceID: folder.WorkspaceID,
-			Position: folder.Position,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
+	newFolder := &domain.Folder{
+		ID:          uuid.New(),
+		ParentID:    folder.ParentID,
+		Name:        folder.Name,
+		WorkspaceID: folder.WorkspaceID,
+		Position:    folder.Position,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
 
-		data,err:=s.folderRepo.Create(ctx, newFolder)
+	data, err := s.folderRepo.Create(ctx, newFolder)
 
-		if err != nil {
-			return nil, err
-		}
+	if err != nil {
+		return nil, err
+	}
 
-	return  data,nil
+	return data, nil
 }
 
-func (s *FolderServiceRepository) GetByID (ctx context.Context,ID uuid.UUID,workspaceID uuid.UUID) (*domain.Folder,error){
+func (s *FolderServiceRepository) GetByID(ctx context.Context, ID uuid.UUID, workspaceID uuid.UUID) (*domain.Folder, error) {
 
-	folder,err:=s.folderRepo.GetByID(ctx , ID)
-
-	if err != nil {
-		return nil, err
-	}
-
-
-	if workspaceID!=folder.WorkspaceID {
-		return  nil,&utils.ApiError{403,"you do not have permission to access this folder"}
-	}
-
-	return  folder,nil
-	
-}
-
-func (s *FolderServiceRepository) GetRootFolders (ctx context.Context,workspaceID uuid.UUID,userID uuid.UUID) ([]domain.Folder,error) {
-
-	workspace,err:=s.workspaceRepo.GetByID(ctx , workspaceID)
+	folder, err := s.folderRepo.GetByID(ctx, ID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if workspace.UserID!=userID {
-		return  nil,&utils.ApiError{403,"unauthorised access to this workspace"}
+	if workspaceID != folder.WorkspaceID {
+		return nil, &utils.ApiError{403, "you do not have permission to access this folder"}
 	}
 
-	folders,err:=s.folderRepo.GetRootFolders(ctx , workspaceID)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return  folders,nil
+	return folder, nil
 
 }
 
-func (s *FolderServiceRepository) GetChildren (ctx context.Context,parentID uuid.UUID,workspaceID uuid.UUID,userID uuid.UUID) ([]domain.Folder,error) {
+func (s *FolderServiceRepository) GetRootFolders(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID) ([]domain.Folder, error) {
 
-	workspace,err:=s.workspaceRepo.GetByID(ctx, workspaceID)
-
-	if err != nil {
-		return nil, err
-	}
-
-		if workspace.UserID!=userID {
-		return  nil,&utils.ApiError{Code:403,Message:"unauthorised access to this workspace"}
-	}
-	
-	
-	
-	parent,err:=s.folderRepo.GetByID(ctx , parentID)
-	
-	if err != nil {
-		return nil, err
-	}
-	
-	if parent.WorkspaceID!=workspace.ID {
-		return  nil,&utils.ApiError{Code:403,Message:"This folder does not belong to this workspace"}
-	}
-
-	foldersChildren,err:=s.folderRepo.GetChildren(ctx , parentID)
+	workspace, err := s.workspaceRepo.GetByID(ctx, workspaceID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Print("leah goti",foldersChildren)
+	if workspace.UserID != userID {
+		return nil, &utils.ApiError{403, "unauthorised access to this workspace"}
+	}
 
-	return  foldersChildren,nil
+	folders, err := s.folderRepo.GetRootFolders(ctx, workspaceID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return folders, nil
 
 }
 
-func (s *FolderServiceRepository) Relocate (ctx context.Context,folderID uuid.UUID,newParentID *uuid.UUID,workspaceID uuid.UUID) (error){
+func (s *FolderServiceRepository) GetChildren(ctx context.Context, parentID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID) ([]domain.Folder, error) {
 
-	folder,err:=s.folderRepo.GetByID(ctx , folderID)
+	workspace, err := s.workspaceRepo.GetByID(ctx, workspaceID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if workspace.UserID != userID {
+		return nil, &utils.ApiError{Code: 403, Message: "unauthorised access to this workspace"}
+	}
+
+	parent, err := s.folderRepo.GetByID(ctx, parentID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if parent.WorkspaceID != workspace.ID {
+		return nil, &utils.ApiError{Code: 403, Message: "This folder does not belong to this workspace"}
+	}
+
+	foldersChildren, err := s.folderRepo.GetChildren(ctx, parentID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Print("leah goti", foldersChildren)
+
+	return foldersChildren, nil
+
+}
+
+func (s *FolderServiceRepository) Relocate(ctx context.Context, folderID uuid.UUID, newParentID *uuid.UUID, workspaceID uuid.UUID) error {
+
+	folder, err := s.folderRepo.GetByID(ctx, folderID)
 
 	if err != nil {
 		return err
 	}
 
-
-	workspace,err:=s.workspaceRepo.GetByID(ctx, workspaceID)
+	workspace, err := s.workspaceRepo.GetByID(ctx, workspaceID)
 
 	if err != nil || folder.WorkspaceID != workspace.ID {
 		fmt.Print(err)
-		return &utils.ApiError{ Code: 404, Message:"workspace not found"}
+		return &utils.ApiError{Code: 404, Message: "workspace not found"}
 	}
 
-	if newParentID !=nil {
+	if newParentID != nil {
 		isLoop, err := folderUtils.IsDescendant(ctx, folderID, *newParentID, s.folderRepo.GetByID)
 
 		if err != nil {
-			return  err
+			return err
 		}
 
 		if isLoop {
-			return  &utils.ApiError{Code:400,Message:"cannot move folder into its own subfolder"}
+			return &utils.ApiError{Code: 400, Message: "cannot move folder into its own subfolder"}
 		}
 
 	}
 
-	err=s.folderRepo.Move(ctx, folderID, newParentID)
-	
-	if err != nil {
-		return err
-	}
-
-	return  nil
-}
-
-
-func (s *FolderServiceRepository) UpdatePosition (ctx context.Context,folderID uuid.UUID,position int) error{
-
-	err:=s.folderRepo.UpdatePosition(ctx , folderID, position)
+	err = s.folderRepo.Move(ctx, folderID, newParentID)
 
 	if err != nil {
 		return err
 	}
-	return  nil
+
+	return nil
 }
 
+func (s *FolderServiceRepository) UpdatePosition(ctx context.Context, folderID uuid.UUID, position int) error {
+
+	err := s.folderRepo.UpdatePosition(ctx, folderID, position)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func (s *FolderServiceRepository) GetContent(ctx context.Context, folderID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.FolderContentsDTO, error) {
 	// 1. Check workspace ownership parameters
@@ -320,7 +315,7 @@ func (s *FolderServiceRepository) GetContent(ctx context.Context, folderID uuid.
 
 	// Calculate child item volume metrics totals
 	folderCount, _ := s.folderRepo.CountChildren(ctx, &folderID)
-	
+
 	// 💡 FIX 4: Dereference folderID to plain uuid.UUID to match the repository method signature requirements
 	videoCount, _ := s.videoRepo.CountByFolderID(ctx, &folderID)
 
@@ -337,37 +332,36 @@ func (s *FolderServiceRepository) GetContent(ctx context.Context, folderID uuid.
 }
 
 func (s *FolderServiceRepository) GetFolderBreadcrumbs(ctx context.Context, folderID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID) ([]domain.Folder, error) {
-    
-    // 1. Validate Workspace existence and user authorization
-    workspace, err := s.workspaceRepo.GetByID(ctx, workspaceID)
-    if err != nil {
-        return nil, err
-    }
 
-    if workspace.UserID != userID {
-        return nil, &utils.ApiError{Code: 403, Message: "unauthorised access to this workspace"}
-    }
+	// 1. Validate Workspace existence and user authorization
+	workspace, err := s.workspaceRepo.GetByID(ctx, workspaceID)
+	if err != nil {
+		return nil, err
+	}
 
-    // 2. Fetch the recursive ancestor line from the repository
-    ancestors, err := s.folderRepo.GetAncestors(ctx, folderID)
-    if err != nil {
-        return nil, err
-    }
+	if workspace.UserID != userID {
+		return nil, &utils.ApiError{Code: 403, Message: "unauthorised access to this workspace"}
+	}
 
-    // 3. Double-check that the target chain actually belongs to this workspace
-    // (Protects against cross-tenant ID injection attacks)
-    if len(ancestors) > 0 && ancestors[0].WorkspaceID != workspace.ID {
-        return nil, &utils.ApiError{Code: 400, Message: "folder sequence does not belong to this workspace"}
-    }
+	// 2. Fetch the recursive ancestor line from the repository
+	ancestors, err := s.folderRepo.GetAncestors(ctx, folderID)
+	if err != nil {
+		return nil, err
+	}
 
-    // 4. Force empty slice declaration instead of returning nil if data array is empty
-    if ancestors == nil {
-        ancestors = []domain.Folder{}
-    }
+	// 3. Double-check that the target chain actually belongs to this workspace
+	// (Protects against cross-tenant ID injection attacks)
+	if len(ancestors) > 0 && ancestors[0].WorkspaceID != workspace.ID {
+		return nil, &utils.ApiError{Code: 400, Message: "folder sequence does not belong to this workspace"}
+	}
 
-    return ancestors, nil
+	// 4. Force empty slice declaration instead of returning nil if data array is empty
+	if ancestors == nil {
+		ancestors = []domain.Folder{}
+	}
+
+	return ancestors, nil
 }
-
 
 // func (s *FolderServiceRepository) GetRootData (ctx context.Context,workspaceID uuid.UUID,userID uuid.UUID,cursor string,limit int) (*dto.FolderContentsDTO,error) {
 // 	// checking ownershop of the user
@@ -382,10 +376,9 @@ func (s *FolderServiceRepository) GetFolderBreadcrumbs(ctx context.Context, fold
 // 		return  nil,&utils.ApiError{Code: 403,Message: "You Don't have Permission to Access the Content. "}
 // 	}
 
-	
 // 	var cursorType string
 // 	var cursorID *uuid.UUID
-	
+
 // 	if cursor != "" {
 //     cursorType, cursorID, err = utils.DecodeCursor(cursor)
 //     if err != nil {
@@ -393,19 +386,17 @@ func (s *FolderServiceRepository) GetFolderBreadcrumbs(ctx context.Context, fold
 //         return nil, &utils.ApiError{Code: 400, Message: "Invalid cursor format"}
 //     }
 // 		} else {
-    
-//     cursorType = "root" 
+
+//     cursorType = "root"
 //     cursorID = nil // or blank string depending on your types
 // 	}
-
-
 
 // 	fetchLimit:=limit+1
 
 // 	var items []dto.ContentItemDTO
 // 	// first folder will be rendering first
 // 	if cursorType !="video"{
-		
+
 // 		var afterID *uuid.UUID
 
 // 		if cursorType=="folder"{
@@ -453,7 +444,7 @@ func (s *FolderServiceRepository) GetFolderBreadcrumbs(ctx context.Context, fold
 // 		remaining := fetchLimit - len(items)
 
 // 		videos,err:=s.videoRepo.GetByFolderIdPaginated(ctx, nil, afterID, remaining)
-		
+
 // 		if err != nil {
 // 			fmt.Print(err)
 // 			return nil, &utils.ApiError{Code: 500, Message: "Failed to fetch videos"}
@@ -491,7 +482,7 @@ func (s *FolderServiceRepository) GetFolderBreadcrumbs(ctx context.Context, fold
 
 // 		metaData:=dto.Metadata{
 // 			HasNextPage: hasNextPage,
-// 			NextCursor: nextCursor,	
+// 			NextCursor: nextCursor,
 // 			Total: folderCount+videoCount,
 // 		}
 // 		return &dto.FolderContentsDTO{
@@ -499,8 +490,6 @@ func (s *FolderServiceRepository) GetFolderBreadcrumbs(ctx context.Context, fold
 // 		Metadata: metaData,
 //     }, nil
 // }
-
-
 
 func (s *FolderServiceRepository) GetRootData(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.FolderContentsDTO, error) {
 	// 1. Verify workspace ownership permissions before loading any data records
@@ -616,8 +605,16 @@ func (s *FolderServiceRepository) GetRootData(ctx context.Context, workspaceID u
 		Total:       folderCount + videoCount,
 	}
 
+	jsonBytes, err := json.MarshalIndent(items, "", "  ")
+	if err != nil {
+		fmt.Printf("Error marshalling items payload: %v\n", err)
+	} else {
+		fmt.Print("lol")
+		fmt.Println(string(jsonBytes))
+	}
 	return &dto.FolderContentsDTO{
 		Items:    items,
 		Metadata: metaData,
 	}, nil
 }
+
