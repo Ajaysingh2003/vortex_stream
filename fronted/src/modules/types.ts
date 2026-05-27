@@ -77,3 +77,24 @@ export interface UserType{
   role:string
   isActive:boolean
 }
+
+
+export interface LibraryType{
+  id:string
+  thumbnailUrl?:string
+  name:string
+  type:"video" | "folder"
+  duration?:number
+  childCount?:number
+  createdAt:string
+  position?:number
+}
+
+export interface LibraryContentType {
+  items:LibraryType[]
+  metadata:{
+    hasNextPage:boolean
+    total:number
+    nextCursor:string
+  }
+}
