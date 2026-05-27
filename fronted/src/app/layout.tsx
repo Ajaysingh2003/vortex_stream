@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Inter, Figtree,DM_Sans,Fraunces,Syne } from "next/font/google";
+import {
+  Geist,
+  Inter,
+  Figtree,
+  DM_Sans,
+  Fraunces,
+  Syne,
+} from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "react-hot-toast";
 import Script from "next/script";
-
-const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { TooltipProvider } from "@/components/ui/tooltip";
+const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
 
 const fontContent = DM_Sans({
   variable: "--font-dm-sans",
@@ -16,7 +24,7 @@ const fontContent = DM_Sans({
 const fontHeading = Syne({
   variable: "--font-heading",
   // weight:["400"],
-  weight:["500","700","800"],
+  weight: ["500", "700", "800"],
   subsets: ["latin"],
 });
 
@@ -35,19 +43,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  
   return (
     <html lang="en" className={cn("font-sans", figtree.variable)}>
       <body
         className={`${fontContent.variable} ${fontHeading.variable} ${fontSubHeading.variable} antialiased`}
       >
-        
-        <Script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"/>
-      <TRPCReactProvider>
-        <Toaster position="top-right" />
-        {children}
+        <Script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" />
+        <TRPCReactProvider>
+          <Toaster position="top-right" />
+          <NuqsAdapter>
+            <TooltipProvider>{children}</TooltipProvider>
+          </NuqsAdapter>
         </TRPCReactProvider>
-
       </body>
     </html>
   );
