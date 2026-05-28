@@ -1,26 +1,15 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import {
-  EllipsisVertical,
   CalendarDays,
-  IndianRupee,
-  FileText,
-  Share2,
 } from "lucide-react";
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -32,7 +21,6 @@ import { formatDuration } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowDataTransferHorizontalIcon,
-  FirstBracketIcon,
   MoreVerticalIcon,
   PencilEdit01Icon,
   Share01Icon,
@@ -40,8 +28,8 @@ import {
 import ToolTipBar from "./ToolTipBar";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import DeleteBox from "@/components/static/DeleteBox";
 export const libraryColumn: ColumnDef<LibraryType>[] = [
-  // 🖼️ Thumbnail + Title
   {
     accessorKey: "title",
     header: "Title",
@@ -74,17 +62,19 @@ export const libraryColumn: ColumnDef<LibraryType>[] = [
             )}
           </div>
 
-          <div className="flex flex-col min-w-0">
+          <div className="flex flex-col gap-3 min-w-0">
             <p className="font-semibold text-sm  md:text-[13px] line-clamp-1 truncate">
-              {row.original.name}
+              {row.original.name} 
             </p>
+            { type =="folder" && <p className="font-semibold text-sm  md:text-[13px] line-clamp-1 truncate">
+          {row.original.childCount} items
+        </p>}
           </div>
         </div>
       );
     },
   },
 
-  // 📝 type
   {
     accessorKey: "type",
     header: "Type",
@@ -108,17 +98,15 @@ export const libraryColumn: ColumnDef<LibraryType>[] = [
       </div>
     ),
   },
-  {
-    accessorKey: "item",
-    header: "Item",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2 text-sm font-medium">
-        <p className="font-semibold text-sm  md:text-[13px] line-clamp-1 truncate">
-          {row.original.childCount ? row.original.childCount : "-"}
-        </p>
-      </div>
-    ),
-  },
+  // {
+  //   accessorKey: "item",
+  //   header: "Item",
+  //   cell: ({ row }) => (
+  //     <div className="flex items-center gap-2 text-sm font-medium">
+        
+  //     </div>
+  //   ),
+  // },
 
   {
     accessorKey: "createdAt",
@@ -135,7 +123,6 @@ export const libraryColumn: ColumnDef<LibraryType>[] = [
     },
   },
 
-  // ⚙️ Actions
   {
     id: "actions",
     header: "",
@@ -185,29 +172,97 @@ export const libraryColumn: ColumnDef<LibraryType>[] = [
       //   await updateChange.mutateAsync({id:row.original.id,isPublished:!row.original.isPublished})
 
       // }
-      const [hover,setHover]=useState(false)
+
+      const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        e.preventDefault();
+        alert("pressed");
+        console.log("button pressed");
+      };
+
+      const [hover, setHover] = useState(false);
+      const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        e.preventDefault();
+      };
       return (
-        <div  onMouseEnter={()=>(setHover(true))} onMouseLeave={()=>setHover(false)} className={`w-fit flex rounded-lg items-center gap-2  px-2 py-0.5 bg-whitez justify-center ${ hover && row.original.type =="video" && "shadow-md border-[0.5px]"} duration-200 transition-all ease-in-out  border-black/10 min-w-[120px]`}>
-          { hover && row.original.type =="video" && <>
-            <ToolTipBar
-            icon={Share01Icon}
-            tooltip="copy share URL"
-            onClick={() => {}}
-          />
-          <ToolTipBar
-            icon={PencilEdit01Icon}
-            tooltip="rename"
-            onClick={() => {}}
-          />
-          <ToolTipBar
-            icon={ArrowDataTransferHorizontalIcon}
-            tooltip="copy embed"
-            onClick={() => {}}
-          />
-          </>}
-          <button className="bg-transparent">
-            <HugeiconsIcon className="size-4.5" icon={MoreVerticalIcon} />
-          </button>
+        <div
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          className={`w-fit flex rounded-lg items-center gap-2  px-2 py-0.5 bg-whitez justify-center ${hover && row.original.type == "video" && "shadow-md border-[0.5px]"} duration-200 transition-all ease-in-out  border-black/10 min-w-[120px]`}
+        >
+          {hover && row.original.type == "video" && (
+            <>
+              <ToolTipBar
+                icon={Share01Icon}
+                tooltip="copy share URL"
+                onClick={() => {}}
+              />
+              <ToolTipBar
+                icon={PencilEdit01Icon}
+                tooltip="rename"
+                onClick={() => {}}
+              />
+              <ToolTipBar
+                icon={ArrowDataTransferHorizontalIcon}
+                tooltip="copy embed"
+                onClick={() => {}}
+              />
+            </>
+          )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                onClick={handleTriggerClick}
+                className="bg-transparent cursor-pointer p-1 hover:bg-neutral-100 rounded-lg flex items-center justify-center transition-colors text-muted-foreground hover:text-foreground"
+              >
+                <HugeiconsIcon className="size-4.5" icon={MoreVerticalIcon} />
+              </button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+              align="end" 
+              className="shadow-md p-1 min-w-[120px] w-auto bg-white dark:bg-zinc-950 border border-border rounded-md"
+              onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                e.stopPropagation()
+              }
+            >
+              <DropdownMenuItem
+                className="cursor-pointer text-accent text-sm font-medium px-2.5 py-1.5 rounded-md hover:bg-muted focus:bg-muted"
+                onClick={() => {
+                  console.log("Trigger Rename Workflow Actions...");
+                }}
+              >
+                Rename
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer text-accent text-sm font-medium px-2.5 py-1.5 rounded-md hover:bg-muted focus:bg-muted"
+                onClick={() => {
+                  console.log("Trigger Rename Workflow Actions...");
+                }}
+              >
+                Move Folder
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer text-accent text-sm font-medium px-2.5 py-1.5 rounded-md hover:bg-muted focus:bg-muted"
+                onClick={() => {
+                  console.log("Trigger Rename Workflow Actions...");
+                }}
+              >
+                Add to favorite
+              </DropdownMenuItem>
+              {/* <DropdownMenuItem
+                className="cursor-pointer text-accent text-sm font-medium px-2.5 py-1.5 rounded-md hover:bg-muted focus:bg-muted"
+                onClick={() => {
+                  console.log("Trigger Rename Workflow Actions...");
+                }}
+              >
+                Delete
+              </DropdownMenuItem> */}
+              <DeleteBox message="Delete this folder permanently? This action cannot be undone and all contained media will be lost." handleDelete={()=>{}}/>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       );
     },
