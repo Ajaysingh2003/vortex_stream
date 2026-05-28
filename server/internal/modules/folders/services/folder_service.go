@@ -241,7 +241,8 @@ func (s *FolderServiceRepository) GetContent(ctx context.Context, folderID uuid.
 	}
 
 	fetchLimit := limit + 1
-	var items []dto.ContentItemDTO
+	// var items []dto.ContentItemDTO
+	items := make([]dto.ContentItemDTO, 0)
 
 	// 4. PHASE 1: Fetch nested directory sub-folders first
 	if cursorType != "video" {
@@ -492,7 +493,6 @@ func (s *FolderServiceRepository) GetFolderBreadcrumbs(ctx context.Context, fold
 // }
 
 func (s *FolderServiceRepository) GetRootData(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.FolderContentsDTO, error) {
-	// 1. Verify workspace ownership permissions before loading any data records
 	isOwned, err := s.userRepo.IsOwned(ctx, workspaceID, userID)
 	if err != nil {
 		return nil, err
@@ -504,7 +504,6 @@ func (s *FolderServiceRepository) GetRootData(ctx context.Context, workspaceID u
 		}
 	}
 
-	// 2. Initialize and decode cursor tracking variables
 	var cursorType string
 	var cursorID *uuid.UUID
 

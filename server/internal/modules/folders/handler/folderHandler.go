@@ -274,7 +274,6 @@ func (h *FolderHandler) Move (c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success":true,"message":"Folder Moved Successfully"})
 }
 
-
 func (r *FolderHandler) GetContent (c *gin.Context) {
 
 	userIDRaw,exists:=c.Get("user_id") 
@@ -334,6 +333,7 @@ func (r *FolderHandler) GetContent (c *gin.Context) {
         return
 	}
 
+	fmt.Print(data,"data")
 	c.JSON(http.StatusOK, gin.H{"data":data,"success":true})
 }
 
@@ -435,6 +435,8 @@ func (h *FolderHandler) GetRootData (c *gin.Context){
     }
 	}
 
+	fmt.Println(cursor,"sonali")
+
 	data,err:=h.FolderService.GetRootData(c.Request.Context(),workspaceId,userId,cursor,limit)
 
 
@@ -454,6 +456,8 @@ func (h *FolderHandler) GetRootData (c *gin.Context){
     
         return
 	}
+
+	
 
 	c.JSON(http.StatusOK, gin.H{"data":data,"success":true})
 }
