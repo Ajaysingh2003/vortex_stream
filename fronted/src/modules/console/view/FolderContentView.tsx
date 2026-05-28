@@ -1,29 +1,35 @@
 "use client";
+
+import { DataTable } from "@/components/static/DataTable";
+import { Inbox, Loader2 } from "lucide-react";
 import React, { useCallback, useEffect, useRef } from "react";
-import TopHeader from "../component/TopHeader";
+import { libraryColumn } from "../component/ColumnLibrary";
+import Filters from "../component/Filters";
 import UploadFile from "../component/UploadFile";
 import ImportVideos from "@/modules/upload/component/ImportVideos";
-import Filters from "../component/Filters";
-import { DataTable } from "@/components/static/DataTable";
-import { libraryColumn } from "../component/ColumnLibrary";
-import { useQueryClient, useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { useTRPC } from "@/trpc/client";
+import TopHeader from "../component/TopHeader";
 import {
+  FolderType,
   LibraryContentType,
-  WorkspaceType,
   LibraryType,
+  WorkspaceType,
 } from "@/modules/types";
-import { Inbox, Loader2 } from "lucide-react";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useLibraryFilters } from "@/lib/useLibraryFilters";
+import {
+    useQueryClient,
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 import { useRouter } from "next/navigation";
 
-interface LibraryViewProps {
+function FolderContentView({
+  folderID,
+  limit,
+}: {
+  folderID: string;
   limit: number;
-}
-
-function LibraryView({ limit }: LibraryViewProps) {
-  const queryClient=useQueryClient()
+}) {
   const trpc = useTRPC();
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -35,9 +41,10 @@ function LibraryView({ limit }: LibraryViewProps) {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSuspenseInfiniteQuery(
-      trpc.folder.getRootContent.infiniteQueryOptions(
+      trpc.folder.getFolderContent.infiniteQueryOptions(
         {
           limit,
+          folderID: folderID,
           cursor: filters.cursor,
           workspaceID: workspacesData.id,
         },
@@ -52,9 +59,16 @@ function LibraryView({ limit }: LibraryViewProps) {
       ),
     );
 
+  const getFolderInfo = useSuspenseQuery(
+    trpc.folder.getfolderInfo.queryOptions({
+      folderID: folderID,
+      workspaceID: workspacesData.id,
+    }),
+  );
+
+  const getFolderInfoData = getFolderInfo.data as FolderType;
+
   const items: LibraryType[] = data.pages.flatMap((page) => page.items);
-
-
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -72,25 +86,18 @@ function LibraryView({ limit }: LibraryViewProps) {
     observer.observe(el);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  // const handleSucess=async()=>{
-  //   await queryClient.invalidateQueries(
-  //         trpc.folder.getRootContent.queryOptions({
-  //            limit,
-  //         cursor: "",
-  //         workspaceID: workspacesData.id,
-  //         }),
-  //       );
-  // }
+  
+  const queryClient=useQueryClient()
 
   const handleSuccess = useCallback(async () => {
     // ← use infiniteQueryOptions not queryOptions
     await queryClient.invalidateQueries(
-        trpc.folder.getRootContent.infiniteQueryOptions(
+        trpc.folder.getFolderContent.infiniteQueryOptions(
             {
                 limit,
                 workspaceID: workspacesData.id,
                 cursor: "",
+                folderID:folderID
             },
             {
                 getNextPageParam: (lastPage: LibraryContentType) =>
@@ -102,6 +109,7 @@ function LibraryView({ limit }: LibraryViewProps) {
         )
     )
 }, [queryClient, limit, workspacesData?.id])
+
 const router=useRouter()
 const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{
   console.log("row.id",row.id)
@@ -117,7 +125,7 @@ const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{
       <div className="px-6 md:px-12 py-4 w-full">
         <div className="flex flex-col gap-6 md:gap-4">
           <TopHeader
-            Header="Library"
+            Header={getFolderInfoData.name}
             Btnchild={
               <div className="flex flex-row gap-3">
                 <ImportVideos />
@@ -127,12 +135,12 @@ const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{
           />
 
           <div className="flex justify-end">
-            <Filters  workspaceID={workspacesData.id} parentId={null} onSucess={handleSuccess}/>
+            <Filters parentId={folderID} workspaceID={workspacesData.id} onSucess={handleSuccess}  />
           </div>
 
-          <div className="max-w-7xl"> 
+          <div className="max-w-7xl">
             {items.length > 0 ? (
-              <DataTable name="library" columns={libraryColumn} data={items} onRowClick={handleRowClick} />
+              <DataTable name="folder" onRowClick={handleRowClick} columns={libraryColumn} data={items} />
             ) : (
               <div className="w-full py-12 flex flex-col items-center justify-center border border-dashed rounded-xl bg-muted/20 text-muted-foreground gap-2">
                 <Inbox className="size-8 opacity-40" />
@@ -162,4 +170,4 @@ const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{
   );
 }
 
-export default LibraryView;
+export default FolderContentView;
