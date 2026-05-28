@@ -4,9 +4,17 @@ import DropdownFilters from "./DropdownFilters";
 import { TextAlignJustify } from "lucide-react";
 import { LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import CreateFolder from "@/modules/upload/component/CreateFolder";
+
+interface PageProps{
+  parentId:string | null
+  workspaceID:string
+  onSucess:()=>void
+}
 
 type typeViewMethod = "list" | "grid";
-function Filters() {
+
+function Filters({parentId,workspaceID,onSucess}:PageProps) {
   const filterType = [
     { label: "All Contents", filter: "all" },
     { label: "Videos Only", filter: "video" },
@@ -39,7 +47,7 @@ function Filters() {
     useState<typeViewMethod>("grid");
 
   return (
-    <div className="w-fit flex gap-3 items-center justify-between w-full">
+    <div className="flex gap-3 items-center justify-between w-full">
       <div className="flex gap-3 items-center">
         <DropdownFilters label="Type" items={filterType} />
         <DropdownFilters label="Date Modified" items={dateFilters} />
@@ -47,6 +55,7 @@ function Filters() {
         <DropdownFilters label="Visibility" items={visibilityFilters} />
       </div>
       <div className="flex gap-4">
+        <CreateFolder parentID={parentId} workspaceID={workspaceID} onSucess={onSucess}/>
         <Button
           onClick={() => setActiveViewMethod("list")}
           className={`${activeViewMethod === "list" ? "bg-stone-100" : "bg-transparent"} rounded-lg px-2 py-4 cursor-pointer`}

@@ -26,6 +26,7 @@ import {
 import { useRouter } from "next/navigation";
 import { PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LibraryType } from "@/modules/types";
 
 
 // import Router from "next/router";
@@ -33,7 +34,7 @@ type withID<T> = T & { id?: string };
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: withID<TData>[];
-  onRowClick ?: (strr: string) => void;
+ onRowClick: (row: { id: string; type: "video" | "folder" }) => void;
   onClick ?: (open: boolean) => void;
   name: string;
   count?:number;
@@ -54,8 +55,6 @@ export function DataTable<TData, TValue>({
   });
   // console.log(table, 44);
   
-  const router = useRouter();
-
 
   return (
     <div className={`  rounded-md border-[0.1px] w-full border-[#eee] bg-background overflow-hidden`}>
@@ -91,8 +90,12 @@ export function DataTable<TData, TValue>({
                     className="cursor-pointer h-14 hover:bg-stone-50 "
                     data-state={row.getIsSelected() && "selected"}
                     
-                    //     onClick={()=> onRowClick(`${(row.original as withID<TData>).id}`) 
-                    // }
+                     onClick={() => {
+                  const asset = row.original as LibraryType;
+                  if (asset && asset.id && asset.type) {
+                    onRowClick({ id: asset.id, type: asset.type });
+                  }
+                }}
                     
                     >
                     {row.getVisibleCells().map((cell, i) => (

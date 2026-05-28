@@ -1,11 +1,10 @@
-// src/lib/searchParams.ts
-import { parseAsString, parseAsInteger, createSearchParamsCache, createSerializer } from 'nuqs/server'
+
+import { createLoader } from 'nuqs'
+import { parseAsString, parseAsInteger, createSearchParamsCache } from 'nuqs/server'
 
 export const libraryCoordinates = {
   cursor: parseAsString.withDefault(''),
-  limit: parseAsInteger.withDefault(1)
+  limit: parseAsInteger.withDefault(10)
 }
 
-// 💡 Make sure these are using your new updated schema name:
-export const loaderLibrary = createSearchParamsCache(libraryCoordinates)
-export const serializeDashboardParams = createSerializer(libraryCoordinates)
+export const loaderLibraryFilter = createSearchParamsCache(libraryCoordinates)

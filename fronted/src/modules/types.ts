@@ -98,3 +98,14 @@ export interface LibraryContentType {
     nextCursor:string
   }
 }
+
+
+export interface FolderType{
+  id:string
+  name:string
+  workspaceId:string
+  parentId:string | null
+  position:number
+  createdAt:string
+  updatedAt:string
+}
