@@ -90,7 +90,6 @@ function FolderContentView({
   const queryClient=useQueryClient()
 
   const handleSuccess = useCallback(async () => {
-    // ← use infiniteQueryOptions not queryOptions
     await queryClient.invalidateQueries(
         trpc.folder.getFolderContent.infiniteQueryOptions(
             {
@@ -109,6 +108,7 @@ function FolderContentView({
         )
     )
 }, [queryClient, limit, workspacesData?.id])
+
 
 const router=useRouter()
 const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{

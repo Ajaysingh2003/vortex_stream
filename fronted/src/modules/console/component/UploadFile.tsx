@@ -133,7 +133,7 @@ function UploadFile() {
           if (key) {
             console.log(item, "leena");
             await createVideo.mutateAsync({
-              WorkshopId: workspaceData.id,
+              worskspaceId: workspaceData.id,
               videoKey: key,
               title: item.file.name,
               duration: item.file.duration ?? 0,
@@ -327,7 +327,7 @@ function UploadFile() {
 
         if (urls[0].Key) {
           await createVideo.mutateAsync({
-            WorkshopId: workspaceData.id,
+            worskspaceId: workspaceData.id,
             duration: item.file.duration ?? 0,
             videoKey: urls[0].Key,
             title: item.file.name,

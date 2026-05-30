@@ -22,6 +22,7 @@ type ContentItemDTO struct {
     Duration     *int        `json:"duration,omitempty"`
     Position     *int        `json:"position,omitempty"`
     ChildCount   *int        `json:"childCount,omitempty"`
+    ParentID    **uuid.UUID     `json:"parentId,omitempty"`
     CreatedAt    time.Time   `json:"createdAt"`
 }
 
@@ -34,4 +35,8 @@ type Metadata struct {
 type FolderContentsDTO struct {
     Metadata    Metadata   `json:"metadata"`
     Items       []ContentItemDTO `json:"items"`
+}
+
+type UpdateFolderRequest struct {
+    Name string `json:"name" binding:"required"`
 }

@@ -56,7 +56,7 @@ func main() {
 	folderService:=folderService.NewFolderService(folderRepo, userRepo, workspaceRepo, videoRepo)
 	workspaceService:=services.NewWorkspaceService(userRepo,workspaceRepo);
 	uploadService:=serviceUpload.NewUploadService(userRepo)
-	videoService:=videoService.NewVideoService(userRepo,videoRepo,workspaceRepo)
+	videoService:=videoService.NewVideoService(userRepo,videoRepo,workspaceRepo,folderRepo)
 	userhandler:=&handler.UserHandler{
 		UserService :userService,
 		WorkspacesService: workspaceService,

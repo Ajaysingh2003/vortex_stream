@@ -149,7 +149,7 @@ export const folderRouter = createTRPCRouter({
       if (status === 401) code = "UNAUTHORIZED";
       if (status === 403) code = "FORBIDDEN";
       if (status === 404) code = "NOT_FOUND";
-
+      
       throw new TRPCError({
         code: code,
         message: error.response?.data?.message || "Operation failed",
@@ -165,7 +165,7 @@ export const folderRouter = createTRPCRouter({
   }),
   getFolderBreadCumb:getUserProcedure.input(z.object({
     workspaceID:z.string(),
-    folderID :z.string().nullable()
+    folderID :z.string().optional().nullable()
   })).query(async({ctx ,input})=>{
 
       try {
@@ -427,5 +427,101 @@ console.log(body,"lol")
       }
 
   }),
-  
+
+  deleteFolder:getUserProcedure.input(z.object({
+    folderID:z.string(),
+    workspaceID:z.string()
+  })).mutation((async({ctx,input})=>{
+    try {
+        // console.log("hitting the func",input.cursor)
+        const cookieStore = await cookies();
+
+        const access_token = cookieStore.get("access_token")?.value;
+        
+        const res = await axios.delete(
+          `${process.env.BASE_API}/v1/workspaces/${input.workspaceID}/folder/${input.folderID}`,
+          {
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          },
+        );
+
+        console.log(res.data)
+
+        return res.data;
+        } catch (error: any) {
+        console.log(error?.response?.data, "error");
+
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      let code: TRPCError["code"] = "BAD_REQUEST";
+
+      if (status === 401) code = "UNAUTHORIZED";
+      if (status === 403) code = "FORBIDDEN";
+      if (status === 404) code = "NOT_FOUND";
+
+      throw new TRPCError({
+        code: code,
+        message: error.response?.data?.message || "Operation failed",
+      });
+    }
+
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Something went wrong",
+    });
+      }
+  })),
+  updateFolder:getUserProcedure.input(z.object({
+    folderID:z.string(),
+    name:z.string(),
+    workspaceID:z.string()
+  })).mutation((async({ctx,input})=>{
+    try {
+        const cookieStore = await cookies();
+
+        const access_token = cookieStore.get("access_token")?.value;
+        
+        const res = await axios.patch(
+          `${process.env.BASE_API}/v1/workspaces/${input.workspaceID}/folder/${input.folderID}`,
+          {
+            "name":input.name
+          },
+          {
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          },
+        );
+
+        console.log(res.data)
+
+        return res.data;
+        } catch (error: any) {
+        console.log(error?.response?.data, "error");
+
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      let code: TRPCError["code"] = "BAD_REQUEST";
+
+      if (status === 401) code = "UNAUTHORIZED";
+      if (status === 403) code = "FORBIDDEN";
+      if (status === 404) code = "NOT_FOUND";
+
+      throw new TRPCError({
+        code: code,
+        message: error.response?.data?.message || "Operation failed",
+      });
+    }
+
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Something went wrong",
+    });
+      }
+  }))
+    
 });

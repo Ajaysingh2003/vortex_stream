@@ -27,22 +27,27 @@ type FolderRepository interface {
     afterID  *uuid.UUID,
     limit    int) ([]domain.Folder,error)
 
-	GetWithVideos(ctx context.Context, id uuid.UUID) (*domain.Folder, error)
+	GetWithVideos (ctx context.Context, id uuid.UUID) (*domain.Folder, error)
 
-	Update(ctx context.Context, folder *domain.Folder) (*domain.Folder, error)
+	Update (ctx context.Context, folder *domain.Folder) (*domain.Folder, error)
 
-	Delete(ctx context.Context, id uuid.UUID) error
+	Delete (ctx context.Context, id uuid.UUID) error
 
-	Move(ctx context.Context, id uuid.UUID, newParentID *uuid.UUID) error
+	DeleteByIDandWorkspaceId (ctx context.Context, id uuid.UUID,workspaceID uuid.UUID) error
 
-	UpdatePosition(ctx context.Context, id uuid.UUID, position int) error
+	Move (ctx context.Context, id uuid.UUID, newParentID *uuid.UUID) error
+
+	UpdatePosition (ctx context.Context, id uuid.UUID, position int) error
 
 	CountChildren (ctx context.Context,parentID *uuid.UUID) (int64 , error)
 
 	CheckDuplicateName (ctx context.Context,name string,parentID *uuid.UUID,workspaceID uuid.UUID) (bool , error)
+
 	GetAncestors (ctx context.Context,folderID uuid.UUID) ([]domain.Folder, error)
 	// ExistsByNameAndParent(ctx context.Context, name string, workspaceID uuid.UUID, parentID *uuid.UUID) (bool, error)
 
+	UpdateFolder (ctx context.Context,folderID uuid.UUID ,workspaceID uuid.UUID,folder domain.Folder) error
+	
 }
 
 
@@ -50,9 +55,23 @@ type postgresFolderRepository struct {
 	db *gorm.DB
 }
 
-
 func NewFolderRepo(db *gorm.DB) FolderRepository {
 	return &postgresFolderRepository{db: db}
+}
+
+func (r *postgresFolderRepository) UpdateFolder (ctx context.Context,folderID uuid.UUID,workspaceID uuid.UUID,folder domain.Folder) error {
+	err := r.db.WithContext(ctx).
+		Model(&domain.Folder{}).
+		Where("id = ? AND workspace_id = ?", folderID,workspaceID).
+		Updates(map[string]interface{}{
+			"name":     folder.Name,
+			"position": folder.Position,
+		}).Error
+
+	if err != nil {
+		return  err
+	}
+	return  nil
 }
 
 func (r *postgresFolderRepository) Create (ctx context.Context,folder *domain.Folder) (*domain.Folder,error){
@@ -63,7 +82,8 @@ func (r *postgresFolderRepository) Create (ctx context.Context,folder *domain.Fo
 
 	return folder,nil
 }
-func (r *postgresFolderRepository) CheckDuplicateName(ctx context.Context, name string, parentID *uuid.UUID, workspaceID uuid.UUID) (bool, error) {
+
+func (r *postgresFolderRepository) CheckDuplicateName (ctx context.Context, name string, parentID *uuid.UUID, workspaceID uuid.UUID) (bool, error) {
     var exists bool
 
     // 1. Explicitly target the "folders" table so GORM builds the query correctly
@@ -166,6 +186,11 @@ func (r *postgresFolderRepository) Delete(ctx context.Context, id uuid.UUID) err
 		Where("id = ?", id).
 		Delete(&domain.Folder{}).Error
 }
+func (r *postgresFolderRepository) DeleteByIDandWorkspaceId(ctx context.Context, id uuid.UUID,workspaceID uuid.UUID) error {
+	return r.db.WithContext(ctx).
+		Where("id = ? AND workspace_id = ?", id,workspaceID).
+		Delete(&domain.Folder{}).Error
+}
 
 func (r *postgresFolderRepository) Move(ctx context.Context, id uuid.UUID, newParentID *uuid.UUID) error {
 	return r.db.WithContext(ctx).
@@ -182,23 +207,23 @@ func (r *postgresFolderRepository) UpdatePosition(ctx context.Context, id uuid.U
 }
 
 func (r *postgresFolderRepository) GetChildrenPaginated(
-    ctx      context.Context,
-    parentID *uuid.UUID,
-    workspaceID uuid.UUID,
-    afterID  *uuid.UUID,
-    limit    int,
+		ctx      context.Context,
+		parentID *uuid.UUID,
+		workspaceID uuid.UUID,
+		afterID  *uuid.UUID,
+		limit    int,
 ) ([]domain.Folder, error) {
 
-	query := r.db.WithContext(ctx).
-    Where("workspace_id = ?", workspaceID).
-    Order("position ASC, created_at ASC").
-    Limit(limit)
+		query := r.db.WithContext(ctx).
+		Where("workspace_id = ?", workspaceID).
+		Order("position ASC, created_at ASC").
+		Limit(limit)
 
-	if parentID != nil {
-    query = query.Where("parent_id = ?", parentID)
-} else {
-    query = query.Where("parent_id IS NULL")
-}
+		if parentID != nil {
+		query = query.Where("parent_id = ?", parentID)
+	} else {
+		query = query.Where("parent_id IS NULL")
+	}
     
 		
     if afterID != nil {
