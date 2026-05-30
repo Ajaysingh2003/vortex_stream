@@ -81,7 +81,7 @@ export const uploadsRouter = createTRPCRouter({
   createVideo: baseProcedure
     .input(
       z.object({
-        WorkshopId:z.string(),
+        worskspaceId:z.string(),
         duration:z.number(),
         title: z.string(),
         userId: z.string(),
