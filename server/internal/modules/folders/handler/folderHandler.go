@@ -214,6 +214,111 @@ func (h *FolderHandler) GetByID (c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"success":true,"data":data})
 }
+func (h *FolderHandler) UpdateFolder (c *gin.Context) {
+
+	var req dto.UpdateFolderRequest
+
+	// fmt.Print(req,"lol")
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+
+	workspaceIDRaw:=c.Param("workspaceID")
+
+	workspaceID, err := uuid.Parse(workspaceIDRaw)
+
+	if err!=nil{
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Workspace ID","success":false})
+		return
+	}
+
+	id,err:=uuid.Parse(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Folder ID","success":false})
+		return
+	}
+
+	userIDRaw,exists:=c.Get("user_id")
+
+	if !exists{
+		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":true})
+		return
+	}
+
+	userId,ok:=userIDRaw.(uuid.UUID)
+
+	if !ok {
+		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":false})
+		return
+	}
+
+
+
+	err=h.FolderService.UpdateFolder(c.Request.Context(),id,userId,workspaceID,dto.UpdateFolderRequest{
+		Name: req.Name,
+	})
+
+	if  err!=nil{
+		if appErr, ok := err.(*utils.ApiError); ok {
+			c.JSON(appErr.Code, gin.H{ "success":false, "message": utils.ErrMsg(err)})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong","success":false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success":true,"message":"Folder Updated Successfully."})
+}
+
+func (h *FolderHandler) DeleteById (c *gin.Context) {
+
+	workspaceIDRaw:=c.Param("workspaceID")
+
+	workspaceID, err := uuid.Parse(workspaceIDRaw)
+
+	if err!=nil{
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Workspace ID","success":false})
+		return
+	}
+
+	id,err:=uuid.Parse(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Folder ID","success":false})
+		return
+	}
+
+	userIDRaw,exists:=c.Get("user_id")
+
+	if !exists{
+		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":true})
+		return
+	}
+
+	userId,ok:=userIDRaw.(uuid.UUID)
+
+	if !ok {
+		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":false})
+		return
+	}
+
+	err=h.FolderService.DeleteByIDAndWorkspaceID(c.Request.Context(),id ,workspaceID,userId)
+
+
+	if  err!=nil{
+		if appErr, ok := err.(*utils.ApiError); ok {
+			c.JSON(appErr.Code, gin.H{ "success":false, "message": utils.ErrMsg(err)})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong","success":false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success":true,"message":"Folder Delete Successfully."})
+}
 
 func (h *FolderHandler) Move (c *gin.Context) {
 

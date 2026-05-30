@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/services"
@@ -18,17 +17,15 @@ type VideoHandler struct {
 	UserRepo      repository.UserRepository
 }
 
-
-
-func (h *VideoHandler) CreateVideo(c *gin.Context) {
+func (h *VideoHandler) CreateVideo (c *gin.Context) {
 	var req struct {
 		Title    string `json:"title" binding:"required"`
 		VideoKey string `json:"videoKey" binding:"required"`
 		Status     domain.VideoStatus `json:"status" binding:"required"`
-		WorkshopId     string `json:"workshopId" binding:"required"`
+		WorkspaceId     string `json:"workspaceId" binding:"required"`
 		Size   int64    `json:"size" binding:"required"`
 		Duration int     `json:"duration" binding:required"`
-		// WorkshopId string `json:""`
+		
 	}
 	
 	
@@ -42,7 +39,7 @@ func (h *VideoHandler) CreateVideo(c *gin.Context) {
 	// fmt.Print(String(reqData),"test from aj");
 	fmt.Print(string(reqData),"test data from ajy")
 
-	workshopId, err := uuid.Parse(req.WorkshopId)
+	workspaceId, err := uuid.Parse(req.WorkspaceId)
 		if err!=nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration","success":false})
 			return
@@ -51,7 +48,7 @@ func (h *VideoHandler) CreateVideo(c *gin.Context) {
 	payload:=&domain.Video{
 		ID: uuid.New(),
 		Size: req.Size,
-		WorkspaceId: workshopId ,
+		WorkspaceID: workspaceId ,
 		Title: req.Title,
 		VideoKey: req.VideoKey,
 		Duration: req.Duration,
@@ -167,4 +164,63 @@ func (h *VideoHandler) Process (c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success":true,"data":data})
 }
 
+func (h *VideoHandler) UpdateVideo (c *gin.Context) {
+
+	var req struct {
+		Title    string `json:"title" binding:"required"`
+		WorkspaceId     uuid.UUID `json:"workspaceId" binding:"required"`
+		FolderID  *uuid.UUID `gorm:"type:uuid;index" json:"folderId"`
+	}
+
+	// fmt.Print(req,"lol")
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	id,err:=uuid.Parse(c.Param("id"))
+
+	
+
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Folder ID","success":false})
+		return
+	}
+
+	userIDRaw,exists:=c.Get("user_id")
+
+	if !exists{
+		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":true})
+		return
+	}
+
+	userId,ok:=userIDRaw.(uuid.UUID)
+
+	if !ok {
+		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":false})
+		return
+	}
+
+
+
+	err=h.VideoService.UpdateVideo(c.Request.Context(),userId,domain.Video{
+		ID: id,
+		Title: req.Title,
+		FolderID: req.FolderID,
+		WorkspaceID: req.WorkspaceId,
+	})
+
+	if  err!=nil{
+		fmt.Print(err,"wqe")
+		if appErr, ok := err.(*utils.ApiError); ok {
+			c.JSON(appErr.Code, gin.H{ "success":false, "message": utils.ErrMsg(err)})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong","success":false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success":true,"message":"Video Updated Successfully."})
+}
 

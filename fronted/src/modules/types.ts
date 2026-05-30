@@ -86,6 +86,7 @@ export interface LibraryType{
   type:"video" | "folder"
   duration?:number
   childCount?:number
+  parentId?:string
   createdAt:string
   position?:number
 }
@@ -108,4 +109,12 @@ export interface FolderType{
   position:number
   createdAt:string
   updatedAt:string
+}
+
+
+export type renameType={
+    id:string
+    assetType:"video" | "folder"
+    oldName:string
+    newName:string | undefined
 }

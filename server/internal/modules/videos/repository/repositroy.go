@@ -72,11 +72,11 @@ func (r *postgresVideoRepository) GetByUserID (ctx context.Context, userID uuid.
 	return videos, err
 }
 
-func (r *postgresVideoRepository) Update (ctx context.Context, video *domain.Video) error {
-	
+func (r *postgresVideoRepository) Update (ctx context.Context,video *domain.Video) error {
+	fmt.Print(video,"sad")
 	return r.db.WithContext(ctx).
-        Model(&domain.Video{}).Joins("JOIN workspaces on workspaces.id =video.workspaces.id ").
-        Where("video.id = ? AND video.workspaces.userId", video.ID, video.Workspace.UserID).
+        Model(&domain.Video{}).
+        Where("id = ? AND workspace_id = ?", video.ID, video.WorkspaceID).
         Updates(map[string]interface{}{
             "status":    video.Status,
 			"title":      video.Title,

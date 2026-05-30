@@ -27,10 +27,10 @@ func SetupRouter(r *gin.Engine, videohandler *handler.VideoHandler,jwtMaker *uti
 	video:=api.Group("/video")
 	 {
 		
-		 video.POST("/create",middleware.AuthMiddleware(jwtMaker),videohandler.CreateVideo)
-		 video.GET("/list",middleware.AuthMiddleware(jwtMaker),videohandler.ListVideo)
-		 video.POST("/process/:videoId",middleware.AuthMiddleware(jwtMaker),videohandler.Process)
-		
+		video.POST("/create",middleware.AuthMiddleware(jwtMaker),videohandler.CreateVideo)
+		video.GET("/list",middleware.AuthMiddleware(jwtMaker),videohandler.ListVideo)
+		video.POST("/process/:videoId",middleware.AuthMiddleware(jwtMaker),videohandler.Process)
+		video.PATCH("/:id/update/name", middleware.AuthMiddleware(jwtMaker),videohandler.UpdateVideo)
 	 }
 	 
 	return r
