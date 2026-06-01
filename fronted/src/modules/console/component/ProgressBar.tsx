@@ -14,15 +14,6 @@ export const ProgressBar = ({
   progress: number;
   status: UploadStatus;
 }) => {
-  // const colorMap: Record<UploadStatus, string> = {
-  //   queued: "bg-slate-300",
-  //   uploading: "bg-gradient-to-r from-violet-500 to-fuchsia-500",
-  //   paused: "bg-amber-400",
-  //   done: "bg-emerald-500",
-  //   error: "bg-red-500",
-  //   cancelled: "bg-slate-300",
-  //   TRANSCODING: "bg-slate-400",
-  // };
 
   return (
     <div className="w-full h-[5px] bg-slate-100 rounded-full overflow-hidden">
