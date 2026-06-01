@@ -1,3 +1,4 @@
+import { IconSvgElement } from "@hugeicons/react"
 import { UPLOADPROVIDER } from "./constant"
 
 export interface WorkspaceType {
@@ -117,4 +118,47 @@ export type renameType={
     assetType:"video" | "folder"
     oldName:string
     newName:string | undefined
+}
+
+
+
+export type BillingCycleType = 'monthly' | 'quarterly' | 'annually';
+export type PlanTierType = 'free' | 'starter' | 'pro' | 'business';
+// export type HLSQualityType = '360p' | '480p' | '720p' | '1080p';
+
+export interface PlanBillingDetails {
+  price_id: string; // Will be an empty string for the free tier
+  amount: number;   // Base price unit (e.g., in dollars or local base denomination)
+}
+
+// export interface PlanLimits {
+//   Name: string;
+//   MaxStorageBytes: number;
+//   MaxBandwidthBytes: number;
+//   MaxPlaybackMinutes: number;
+//   MaxWorkspaces: number;
+//   AllowCustomBranding: boolean;
+//   AllowSubtitles: boolean;
+//   Analytics: boolean;
+//   HLSQualities: HLSQualityType[];
+// }
+
+export interface PlanConfig {
+  name: string;
+  description: string;
+  // Use Partial because the 'free' tier configuration only contains a 'monthly' key
+  billing_cycles: Record<BillingCycleType, PlanBillingDetails>;
+  // Limits: PlanLimits;
+}
+
+// This represents the entire structural map returned by your Go backend
+export type BillingConfigResponse = Record<PlanTierType, PlanConfig>;
+
+
+
+export interface FeatureItem {
+  label: string;       
+  icon: IconSvgElement;     
+  // unit?: 'workspace' | 'mb' | 'gb' | 'hours';
+  // icon: 'WorkIcon' | 'DatabaseIcon' | 'PlayIcon' | 'TransferIcon';
 }

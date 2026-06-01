@@ -28,6 +28,7 @@ import {
 
 import ProfileMenu from "./ProfileMenu";
 import { cn } from "@/lib/utils"; // Standard shadcn helper utility
+import SidebarStorage from "./SidebarStorage";
 
 export function AppSidebar() {
   const { open } = useSidebar();
@@ -122,6 +123,9 @@ export function AppSidebar() {
 
             </SidebarMenu>
           </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup className="mt-10 md:mt-24 pl-4">
+          <SidebarStorage/>
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
