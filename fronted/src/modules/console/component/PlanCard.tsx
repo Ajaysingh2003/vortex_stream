@@ -4,7 +4,7 @@ import { FeatureItem, PlanConfig } from "@/modules/types";
 import React, { useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight, CircleChevronRightIcon } from "lucide-react";
-
+import { motion } from "motion/react";
 function PlanCard({
   plan,
   timeLine,
@@ -16,7 +16,7 @@ function PlanCard({
   popular?: boolean;
   feature?: FeatureItem[];
 }) {
-  const [hoverSeeAll,sethoverSeeAll]=useState(false)
+  const [hoverSeeAll, sethoverSeeAll] = useState(false);
   return (
     <div
       className={cn(
@@ -32,8 +32,8 @@ function PlanCard({
               <HugeiconsIcon
                 icon={e.icon}
                 size={14}
-                color="#000000"
-                strokeWidth={2}
+                className={cn("text-accent", popular && "text-white/80")}
+                strokeWidth={1.5}
               />
               <span
                 className={cn(
@@ -49,9 +49,9 @@ function PlanCard({
         <Button
           // key={i}
           onMouseEnter={() => {
-            sethoverSeeAll(true)
+            sethoverSeeAll(true);
           }}
-          onMouseLeave={()=>sethoverSeeAll(false)}
+          onMouseLeave={() => sethoverSeeAll(false)}
           variant={"outline"}
           className={`rounded-xl text-xs md:text-[13px] capitalizez md:text-md font-semibold  cursor-pointer border px-3 py-1.5  transition-all duration-200 ${
             !popular
@@ -62,8 +62,25 @@ function PlanCard({
                         `}
         >
           Explore all feature{" "}
-          <span className={cn("bg-gray-300 rounded-full size-5 text-center flex items-center justify-center ",popular && "bg-stone-700")}>
-           <div.span> <ArrowRight className={cn("size-4", popular && "text-stone-300")} /></div.span>
+          <span
+            className={cn(
+              "bg-gray-300 overflow-hidden rounded-full size-5 text-center flex items-center justify-center ",
+              popular && "bg-stone-700",
+            )}
+          >
+            <motion.div
+              initial={{ x: 10 }}
+              animate={{ x: hoverSeeAll ? [0,20,0] : 0 }}
+              transition={{
+                duration: 0.3,
+                ease: "easeInOut",
+              }}
+              className="w-full flex items-start justify-center gap-1"
+            >
+              <ArrowRight
+                className={cn("size-4", popular && "text-stone-300")}
+              />
+            </motion.div>
           </span>
         </Button>
       </div>
