@@ -8,12 +8,14 @@ import (
 	"time"
 
 	uploadHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/handler"
+	billingHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/handler"
 	videoHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/handler"
 	folderHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/handler"
 	videoRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/repository"
 	workspaceRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	folderRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/repository"
 	uploadRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/routes"
+	billingRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/routes"
 	videosRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/routes"
 	folderRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/routes"
 	serviceUpload "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/services"
@@ -77,6 +79,9 @@ func main() {
 		UserService: userService,
 	}
 
+	billingHandler:=&billingHandler.BillingHandler{}
+
+
 
 	r := gin.Default()
 	
@@ -93,6 +98,7 @@ func main() {
 	uploadRoutes.SetupRouter(r,uploadhandler,jwtToken)
 	videosRoutes.SetupRouter(r,videohandler,jwtToken)
 	folderRoutes.SetupRouter(r,folderhandler,jwtToken)
+	billingRoutes.SetupRouter(r,*billingHandler,jwtToken)
 
 
 	if err := r.Run(":3000"); err != nil {
