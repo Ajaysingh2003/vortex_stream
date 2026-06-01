@@ -67,7 +67,7 @@ function PlanCard({
               "bg-gray-300 overflow-hidden rounded-full size-5 text-center flex items-center justify-center ",
               popular && "bg-stone-700",
             )}
-          >
+          > 
             <motion.div
               initial={{ x: 10 }}
               animate={{ x: hoverSeeAll ? [0,20,0] : 0 }}
