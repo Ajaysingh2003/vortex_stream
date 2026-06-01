@@ -174,6 +174,7 @@ body{
   transition: all 0.3s ease;
   cursor: pointer;
 }
+
 .bg-primary-btn-import {
   /* background-image: linear-gradient(90.48deg, rgb(250, 195, 210) 0%, #0a485f 100%); */
   background-image: linear-gradient(110.48deg, rgba(205, 146, 245, 0.299) 0%, #350c5f 70%);
@@ -201,6 +202,24 @@ body{
   /* background-color: red; */
 }
 
+.bg-background-card-popular{
+  background: black;
+  position: relative;
+  overflow: hidden; 
+}
+.bg-background-card-popular::after {
+   position: absolute;
+  content: "";
+  border-radius: inherit;
+  z-index: 1; 
+  inset: 0px;
+  opacity: 1;
+  pointer-events: none;
+  transition-property: background-color, background, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 100ms;
+  /* background-image: linear-gradient(rgba(255, 255, 255, 0.184) 0%, rgba(255, 255, 255, 0.058) 100%); */
+  background-image: linear-gradient(#ffffff2b 0%, rgba(255, 255, 255, 0.132) 100%);
+}
 .bg-background-btn {
   /* background: rgb(94, 36, 180); */
   background: black;
@@ -221,6 +240,28 @@ body{
   /* background-image: linear-gradient(rgba(255, 255, 255, 0.184) 0%, rgba(255, 255, 255, 0.058) 100%); */
   background-image: linear-gradient(rgba(255, 255, 255, 0.309) 0%, rgba(255, 255, 255, 0.132) 100%);
 }
+
+.bg-main-btn{
+  background: rgba(77, 117, 250, 0.828);
+  position: relative;
+  color: white;
+  overflow: hidden; 
+}
+
+.bg-main-btn::after {
+  position: absolute;
+  content: "";
+  border-radius: inherit;
+  z-index: 1; 
+  inset: 0px;
+  opacity: 1;
+  pointer-events: none;
+  transition-property: background-color, background, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 100ms;
+  /* background-image: linear-gradient(rgba(255, 255, 255, 0.184) 0%, rgba(255, 255, 255, 0.058) 100%); */
+  background-image: linear-gradient(#ffffff25 0%, rgba(255, 255, 255, 0.228) 100%);
+}
+
 
 
 
@@ -252,4 +293,17 @@ body{
   height: 50%;
   bottom: 0;
   background: linear-gradient(transparent 20%, rgb(255, 255, 255) 98%);
+}
+
+
+.text-gradient {
+  background-image: linear-gradient(110.48deg, rgba(115, 103, 240, 0.963) 0%, #e1caec 100%);
+  /* background-image: linear-gradient(110.48deg, rgba(154, 146, 245, 0.963) 0%, #350c5f 100%); */
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  
+  /* Optional: Ensures the gradient looks smooth on low-res screens */
+  -webkit-print-color-adjust: exact;
 }
