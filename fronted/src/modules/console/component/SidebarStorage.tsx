@@ -29,6 +29,14 @@ function SidebarStorage() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="rounded-xl shadow-2xl w-[95vw] h-[90vh] max-w-[1200px] sm:max-w-[1400px]">
+                <DialogTitle>
+                  <div className=" flex items-center justify-center w-full">
+                          <h3 className="text-2xl md:max-w-164z md:text-4xl tracking-wider font-heading font-semibold text-center">
+                            The all-in-one platform <br /> for your Video,{" "}
+                            <span className=" italic text-gradient font-bold">at any scale</span>
+                          </h3>
+                        </div>
+                </DialogTitle>
                 <PricingSection />
               </DialogContent>
             </Dialog>
