@@ -5,6 +5,9 @@ import React, { useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight, CircleChevronRightIcon } from "lucide-react";
 import { motion } from "motion/react";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 function PlanCard({
   plan,
   timeLine,
@@ -17,6 +20,7 @@ function PlanCard({
   feature?: FeatureItem[];
 }) {
   const [hoverSeeAll, sethoverSeeAll] = useState(false);
+
   return (
     <div
       className={cn(
@@ -70,7 +74,7 @@ function PlanCard({
           > 
             <motion.div
               initial={{ x: 10 }}
-              animate={{ x: hoverSeeAll ? [0,20,0] : 0 }}
+              animate={{ x: hoverSeeAll ? [0, 20, 0] : 0 }}
               transition={{
                 duration: 0.3,
                 ease: "easeInOut",
@@ -99,6 +103,21 @@ function PlanCardHeader({
   timeLine: "monthly" | "quarterly" | "annually";
   popular: boolean;
 }) {
+  const trpc = useTRPC();
+  const mutate = useMutation(
+    trpc.billing.Createcheckout.mutationOptions({
+      onSuccess(data) {
+        if (data?.url) {
+          window.location.href = data.url;
+        }
+      },
+      onError(error) {
+        toast.error(
+          error.message || "Failed to initiate checkout. Please try again.",
+        );
+      },
+    }),
+  );
   return (
     <div
       className={cn(
@@ -142,7 +161,14 @@ function PlanCardHeader({
 
       <div className="">
         <Button
-          // onClick={() => setTimeLine(e.scope as planType)}
+          disabled={mutate.isPending}
+          onClick={() => {
+            if (plan.billing_cycles[timeLine].amount > 0) {
+              mutate.mutateAsync({
+              price_id: plan.billing_cycles[timeLine].price_id,
+            })
+            }
+          }}
           variant={"outline"}
           className={`rounded-md w-full capitalize font-semibold  cursor-pointer border px-3 py-1.5 md:py-2 text-xs md:text-sm transition-all duration-200 ${
             popular
@@ -152,7 +178,9 @@ function PlanCardHeader({
              relative
             `}
         >
-          upgrade to {plan.name}
+          {plan.billing_cycles[timeLine].amount > 0
+            ? "Upgrade Now"
+            : "Current Plan"}
         </Button>
       </div>
     </div>

@@ -14,6 +14,8 @@ import (
 	videoRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/repository"
 	workspaceRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	folderRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/repository"
+	subscriptionRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/repository"
+	userUsageRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/repository"
 	uploadRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/routes"
 	billingRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/routes"
 	videosRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/routes"
@@ -21,6 +23,7 @@ import (
 	serviceUpload "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/services"
 	videoService "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/services"
 	folderService "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/services"
+	billingService "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/services"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/handler"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	router "github.com/ajaysingh2003/vortex-stream/internal/modules/users/routes"
@@ -53,12 +56,14 @@ func main() {
 	videoRepo:=videoRepository.NewPostgresVideoRepository(database)
 	workspaceRepo:=workspaceRepository.NewPostgresWorkspaceRepository(database)
 	folderRepo:=folderRepository.NewFolderRepo(database)
-	
+	subscriptionRepo:=subscriptionRepository.NewPostgresSubscriptionRepository(database)
+	userUsageRepo:=userUsageRepository.NewPostgresUsageRepository(database)
 	userService:=services.NewUserService(userRepo,jwtToken,workspaceRepo,database,accountRepo)
 	folderService:=folderService.NewFolderService(folderRepo, userRepo, workspaceRepo, videoRepo)
 	workspaceService:=services.NewWorkspaceService(userRepo,workspaceRepo);
 	uploadService:=serviceUpload.NewUploadService(userRepo)
 	videoService:=videoService.NewVideoService(userRepo,videoRepo,workspaceRepo,folderRepo)
+	billingService:=billingService.NewBillingService(userRepo,videoRepo,workspaceRepo,folderRepo,subscriptionRepo,userUsageRepo,database)
 	userhandler:=&handler.UserHandler{
 		UserService :userService,
 		WorkspacesService: workspaceService,
@@ -79,7 +84,10 @@ func main() {
 		UserService: userService,
 	}
 
-	billingHandler:=&billingHandler.BillingHandler{}
+	billingHandler:=&billingHandler.BillingHandler{
+		// BillingService: videoService,
+		PaymentService: billingService,
+	}
 
 
 

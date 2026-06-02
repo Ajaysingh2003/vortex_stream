@@ -51,5 +51,55 @@ export const billingRouter = createTRPCRouter({
     });
       }
     }),
+    
+  Createcheckout: baseProcedure.input(z.object({
+    price_id: z.string(),
+  }))
+    .mutation(async ({ctx ,input}) => {
+      try {
+
+        const cookieStore = await cookies();
+
+        const access_token = cookieStore.get("access_token")?.value;
+        
+
+        const res = await axios.post(
+          `${process.env.BASE_API}/v1/payments/checkout`,
+          {
+            price_id: input.price_id,
+          },
+          {
+              withCredentials: true,
+              headers: {
+                Authorization: `Bearer ${access_token}`,
+              },
+          }
+        );
+
+        return res.data
+
+      } catch (error:any) {
+        console.log(error?.response?.data, "error occurred");
+
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      let code: TRPCError["code"] = "BAD_REQUEST";
+
+      if (status === 401) code = "UNAUTHORIZED";
+      if (status === 403) code = "FORBIDDEN";
+      if (status === 404) code = "NOT_FOUND";
+
+      throw new TRPCError({
+        code: code,
+        message: error.response?.data?.message || "Operation failed",
+      });
+    }
+
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Something went wrong",
+    });
+      }
+    }),
 
 });
