@@ -3,6 +3,7 @@ package routes
 import (
 	"time"
 	// "github.com/ajaysingh2003/vortex-stream/internal/api/middleware"
+	"github.com/ajaysingh2003/vortex-stream/internal/api/middleware"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/billing/handler"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/gin-contrib/cors"
@@ -24,12 +25,11 @@ func SetupRouter(r *gin.Engine, billingHandler handler.BillingHandler ,jwtMaker 
 	// user api
 	api := r.Group("/api/v1")
 	billing:=api.Group("/billing")
+	payment:=api.Group("/payments")
 	 {
-		
 		billing.GET("/plans/config",billingHandler.BillingPlan)
-		// video.GET("/list",middleware.AuthMiddleware(jwtMaker),videohandler.ListVideo)
-		// video.POST("/process/:videoId",middleware.AuthMiddleware(jwtMaker),videohandler.Process)
-		// video.PATCH("/:id/update/name", middleware.AuthMiddleware(jwtMaker),videohandler.UpdateVideo)
+		payment.POST("/checkout",middleware.AuthMiddleware(jwtMaker),billingHandler.CreateCheckoutSession)
+		payment.POST("/webhook",billingHandler.ListenWebhook)
 	 }
 	 
 	return r

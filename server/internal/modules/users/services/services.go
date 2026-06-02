@@ -37,7 +37,7 @@ type userServiceRepo struct {
 	workspaceRepo workspaceRepo.WorkshopRepository 
 	db *gorm.DB
 	accountRepo repository.AccountRepository
-
+	
 }
 
 func NewUserService(userRepo repository.UserRepository,jwtToken *utils.JwtMaker,workspaceRepo workspaceRepo.WorkshopRepository,db *gorm.DB,accountRepo repository.AccountRepository)UserServiceInterface {

@@ -45,6 +45,7 @@ type Folder struct {
 	Videos    []Video   `gorm:"foreignKey:FolderID;constraint:onDelete:CASCADE;" json:"videos,omitempty"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+
 }
 
 const (
@@ -62,13 +63,34 @@ const (
 	Business PlanTier = "BUSINESS"
 )
 
+
+type User struct {
+	// Changed ID back to uuid.UUID for consistency with Video and VideoResolution
+	ID        uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
+	Email     string         `gorm:"uniqueIndex;not null" json:"email"`
+	Password  string         `gorm:"not null" json:"-"`
+	Name      *string        `gorm:"type:varchar(255)" json:"name"`
+	Avatar    *string        `gorm:"type:varchar(255)" json:"avatar"`
+	Role      UserRole       `gorm:"type:varchar(20);default:'User'" json:"role"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	IsActive  bool           `gorm:"default:true" json:"isActive"`
+	// Videos []Video `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
+	Workspaces []Workspaces `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"workspaces,omitempty"`
+	Accounts   []Account    `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"accounts,omitempty"`
+	Subscriptions *Subscription `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"subscriptions,omitempty"`
+	UsageCounters UserUsageCounters `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"usageCounters,omitempty"`
+}
+
+
 type Subscription struct {
 	ID                   uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	UserID               uuid.UUID `gorm:"type:uuid;index" json:"userId"`
 	StripeSubscriptionID string    `gorm:"type:varchar(255);not null" json:"stripe_subscription_id"`
 	StripePriceID        string    `gorm:"type:varchar(255);not null" json:"stripe_price_id"`
 	Plan                 PlanTier  `gorm:"type:varchar(50);not null;default:'free'" json:"plan"`
-	Status               string    `gorm:"type:varchar(50);not null;default:'active'" josn:"status"`
+	Status               string `gorm:"type:varchar(50);not null;default:'active'" json:"status"`
 	PeriodStart          time.Time `gorm:"type:timestamptz;not null" json:"period_start"`
 	PeriodEnd            time.Time `gorm:"type:timestamptz;not null" json:"period_end"`
 	CreatedAt            time.Time `json:"createdAt"`
@@ -76,7 +98,8 @@ type Subscription struct {
 }
 
 type UserUsageCounters struct {
-	UserID                  uuid.UUID      `gorm:"type:uuid;primaryKey" json:"user_id"`
+	ID                      uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
+	UserID                  uuid.UUID      `gorm:"type:uuid;uniqueIndex;not null" json:"user_id"`
 	StorageBytesUsed        int64          `gorm:"type:bigint;default:0" json:"storage_bytes_used"`
 	PlaybackMinutesUsed     int            `gorm:"type:integer;default:0" json:"playback_minutes_used"`
 	SubtitleGenerationsUsed int            `gorm:"type:integer;default:0" json:"subtitle_generations_used"`
@@ -84,6 +107,8 @@ type UserUsageCounters struct {
 	UpdatedAt               time.Time      `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"updated_at"`
 	DeletedAt               gorm.DeletedAt `gorm:"index" json:"-"`
 }
+
+
 type Workspaces struct {
 	ID   uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	Name string    `gorm:"type:varchar(255);not null" json:"name"`
@@ -115,24 +140,6 @@ type PlayerSettings struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-// UserRole and VideoStatus remain exactly as you wrote them - they are perfect.
-
-type User struct {
-	// Changed ID back to uuid.UUID for consistency with Video and VideoResolution
-	ID        uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
-	Email     string         `gorm:"uniqueIndex;not null" json:"email"`
-	Password  string         `gorm:"not null" json:"-"`
-	Name      *string        `gorm:"type:varchar(255)" json:"name"`
-	Avatar    *string        `gorm:"type:varchar(255)" json:"avatar"`
-	Role      UserRole       `gorm:"type:varchar(20);default:'User'" json:"role"`
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	IsActive  bool           `gorm:"default:true" json:"isActive"`
-	// Videos []Video `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
-	Workspaces []Workspaces `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"workspaces,omitempty"`
-	Accounts   []Account    `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"accounts,omitempty"`
-}
 
 type Account struct {
 	ID         uuid.UUID     `gorm:"type:uuid;primaryKey" json:"id"`
@@ -168,6 +175,8 @@ type Video struct {
 	UpdatedAt      time.Time         `json:"updatedAt"`
 	DeletedAt      gorm.DeletedAt    `gorm:"index" json:"-"`
 }
+
+
 
 type VideoResolution struct {
 	ID      uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`

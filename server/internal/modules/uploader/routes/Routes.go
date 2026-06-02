@@ -25,7 +25,6 @@ func SetupRouter(r *gin.Engine,uploadHandler *handler.UploadHandler,jwtMaker *ut
 	// user api
 	api := r.Group("/api/v1")
 	upload:=api.Group("/upload")
-	// video:=api.Group("/video")
 	 {
 
 		 upload.POST("/presigned-url",middleware.AuthMiddleware(jwtMaker),uploadHandler.GetSignedUrl)
