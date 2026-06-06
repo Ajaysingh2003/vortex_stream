@@ -2,16 +2,18 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
-	workspaceRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	folderRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/repository"
 	userRpo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
+	workspaceRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/repository"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/async/worker"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type VideoInterface interface {
@@ -19,6 +21,7 @@ type VideoInterface interface {
 	ListVideo(ctx context.Context,userID uuid.UUID) ([]domain.Video,error)
 	UpdateVideo(ctx context.Context,userID uuid.UUID,video domain.Video) error
 	ProcessVideo(ctx context.Context ,videoID uuid.UUID,userID uuid.UUID) (*domain.Video,error)
+	StreamVideo(ctx context.Context,videoID uuid.UUID) (*domain.Video,error)
 }
 
 type VideoServiceRepo struct {
@@ -160,4 +163,29 @@ func (r *VideoServiceRepo) ProcessVideo(ctx context.Context,videoID uuid.UUID , 
 	
 
 	return data ,nil
+}
+
+func(r *VideoServiceRepo) StreamVideo(ctx context.Context,videoID uuid.UUID) (*domain.Video,error){
+
+	videoData, err := r.videoRepo.GetByID(ctx , videoID)
+
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, &utils.ApiError{
+				Code:    404,
+				Message: "Video not found",
+			}
+		}
+		return nil, err
+	}
+
+	if videoData == nil {
+		return nil, &utils.ApiError{
+			Code:    404,
+			Message: "Video not found",
+		}
+	}
+
+	return videoData, nil
 }

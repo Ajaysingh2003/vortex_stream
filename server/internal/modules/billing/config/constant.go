@@ -12,19 +12,21 @@ const (
 type PlanLimits struct {
 	Name                string
 	MaxStorageBytes     int64
-    MaxBandwidthBytes   int64
+	MaxBandwidthBytes   int64
 	MaxPlaybackMinutes  int
 	MaxWorkspaces       int
 	AllowCustomBranding bool
 	AllowSubtitles      bool
 	Analytics           bool
 	HLSQualities        []string
+	MaxChannel          int
+	VideoChapter        bool
+	LeadCapture         bool
 }
 
-// 🟩 Add a flexible price tracking schema to support your multiple duration intervals
 type PriceDetails struct {
 	PriceID string `json:"price_id"`
-	Amount  int    `json:"amount"` // In cents (e.g., 2999 for $29.99)
+	Amount  int    `json:"amount"`
 }
 
 type Plan struct {
@@ -40,20 +42,23 @@ var Plans = map[string]Plan{
 		Name:        "Free",
 		Description: "Test our video infrastructure with 1,000 free minutes.",
 		BillingCycles: map[string]PriceDetails{
-			"monthly": {PriceID: "", Amount: 0},
-			"quarterly": {PriceID: "", Amount: 0},
-			"annually":  {PriceID: "", Amount: 0},
+			"monthly":   {PriceID: "free_tier_forever", Amount: 0},
+			"quarterly": {PriceID: "free_tier_forever", Amount: 0},
+			"annually":  {PriceID: "free_tier_forever", Amount: 0},
 		},
 		Limits: PlanLimits{
 			Name:                "Free Sandbox",
 			MaxStorageBytes:     5 * 1024 * 1024 * 1024, // 5 GB
 			MaxPlaybackMinutes:  1000,
-            MaxBandwidthBytes:   50 * 1024 * 1024 * 1024, //50 GB bandwidth
+			MaxBandwidthBytes:   50 * 1024 * 1024 * 1024, // 50 GB
 			MaxWorkspaces:       1,
 			Analytics:           false,
 			HLSQualities:        []string{"360p", "720p"},
 			AllowSubtitles:      false,
 			AllowCustomBranding: false,
+			MaxChannel:          1,
+			VideoChapter:        false,
+			LeadCapture:         false,
 		},
 	},
 	TierStarter: {
@@ -66,16 +71,19 @@ var Plans = map[string]Plan{
 		},
 		Limits: PlanLimits{
 			Name:                "Starter Growth",
-			MaxStorageBytes:     5 * 1024 * 1024 * 1024, 
+			MaxStorageBytes:     5 * 1024 * 1024 * 1024,
 			MaxPlaybackMinutes:  10000,
-            MaxBandwidthBytes:   1000 * 1024 * 1024 * 1024,  //300 gb
+			MaxBandwidthBytes:   1000 * 1024 * 1024 * 1024,
 			MaxWorkspaces:       3,
 			Analytics:           true,
 			HLSQualities:        []string{"360p", "480p", "720p"},
 			AllowSubtitles:      true,
 			AllowCustomBranding: false,
+			MaxChannel:          3,
+			VideoChapter:        true,
+			LeadCapture:         true,
 		},
-	},
+	}, // 🟩 FIXED: Removed the extra structural closing braces that broke your code here
 	TierPro: {
 		Name:        "Pro",
 		Description: "Unlocks custom branding and 22,000 monthly playback minutes.",
@@ -86,15 +94,17 @@ var Plans = map[string]Plan{
 		},
 		Limits: PlanLimits{
 			Name:                "Professional Pro",
-			MaxStorageBytes:     60 * 1024 * 1024 * 1024, // 600 GB from your UI layout
+			MaxStorageBytes:     600 * 1024 * 1024 * 1024,
 			MaxPlaybackMinutes:  22000,
-            MaxBandwidthBytes:   3000 * 1024 * 1024 * 1024, // 1tb
-            
+			MaxBandwidthBytes:   1000 * 1024 * 1024 * 1024,
 			MaxWorkspaces:       10,
 			Analytics:           true,
 			HLSQualities:        []string{"360p", "480p", "720p", "1080p"},
 			AllowSubtitles:      true,
 			AllowCustomBranding: true,
+			MaxChannel:          10,
+			VideoChapter:        true,
+			LeadCapture:         true,
 		},
 	},
 	TierBusiness: {
@@ -107,18 +117,20 @@ var Plans = map[string]Plan{
 		},
 		Limits: PlanLimits{
 			Name:                "Enterprise Scale",
-			MaxStorageBytes:     2 * 1024 * 1024 * 1024 * 1024, // 2 TB 
-			MaxPlaybackMinutes:  50000,                         // 50,000 mins
-            MaxBandwidthBytes:   3000 * 1024 * 1024 * 1024, //1 tb
+			MaxStorageBytes:     2 * 1024 * 1024 * 1024 * 1024, // 2 TB
+			MaxPlaybackMinutes:  50000,
+			MaxBandwidthBytes:   3000 * 1024 * 1024 * 1024, // 3 TB
 			MaxWorkspaces:       50,
 			Analytics:           true,
 			HLSQualities:        []string{"360p", "480p", "720p", "1080p"},
 			AllowSubtitles:      true,
 			AllowCustomBranding: true,
+			MaxChannel:          30,
+			VideoChapter:        true,
+			LeadCapture:         true,
 		},
 	},
 }
-
 
 func GetPlan(key string) Plan {
 	if plan, ok := Plans[key]; ok {
@@ -131,7 +143,7 @@ func GetPlanFromPriceID(priceID string) string {
 	if priceID == "" {
 		return TierFree
 	}
-	
+
 	// Scan through all tier containers
 	for tierKey, plan := range Plans {
 		for _, cycleDetails := range plan.BillingCycles {
@@ -140,6 +152,6 @@ func GetPlanFromPriceID(priceID string) string {
 			}
 		}
 	}
-	
+
 	return TierFree
 }

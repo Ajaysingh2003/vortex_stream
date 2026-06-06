@@ -1,0 +1,97 @@
+	// for handling auto renewal we might use this and need to fix some issues
+
+
+
+
+
+
+    case "invoice.payment_succeeded":
+		var invoice stripe.Invoice
+		if err := json.Unmarshal(event.Data.Raw, &invoice); err != nil {
+			return fmt.Errorf("failed to parse invoice payload: %w", err)
+		}
+
+		userIdRaw := invoice.Metadata["user_id"]
+		if userIdRaw == "" && invoice.Lines != nil && len(invoice.Lines.Data) > 0 {
+			if invoice.Lines.Data[0].Metadata != nil {
+				userIdRaw = invoice.Lines.Data[0].Metadata["user_id"]
+			}
+		}
+
+		// if userIdRaw == "" {
+		// 	log.Printf("[Billing Warning] Invoice %s missing user_id metadata pointer. Skipping renewal.", invoice.ID)
+		// 	return nil
+		// }
+
+				userID, err := uuid.Parse(userIdRaw)
+		if err != nil {
+			return fmt.Errorf("failed to parse user ID: %w", err)
+		}
+
+
+		
+
+		// fmt.Print(userIdRaw)
+
+		fmt.Print(userIdRaw, "lollol")
+		if invoice.Parent.SubscriptionDetails.Subscription == nil {
+			log.Printf("[Billing Info] Invoice %s has no linked subscription. Skipping.", invoice.ID)
+			return nil
+		}
+		subscriptionID := invoice.Parent.SubscriptionDetails.Subscription.ID
+		// Extract timestamps accurately out of the invoice payload lines
+		var periodStart, periodEnd time.Time
+		if invoice.Lines != nil && len(invoice.Lines.Data) > 0 {
+			periodStart = time.Unix(invoice.Lines.Data[0].Period.Start, 0)
+			periodEnd = time.Unix(invoice.Lines.Data[0].Period.End, 0)
+		} else {
+			periodStart = time.Now()
+			periodEnd = periodStart.AddDate(0, 1, 0)
+		}
+
+		err = r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+
+			subscriptionData, err := r.subscriptionRepo.GetByUserID(ctx, userID)
+			if err != nil {
+
+				
+				return fmt.Errorf("failed to look up subscription for renewal: %w", err)
+				// return fmt.Errorf("failed to look up active subscription mapping: %w", err)
+			}
+
+			// 🟩 FIXED: Carried forward existing details so UpsertAll doesn't nullify your strings!
+			err = r.subscriptionRepo.UpsertTx(ctx, tx, &domain.Subscription{
+				ID:                   subscriptionData.ID,
+				UserID:               subscriptionData.UserID,
+				StripeSubscriptionID: subscriptionData.StripeSubscriptionID,
+				StripePriceID:        subscriptionData.StripePriceID,
+				Plan:                 subscriptionData.Plan,
+				Status:               "cat",
+				PeriodStart:          periodStart,
+				PeriodEnd:            periodEnd,
+			})
+			if err != nil {
+				return err
+			}
+
+			// Reset usage metrics back to 0 for the fresh month
+			err = r.userUsageRepo.UpsertTx(ctx, tx, &domain.UserUsageCounters{
+				ID:                      uuid.New(),
+				UserID:                  subscriptionData.UserID,
+				StorageBytesUsed:        0,
+				PlaybackMinutesUsed:     0,
+				SubtitleGenerationsUsed: 0,
+				ResetAt:                 periodEnd, // Clear and set next month boundary
+			})
+			if err != nil {
+				return err
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to log subscription renewal milestones: %w", err)
+		}
+
+		log.Printf("[Billing Success] Subscription %s renewed successfully until %v.", subscriptionID, periodEnd)
