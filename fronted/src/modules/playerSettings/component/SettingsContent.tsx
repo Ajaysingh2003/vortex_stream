@@ -8,6 +8,9 @@ import Advance from './Advance'
 
 function SettingsContent({activeOption}:{activeOption:string | undefined}) {
 
+    
+    
+
   switch (activeOption){
     case 'general':
         return <GeneralSetting/>

@@ -86,7 +86,7 @@ type User struct {
 
 type Subscription struct {
 	ID                   uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
-	UserID               uuid.UUID `gorm:"type:uuid;index" json:"userId"`
+	UserID               uuid.UUID `gorm:"type:uuid;uniqueIndex" json:"userId"`
 	StripeSubscriptionID string    `gorm:"type:varchar(255);not null" json:"stripe_subscription_id"`
 	StripePriceID        string    `gorm:"type:varchar(255);not null" json:"stripe_price_id"`
 	Plan                 PlanTier  `gorm:"type:varchar(50);not null;default:'free'" json:"plan"`
@@ -96,7 +96,7 @@ type Subscription struct {
 	CreatedAt            time.Time `json:"createdAt"`
 	UpdatedAt            time.Time `json:"updatedAt"`
 }
-
+  
 type UserUsageCounters struct {
 	ID                      uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
 	UserID                  uuid.UUID      `gorm:"type:uuid;uniqueIndex;not null" json:"user_id"`
@@ -107,7 +107,6 @@ type UserUsageCounters struct {
 	UpdatedAt               time.Time      `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"updated_at"`
 	DeletedAt               gorm.DeletedAt `gorm:"index" json:"-"`
 }
-
 
 type Workspaces struct {
 	ID   uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
@@ -135,7 +134,7 @@ type PlayerSettings struct {
 	BrandingSettings datatypes.JSON `json:"branding_settings" gorm:"type:jsonb;default:'{}'"`
 	SecuritySettings datatypes.JSON `json:"security_settings" gorm:"type:jsonb;default:'{}'"`
 	AdvancedSettings datatypes.JSON `json:"advanced_settings" gorm:"type:jsonb;default:'{}'"`
-
+	
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
