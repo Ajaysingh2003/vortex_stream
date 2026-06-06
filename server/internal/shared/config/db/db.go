@@ -66,12 +66,14 @@ func InitDb() *gorm.DB {
 		&domain.PlayerSettings{},
 		&domain.VideoResolution{},
 		&domain.VideoDomain{},
+		&domain.Subscription{},
+		&domain.UserUsageCounters{},	
 	)
 		  
 	if err != nil {
 		log.Fatal("❌ Migration  failed: for db ", err)
 	}
-
+	
 	DB = db
 	fmt.Println("✅ Database connection established successfully!")
 	

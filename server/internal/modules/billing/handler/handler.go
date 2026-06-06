@@ -25,10 +25,10 @@ type BillingHandler struct {
 type PublicPlanProjection struct {
 	Name          string      `json:"name"`
 	Description   string      `json:"description"`
-	BillingCycles interface{} `json:"billing_cycles"` 
+	BillingCycles interface{} `json:"billing_cycles"`
 }
 
-func (*BillingHandler) BillingPlan (c *gin.Context) {
+func (*BillingHandler) BillingPlan(c *gin.Context) {
 	publicPlans := make(map[string]PublicPlanProjection)
 
 	for tierKey, internalPlan := range config.Plans {
@@ -39,19 +39,17 @@ func (*BillingHandler) BillingPlan (c *gin.Context) {
 		}
 	}
 
-	
-	c.JSON(http.StatusOK, gin.H{"success":true,"data":publicPlans})
-} 
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": publicPlans})
+}
 
 type CheckoutRequest struct {
 	PriceID string `json:"price_id" binding:"required"`
 }
 
+func (h *BillingHandler) CreateCheckoutSession(c *gin.Context) {
+	userIDRaw, exists := c.Get("user_id")
 
-func (h *BillingHandler) CreateCheckoutSession (c *gin.Context) {
-		userIDRaw,exists:=c.Get("user_id")
-
-		fmt.Print(userIDRaw,"userID test")
+	fmt.Print(userIDRaw, "userID test")
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 
 	var req CheckoutRequest
@@ -60,19 +58,18 @@ func (h *BillingHandler) CreateCheckoutSession (c *gin.Context) {
 		return
 	}
 
-
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: user_id not found in context"})
 		return
 	}
-	currentUserID ,ok := userIDRaw.(uuid.UUID)
+	currentUserID, ok := userIDRaw.(uuid.UUID)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: invalid user_id format"})
 		return
 	}
 
 	params := &stripe.CheckoutSessionParams{
-		Mode:       stripe.String(string(stripe.CheckoutSessionModeSubscription)), // "subscription" handles monthly/yearly recurring loops
+		Mode:               stripe.String(string(stripe.CheckoutSessionModeSubscription)), // "subscription" handles monthly/yearly recurring loops
 		PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
@@ -82,6 +79,11 @@ func (h *BillingHandler) CreateCheckoutSession (c *gin.Context) {
 		},
 		SuccessURL: stripe.String("http://localhost:4000/console?payment=success"),
 		CancelURL:  stripe.String("http://localhost:4000/pricing?payment=cancelled"),
+		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
+        Metadata: map[string]string{
+            "user_id": currentUserID.String(), 
+        },
+    },
 	}
 
 	params.AddMetadata("user_id", currentUserID.String())
@@ -98,11 +100,11 @@ func (h *BillingHandler) CreateCheckoutSession (c *gin.Context) {
 }
 
 type ProcessedWebhookEvent struct {
-	ID        string    `gorm:"primaryKey"`
+	ID          string    `gorm:"primaryKey"`
 	ProcessedAt time.Time `gorm:"autoCreateTime"`
 }
 
-func (h *BillingHandler) ListenWebhook (c *gin.Context) {
+func (h *BillingHandler) ListenWebhook(c *gin.Context) {
 	// 1. Guard against massive payloads (DDoS protection)
 	fmt.Print("listening webhook")
 	const MaxBodyBytes = int64(65536)
@@ -114,7 +116,7 @@ func (h *BillingHandler) ListenWebhook (c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read request body"})
 		return
 	}
-	
+
 	// 2. Cryptographically verify the signature
 	endpointSecret := os.Getenv("STRIPE_WEBHOOK_SECRET")
 	signatureHeader := c.GetHeader("Stripe-Signature")
@@ -127,7 +129,7 @@ func (h *BillingHandler) ListenWebhook (c *gin.Context) {
 		return
 	}
 
-	err=h.PaymentService.ListenWebhook(c.Request.Context(), event)
+	err = h.PaymentService.ListenWebhook(c.Request.Context(), event)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrMsg(err)})
@@ -143,7 +145,6 @@ func (h *BillingHandler) ListenWebhook (c *gin.Context) {
 	// }
 
 	// 4. Core Switch Matrix to handle the subscription lifecycle
-	
 
 	// 5. Always reply with a clean 200 OK to Stripe
 	c.Status(http.StatusOK)
