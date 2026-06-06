@@ -47,7 +47,6 @@ type FolderRepository interface {
 	// ExistsByNameAndParent(ctx context.Context, name string, workspaceID uuid.UUID, parentID *uuid.UUID) (bool, error)
 
 	UpdateFolder (ctx context.Context,folderID uuid.UUID ,workspaceID uuid.UUID,folder domain.Folder) error
-	
 }
 
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/services"
@@ -14,120 +15,112 @@ import (
 
 type VideoHandler struct {
 	VideoService services.VideoInterface
-	UserRepo      repository.UserRepository
+	UserRepo     repository.UserRepository
 }
 
-func (h *VideoHandler) CreateVideo (c *gin.Context) {
+func (h *VideoHandler) CreateVideo(c *gin.Context) {
 	var req struct {
-		Title    string `json:"title" binding:"required"`
-		VideoKey string `json:"videoKey" binding:"required"`
-		Status     domain.VideoStatus `json:"status" binding:"required"`
-		WorkspaceId     string `json:"workspaceId" binding:"required"`
-		Size   int64    `json:"size" binding:"required"`
-		Duration int     `json:"duration" binding:required"`
-		
+		Title       string             `json:"title" binding:"required"`
+		VideoKey    string             `json:"videoKey" binding:"required"`
+		Status      domain.VideoStatus `json:"status" binding:"required"`
+		WorkspaceId string             `json:"workspaceId" binding:"required"`
+		Size        int64              `json:"size" binding:"required"`
+		Duration    int                `json:"duration" binding:required"`
 	}
-	
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(),"success":false})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false})
 		return
 	}
 
-	reqData,_:=json.MarshalIndent(req, " ","");
-	
+	reqData, _ := json.MarshalIndent(req, " ", "")
+
 	// fmt.Print(String(reqData),"test from aj");
-	fmt.Print(string(reqData),"test data from ajy")
+	fmt.Print(string(reqData), "test data from ajy")
 
 	workspaceId, err := uuid.Parse(req.WorkspaceId)
-		if err!=nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration","success":false})
-			return
-	}
-
-	payload:=&domain.Video{
-		ID: uuid.New(),
-		Size: req.Size,
-		WorkspaceID: workspaceId ,
-		Title: req.Title,
-		VideoKey: req.VideoKey,
-		Duration: req.Duration,
-	}
-
-
-	datas,err:=json.Marshal(payload)
-
-	if err!=nil{
-		c.JSON(http.StatusInternalServerError,gin.H{"message":utils.ErrMsg(err),"success":false})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration", "success": false})
 		return
 	}
 
-	fmt.Print(datas,"from datas","going and gone")
-	data,err:=h.VideoService.CreateVideo(c.Request.Context(),payload)
+	payload := &domain.Video{
+		ID:          uuid.New(),
+		Size:        req.Size,
+		WorkspaceID: workspaceId,
+		Title:       req.Title,
+		VideoKey:    req.VideoKey,
+		Duration:    req.Duration,
+	}
 
-		if err!=nil{
-			c.JSON(http.StatusInternalServerError,gin.H{"message":utils.ErrMsg(err),"success":false})
-			return
-		}
+	datas, err := json.Marshal(payload)
 
-	c.JSON(http.StatusAccepted,gin.H{"message":"Video Updated SuccessFuly","data":data})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": utils.ErrMsg(err), "success": false})
+		return
+	}
+
+	fmt.Print(datas, "from datas", "going and gone")
+	data, err := h.VideoService.CreateVideo(c.Request.Context(), payload)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": utils.ErrMsg(err), "success": false})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"message": "Video Updated SuccessFuly", "data": data})
 }
 
-func (h *VideoHandler) ListVideo (c *gin.Context) {
+func (h *VideoHandler) ListVideo(c *gin.Context) {
 
-	userId,exists:=c.Get("user_id")
+	userId, exists := c.Get("user_id")
 
-	if !exists{
-		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":true})
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": true})
 		return
 	}
-	fmt.Print(userId,"lollol")
+	fmt.Print(userId, "lollol")
 
 	id, ok := userId.(uuid.UUID)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration","success":false})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration", "success": false})
 
 	}
 
-	user,err:=h.UserRepo.GetByID(c.Request.Context(),id)
+	user, err := h.UserRepo.GetByID(c.Request.Context(), id)
 
-	if (err!=nil || user==nil || user.IsActive==false){
+	if err != nil || user == nil || user.IsActive == false {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "You don't have access"})
 		return
 	}
-	
 
+	data, err := h.VideoService.ListVideo(c.Request.Context(), id)
 
-
-
-	
-	data,err:=h.VideoService.ListVideo(c.Request.Context(), id)
-	
-	if  err!=nil{
+	if err != nil {
 		if appErr, ok := err.(*utils.ApiError); ok {
-			c.JSON(appErr.Code, gin.H{ "success":false, "message": appErr.Message})
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong","success":false})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success":true,"data":data})
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
 }
 
-func (h *VideoHandler) Process (c *gin.Context) {
-	videoIDRaw:=c.Param("videoId")
-	userId,exists:=c.Get("user_id")
+func (h *VideoHandler) Process(c *gin.Context) {
+	videoIDRaw := c.Param("videoId")
+	userId, exists := c.Get("user_id")
 
-	if !exists{
-		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":false})
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
 		return
 	}
-	fmt.Print(userId,"lollol")
+	fmt.Print(userId, "lollol")
 
 	id, ok := userId.(uuid.UUID)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration","success":false})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration", "success": false})
 
 	}
 	videoID, err := uuid.Parse(videoIDRaw)
@@ -136,40 +129,39 @@ func (h *VideoHandler) Process (c *gin.Context) {
 			"message": "invalid uuid format",
 			"success": false,
 		})
-    return 
-}
+		return
+	}
 
-	user,err:=h.UserRepo.GetByID(c.Request.Context(),id)
+	user, err := h.UserRepo.GetByID(c.Request.Context(), id)
 
-	if (err!=nil || user==nil ||user.IsActive==false){
+	if err != nil || user == nil || user.IsActive == false {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "You don't have access"})
 		return
 	}
-	
 
-	data,err:=h.VideoService.ProcessVideo(c.Request.Context(), videoID,id)
+	data, err := h.VideoService.ProcessVideo(c.Request.Context(), videoID, id)
 
 	// if data ==nil {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"success":false,"message":utils.ErrMsg("video")})
 	// }
-	if  err!=nil{
+	if err != nil {
 		if appErr, ok := err.(*utils.ApiError); ok {
-			c.JSON(appErr.Code, gin.H{ "success":false, "message": appErr.Message})
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"message": utils.ErrMsg(err),"success":false})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": utils.ErrMsg(err), "success": false})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success":true,"data":data})
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
 }
 
-func (h *VideoHandler) UpdateVideo (c *gin.Context) {
+func (h *VideoHandler) UpdateVideo(c *gin.Context) {
 
 	var req struct {
-		Title    string `json:"title" binding:"required"`
-		WorkspaceId     uuid.UUID `json:"workspaceId" binding:"required"`
-		FolderID  *uuid.UUID `gorm:"type:uuid;index" json:"folderId"`
+		Title       string     `json:"title" binding:"required"`
+		WorkspaceId uuid.UUID  `json:"workspaceId" binding:"required"`
+		FolderID    *uuid.UUID `gorm:"type:uuid;index" json:"folderId"`
 	}
 
 	// fmt.Print(req,"lol")
@@ -178,49 +170,72 @@ func (h *VideoHandler) UpdateVideo (c *gin.Context) {
 		return
 	}
 
-	id,err:=uuid.Parse(c.Param("id"))
-
-	
-
+	id, err := uuid.Parse(c.Param("id"))
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Folder ID","success":false})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Folder ID", "success": false})
 		return
 	}
 
-	userIDRaw,exists:=c.Get("user_id")
+	userIDRaw, exists := c.Get("user_id")
 
-	if !exists{
-		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":true})
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": true})
 		return
 	}
 
-	userId,ok:=userIDRaw.(uuid.UUID)
+	userId, ok := userIDRaw.(uuid.UUID)
 
 	if !ok {
-		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized","success":false})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
 		return
 	}
 
-
-
-	err=h.VideoService.UpdateVideo(c.Request.Context(),userId,domain.Video{
-		ID: id,
-		Title: req.Title,
-		FolderID: req.FolderID,
+	err = h.VideoService.UpdateVideo(c.Request.Context(), userId, domain.Video{
+		ID:          id,
+		Title:       req.Title,
+		FolderID:    req.FolderID,
 		WorkspaceID: req.WorkspaceId,
 	})
 
-	if  err!=nil{
-		fmt.Print(err,"wqe")
+	if err != nil {
+		fmt.Print(err, "wqe")
 		if appErr, ok := err.(*utils.ApiError); ok {
-			c.JSON(appErr.Code, gin.H{ "success":false, "message": utils.ErrMsg(err)})
+			c.JSON(appErr.Code, gin.H{"success": false, "message": utils.ErrMsg(err)})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong","success":false})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success":true,"message":"Video Updated Successfully."})
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Video Updated Successfully."})
 }
 
+func (h *VideoHandler) GetByVideoID(c *gin.Context) {
+	videoIDRaw := c.Param("videoId")
+
+	videoID, err := uuid.Parse(videoIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid uuid format",
+			"success": false,
+		})
+		return
+
+	}
+
+	videoData, err := h.VideoService.StreamVideo(c.Request.Context(), videoID)
+
+		if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+
+			fmt.Print(appErr.Code,"jerry")
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": videoData})
+}

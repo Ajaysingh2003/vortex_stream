@@ -7,7 +7,7 @@ import Preview from '../component/Preview'
 import { Settings } from '../component/Settings'
 function PlayerSettingsView() {
   return (
-    <div className=' w-full h-full px-4 md:px-6 p-3 md:px-10 md:py-4'>
+    <div className=' w-full h-full px-4  p-3 md:px-8  md:py-4'>
         <div className='flex items-center justify-between  my-2 md:my-4'>
             <div className='right '>
                 <h3 className='font-heading leading-8 font-bold tracking-wider text-lg md:text-xl lg:2xl capitalize'>Player Settings</h3>
@@ -21,7 +21,7 @@ function PlayerSettingsView() {
             </div>
         </div>
         <div className=' grid grid-cols-1 md:grid-cols-12 gap-3  h-full w-full'>
-            <div className=' col-span-7 h-full     w-full'>
+            <div className=' col-span-7  h-full     w-full'>
                 <Settings>
                     <Settings.Menu/>
                     <Settings.Content/>
