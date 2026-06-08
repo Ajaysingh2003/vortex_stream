@@ -33,6 +33,7 @@ import {
   Settings,
   X,
 } from "lucide-react";
+
 import VolumeControls from "./VolumeControls";
 
 export type generalType = {
@@ -381,6 +382,7 @@ export default function ProductionVideoPlayer({
   onProgress,
   onEnded,
 }: ProductionVideoPlayerProps) {
+  const [hasStarted, setHasStarted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const ctaShownRef = useRef(false);
   const progressTickRef = useRef(0);
@@ -430,6 +432,7 @@ export default function ProductionVideoPlayer({
     if (!video) return;
 
     if (video.paused) {
+      setHasStarted(true);
       await video.play();
       return;
     }
@@ -540,20 +543,25 @@ export default function ProductionVideoPlayer({
   }, [controls.disableSeekbar, togglePlay]);
 
   return (
-    <div
-      className={cx(
-        "w-full overflow-hidden ",
-        className,
-      )}
-      style={cssVars}
-    >
-      <MediaController className="relative aspect-video w-full bg-[color:var(--vp-bg)] font-sans">
+    <div className={cx("w-full overflow-hidden ", className)} style={cssVars}>
+      <MediaController
+        style={{ ["--media-background-color" as any]: "transparent" }}
+        className="relative z-0 aspect-video w-full abg-[color:var(--vp-bg)] font-sans"
+      >
+        <button
+          type="button"
+          className="absolute inset-0 z-10 cursor-pointer bg-transparent"
+          aria-label={isPlaying ? "Pause video" : "Play video"}
+          onClick={togglePlay}
+        />
         <video
           ref={videoRef}
           // src={""}
           slot="media"
-          className="h-full w-full cursor-pointer bg-blackx object-contain"
-          poster={poster}
+          className="h-full w-full cursor-pointer object-contain"
+          poster={
+            "https://pub-db02f4666efb4ae9b337950ff0610772.r2.dev/blogimages/4372937.webp"
+          }
           playsInline
           muted={general.autoplay}
           autoPlay={general.autoplay}
@@ -589,25 +597,28 @@ export default function ProductionVideoPlayer({
           slot="centered-chrome"
           className="scale-125 text-[color:var(--vp-accent)]"
         />
-
-        <button
-          className={cx(
-            "grid h-[72px] w-[72px] place-items-center rounded-full border-0 bg-[color:var(--vp-accent)] text-white shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white max-sm:h-[58px] max-sm:w-[58px]",
-            isPlaying && "pointer-events-none opacity-0",
-          )}
-          slot="centered-chrome"
-          type="button"
-          aria-label={isPlaying ? "Pause" : "Play"}
-          onClick={togglePlay}
-        >
-          {isPlaying ? (
-            <Pause size={32} fill="currentColor" />
-          ) : (
-            <Play size={34} fill="currentColor" />
-          )}
-        </button>
+       { !isPlaying && <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-transparent">
+          <button
+            style={{ background: branding.primaryColor }}
+            className={cx(
+              "pointer-events-auto grid size-12 sm:size-14 md:size-18 place-items-center rounded-full border-0 bg-[color:var(--vp-accent)] text-white shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white amax-sm:h-[58px] amax-sm:w-[58px]",
+              isPlaying && "pointer-events-none opacity-0",
+            )}
+            slot="centered-chrome"
+            type="button"
+            aria-label={isPlaying ? "Pause" : "Play"}
+            onClick={togglePlay}
+          >
+            {isPlaying ? (
+              <Pause className="size-6 md:size-10" fill="currentColor" />
+            ) : (
+              <Play fill="currentColor" className="size-6 md:size-10" />
+            )}
+          </button>
+        </div>}
 
         <LogoOverlay branding={branding} />
+
         <Watermark
           security={security}
           viewerEmail={advanced.viewerEmail}
@@ -625,26 +636,95 @@ export default function ProductionVideoPlayer({
           />
         ) : null}
 
-        <div className=" px-3 w-full rounded-xl overflow-hidden relative">
-            <MediaControlBar style={{background:branding.backgroundColor}} className="bg-black   w-full lg:max-h-56  md:mb-3">
-          {/* <MediaPreviewChapterDisplay /> */}
-          <MediaPlayButton />
+        <section className="absolute bottom-0 left-0 right-0 z-30  w-full px-3 pb-3">
+          <div
+            style={{
+              background: branding.backgroundColor,
+            }}
+            className="flex w-full items-center justify-center px-2 h-8 rounded-lg relative overflow-visible"
+          >
+            <MediaControlBar
+              style={{
+                ["--media-control-bar-background" as any]: "transparent",
+                ["--media-control-hover-background" as any]: "transparent",
+                boxShadow: "none",
+                background: "transparent",
+                // 🚀 Locks execution strictly flat against the container canvas bounds
+                margin: 0,
+                bottom: 0,
+              }}
+              className="w-full relative bg-transparent border-none outline-none flex items-center h-11"
+            >
+              <MediaPlayButton
+                className="size-4 lg:size-5"
+                style={{ background: "transparent" }}
+              />
 
-          {controls.skipBackward && <MediaSeekBackwardButton seekOffset={10} />}
-          {controls.skipForward && <MediaSeekForwardButton seekOffset={10} />}
+              {controls.skipBackward && (
+                <MediaSeekBackwardButton
+                  className="size-4 lg:size-5"
+                  style={{ background: "transparent" }}
+                  seekOffset={10}
+                />
+              )}
+              {controls.skipForward && (
+                <MediaSeekForwardButton
+                  className="size-4 lg:size-5"
+                  seekOffset={10}
+                  style={{ background: "transparent" }}
+                />
+              )}
 
-          {controls.muteButton && <MediaMuteButton />}
-          {controls.volume && <MediaVolumeRange />}
-          {controls.volume && <VolumeControls videoRef={videoRef}/>}
+              {controls.volume && (
+                <VolumeControls
+                  // className="size-4 lg:size-5"
+                  videoRef={videoRef}
+                  iconColor={branding.iconColor}
+                />
+              )}
 
-          <MediaTimeDisplay showDuration />
-          <MediaTimeRange />
-          {general.captions && <MediaCaptionsButton />}
-          {<MediaPlaybackRateButton />}
-          {controls.pipButton && <MediaPipButton />}
-          {controls.fullScreen && <MediaFullscreenButton />}
-        </MediaControlBar>
-        </div>
+              <MediaTimeDisplay
+                className="size-4 lg:size-5"
+                remaining={false}
+                show-duration={false}
+                style={{ background: "transparent", color: branding.iconColor }}
+              />
+
+              <MediaTimeRange
+                className="size-4 lg:size-5"
+                style={{ background: "transparent" }}
+              />
+
+              {general.captions && (
+                <MediaCaptionsButton
+                  className="size-4 lg:size-5"
+                  style={{ background: "transparent" }}
+                />
+              )}
+
+              {controls.playbackRate && (
+                <MediaPlaybackRateButton
+                  className="size-4 lg:size-5"
+                  style={{ background: "transparent" }}
+                />
+              )}
+
+              {controls.pipButton && (
+                <MediaPipButton
+                  className="size-4 lg:size-5"
+                  style={{ background: "transparent" }}
+                />
+              )}
+
+              {controls.fullScreen && (
+                <MediaFullscreenButton
+                  className="size-4 lg:size-5"
+                  style={{ background: "transparent" }}
+                />
+              )}
+            </MediaControlBar>
+          </div>
+        </section>
       </MediaController>
     </div>
   );

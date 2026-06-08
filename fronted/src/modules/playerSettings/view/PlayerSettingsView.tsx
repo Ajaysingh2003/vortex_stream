@@ -5,52 +5,64 @@ import { Save, RotateCcw } from "lucide-react";
 // import Settings from '../component/Settings'
 import Preview from "../component/Preview";
 import { Settings, useSetting } from "../component/Settings";
-import { VideoPlayerSettings, WorkspaceType } from "@/modules/types";
+import {
+  VideoPlayerMetaData,
+  VideoPlayerSettings,
+  WorkspaceType,
+} from "@/modules/types";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import toast from "react-hot-toast";
 function PlayerSettingsView() {
   // const {playerSettings,setPlayerSettings}=useSetting()!
 
+  const trpc = useTRPC();
+
+  const { data: player } = useSuspenseQuery(
+    trpc.videoPlayer.getPlayerMetaDataServer.queryOptions(),
+  );
+
+  const playerSettingData = player as VideoPlayerMetaData;
   const [playerSettings, setPlayerSettings] = useState<VideoPlayerSettings>({
     general: {
-      ctaEnabled: false,
-      autoplay: false,
-      preload: true,
-      loop: false,
-      captions: false,
+      ctaEnabled: playerSettingData.general_settings.ctaEnabled ?? false,
+      autoplay: playerSettingData.general_settings.autoplay ?? false,
+      preload: playerSettingData.general_settings.preload ?? true,
+      loop: playerSettingData.general_settings.loop ?? false,
+      captions: playerSettingData.general_settings.captions ?? false,
     },
     controls: {
-      downloadButton: false, // Usually hidden by default for SaaS protection
-      disableSeekbar: false, // Allowed by default so viewers can skip
-      showControls: true, // Interface visible
-      skipForward: true,
-      skipBackward: true,
-      fullScreen: true,
-      volume: true,
+      disableSeekbar:
+      playerSettingData.control_settings.disableSeekbar ?? false,
+      downloadButton:
+      playerSettingData.control_settings.downloadButton ?? false,
+      showControls: playerSettingData.control_settings.showControls ?? true,
+      skipForward: playerSettingData.control_settings.skipForward ?? false,
+      skipBackward: playerSettingData.control_settings.skipBackward ?? true,
+      fullScreen: playerSettingData.control_settings.fullScreen ?? true,
+      volume: playerSettingData.control_settings.volume ?? true,
 
-      playbackRate: false,
-      pipButton: false,
-      muteButton: false,
-      
+      playbackRate: playerSettingData.control_settings.playbackRate ?? false,
+      pipButton: playerSettingData.control_settings.pipButton ?? false,
+      muteButton: playerSettingData.control_settings.muteButton ?? false,
     },
     branding: {
-      logoUrl: "",
-      logoPosition: "top_right",
-      logoWidth: 50,
-      backgroundColor: "#000000",
-      primaryColor: "#000000",
-      accentColor: "#000000",
-      iconColor: "#000000",
+      logoUrl: playerSettingData.branding_settings.logoUrl ?? "",
+      logoPosition: playerSettingData.branding_settings.logoPosition ?? "top_right",
+      logoWidth: playerSettingData.branding_settings.logoWidth ?? 50,
+      backgroundColor: playerSettingData.branding_settings.backgroundColor ?? "#000000",
+      primaryColor: playerSettingData.branding_settings.primaryColor ?? "#000000",
+      accentColor: playerSettingData.branding_settings.accentColor ?? "#000000",
+      iconColor: playerSettingData.branding_settings.iconColor ?? "#000000",
     },
     security: {
-      watermarkEnabled: false,
-      watermarkTextType: "none",
-      watermarkImage: "",
+      watermarkEnabled: playerSettingData.security_settings.watermarkEnabled ?? false,
+      watermarkTextType: playerSettingData.security_settings.watermarkTextType ?? "none",
+      watermarkImage: playerSettingData.security_settings.watermarkImage ?? "",
     },
   });
 
-  const trpc = useTRPC();
+  // const trpc = useTRPC();
   const { data: workspace } = useSuspenseQuery(
     trpc.user.getWorkspace.queryOptions(),
   );
@@ -78,7 +90,7 @@ function PlayerSettingsView() {
   };
   return (
     <div className=" w-full h-full px-4  p-3 md:px-8  md:py-4">
-      {/* {JSON.stringify(playerSettings, null, 2)} */}
+      {/* {JSON.stringify(playerSettingData, null, 2)} */}
       <div className="flex items-center justify-between  my-2 md:my-4">
         <div className="right ">
           <h3 className="font-heading leading-8 font-bold tracking-wider text-lg md:text-xl lg:2xl capitalize">

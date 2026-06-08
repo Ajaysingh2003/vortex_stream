@@ -5,7 +5,7 @@ import ImportVideos from "@/modules/upload/component/ImportVideos";
 import TopHeader from "../component/TopHeader";
 function VideoPlayerView() {
   return (
-    <div className="w-full h-full min-h-screen relative">
+    <div className="w-full h-full min-h-screesn relative">
       <div className="px-6 md:px-12 py-4 w-full">
         <TopHeader
           Header={"Content Library"}
