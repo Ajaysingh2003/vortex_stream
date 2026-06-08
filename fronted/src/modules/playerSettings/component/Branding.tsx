@@ -10,41 +10,20 @@ import {
 import { Sticker, LayoutTemplate, Pipette, Baseline, SprayCan, Brush, Globe, LayoutDashboard } from "lucide-react";
 import React from "react";
 import { ColorResult, hsvaToHex, hexToHsva } from "@uiw/react-color";
-import { brandingType, useSetting } from "./Settings";
+import {  useSetting } from "./Settings";
 import {
-  Slider,
   Sketch,
-  Material,
-  Colorful,
-  Compact,
-  Circle,
-  Swatch,
-  Wheel,
-  Block,
-  Github,
-  Chrome,
-} from "@uiw/react-color";
-import {
-  Alpha,
-  Hue,
-  ShadeSlider,
-  Saturation,
-  hsvaToHslaString,
-} from "@uiw/react-color";
-import {
-  EditableInput,
-  EditableInputRGBA,
-  EditableInputHSLA,
 } from "@uiw/react-color";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { brandingType } from "@/modules/types";
 
 function Branding() {
   const { playerSettings, setPlayerSettings } = useSetting()!;
-
+  
   const handleBrandingChange = <K extends keyof brandingType>(
     key: K,
     value: brandingType[K],
