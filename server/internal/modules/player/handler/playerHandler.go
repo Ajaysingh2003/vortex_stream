@@ -115,3 +115,33 @@ func (h *PlayerHandler) UpdatePlayer(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{"message":"Player Settings Updated Successfully"})
 	
 }
+
+func (h *PlayerHandler) GetPlayer(c *gin.Context) {
+
+	workspaceIDRaw := c.Param("workspaceID")
+
+	workspaceID, err := uuid.Parse(workspaceIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Workspace ID", "success": false})
+	}
+
+	
+
+	
+
+	playerData,err:=h.PlayerService.GetPlayer(c.Request.Context(), workspaceID )
+
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+
+	c.JSON(http.StatusAccepted, gin.H{"data":playerData,"success":true})
+	
+}
+

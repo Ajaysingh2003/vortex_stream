@@ -18,6 +18,9 @@ type ControlSettingsReq struct {
 	SkipBackward   bool `json:"skipBackward"`
 	FullScreen     bool `json:"fullScreen"`
 	Volume         bool `json:"volume"`
+	PlaybackRate   bool `json:"playbackRate"`
+	PipButton      bool `json:"popButton"`
+	MuteButton     bool `json:"muteButton"`
 }
 
 type BrandingSettingsReq struct {

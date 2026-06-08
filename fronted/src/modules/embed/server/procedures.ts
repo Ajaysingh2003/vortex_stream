@@ -18,10 +18,13 @@ axiosRetry(axios, {
     axiosRetry.isNetworkError(error) || (error.response?.status ?? 0) >= 500,
 });
 export const playerRouter = createTRPCRouter({
-  getPlans: baseProcedure.query(async () => {
+  getPlayerMetaData: baseProcedure.input(z.object({
+    workspaceID:z.string()
+  })).query(async ({input}) => {
+
     try {
       const res = await axios.get(
-        `${process.env.BASE_API}/v1/billing/plans/config`,
+        `${process.env.BASE_API}/v1/workspace/${input.workspaceID}/player/settings`,
       );
 
       return res.data.data;
@@ -92,7 +95,7 @@ export const playerRouter = createTRPCRouter({
         const access_token = cookieStore.get("access_token")?.value;
 
         const res = await axios.patch(
-          `${process.env.BASE_API}/v1/workspace/${input.workspace_id}/player/setting`,
+          `${process.env.BASE_API}/v1/workspace/${input.workspace_id}/player/settings`,
           {
             "general_settings":input.general,
             "control_settings":input.control,

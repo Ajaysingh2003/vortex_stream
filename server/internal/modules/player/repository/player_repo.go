@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -12,6 +12,7 @@ import (
 type PlayerRepository interface {
 	UpsertTx(ctx context.Context, tx *gorm.DB, settings *domain.PlayerSettings) error
 	Upsert(ctx context.Context, settings *domain.PlayerSettings) error
+	GetByWorkspaceID(crx context.Context, workspaceID uuid.UUID) (*domain.PlayerSettings, error)
 }
 
 type postgresPlayerRepository struct {
@@ -26,11 +27,10 @@ func (r *postgresPlayerRepository) UpsertTx(ctx context.Context, tx *gorm.DB, se
 
 	err := tx.WithContext(ctx).
 		Clauses(clause.OnConflict{
-			Columns: []clause.Column{{Name: "workspaceId"}}, 
+			Columns: []clause.Column{{Name: "workspaceId"}},
 
 			DoUpdates: clause.AssignmentColumns([]string{
-				
-				
+
 				"general_settings",
 				"control_settings",
 				"branding_settings",
@@ -43,18 +43,16 @@ func (r *postgresPlayerRepository) UpsertTx(ctx context.Context, tx *gorm.DB, se
 	if err != nil {
 		return err
 	}
-	
 
 	return nil
 }
 
-
 func (r *postgresPlayerRepository) Upsert(ctx context.Context, settings *domain.PlayerSettings) error {
-	fmt.Print(settings,"custom-player")
+	// fmt.Print(settings,"custom-player")
 
 	err := r.db.WithContext(ctx).
 		Clauses(clause.OnConflict{
-			Columns: []clause.Column{{Name: "workspace_id"}}, 
+			Columns: []clause.Column{{Name: "workspace_id"}},
 
 			DoUpdates: clause.AssignmentColumns([]string{
 				"general_settings",
@@ -69,9 +67,19 @@ func (r *postgresPlayerRepository) Upsert(ctx context.Context, settings *domain.
 	if err != nil {
 		return err
 	}
-	
 
 	return nil
 }
 
+func (r *postgresPlayerRepository) GetByWorkspaceID(ctx context.Context, workspaceID uuid.UUID) (*domain.PlayerSettings,error) {
 
+	var player domain.PlayerSettings
+
+	err := r.db.WithContext(ctx).Where("workspace_id = ? ", workspaceID).First(&player).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &player, nil
+}

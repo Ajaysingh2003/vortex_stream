@@ -10,12 +10,14 @@ import {
   MonitorOff,
   Play,
   PlayCircle,
+  SoapDispenserDroplet,
   Timer,
   Volume,
   Volume1,
 } from "lucide-react";
 import { FullScreenIcon } from "@hugeicons/core-free-icons";
-import { controlsType, useSetting } from "./Settings";
+import {  useSetting } from "./Settings";
+import { controlsType } from "@/modules/types";
 
 interface ControlItemConfig {
   scope: keyof controlsType;
@@ -69,6 +71,12 @@ function ControlsSetting() {
       description: "Show volume control",
       scope: "volume",
       icon: <Volume1 className="" />,
+    },
+    {
+      label: "playback rate",
+      description: "Button for Controlling video speed",
+      scope: "playbackRate",
+      icon: <SoapDispenserDroplet className="" />,
     },
   ];
 
