@@ -1,7 +1,7 @@
 import { Switch } from "@/components/ui/switch";
 import { Play } from "lucide-react";
 import React from "react";
-import { advanceType, controlsType, generalType, useSetting } from "./Settings";
+import {  controlsType, generalType, useSetting } from "./Settings";
 
 interface RowType {
   label: string;

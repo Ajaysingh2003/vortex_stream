@@ -5,6 +5,7 @@ import Branding from './Branding'
 // import SubTitle from './SubTitle'
 import Security from './Security'
 import Advance from './Advance'
+// import Cta from './Cta'
 
 function SettingsContent({activeOption}:{activeOption:string | undefined}) {
 
@@ -20,8 +21,8 @@ function SettingsContent({activeOption}:{activeOption:string | undefined}) {
         return <Branding/>
     case 'security':
         return <Security/>
-    case 'advanced':
-        return <Advance/>
+    // case 'cta':
+    //     return <Cta/>
   }
 }
 
