@@ -7,10 +7,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sticker, LayoutTemplate } from "lucide-react";
+import { Sticker, LayoutTemplate, Pipette, Baseline, SprayCan, Brush, Globe, LayoutDashboard } from "lucide-react";
 import React from "react";
-
+import { ColorResult, hsvaToHex, hexToHsva } from "@uiw/react-color";
 import { brandingType, useSetting } from "./Settings";
+import {
+  Slider,
+  Sketch,
+  Material,
+  Colorful,
+  Compact,
+  Circle,
+  Swatch,
+  Wheel,
+  Block,
+  Github,
+  Chrome,
+} from "@uiw/react-color";
+import {
+  Alpha,
+  Hue,
+  ShadeSlider,
+  Saturation,
+  hsvaToHslaString,
+} from "@uiw/react-color";
+import {
+  EditableInput,
+  EditableInputRGBA,
+  EditableInputHSLA,
+} from "@uiw/react-color";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function Branding() {
   const { playerSettings, setPlayerSettings } = useSetting()!;
@@ -41,7 +71,7 @@ function Branding() {
             <div className="w-full grid grid-cols-[40px_1fr_auto] pb-3 gap-3">
               <div className="flex items-center justify-center">
                 <div className="bg-stone-100  rounded-md px-2 py-2">
-                  <Sticker />
+                  <Globe className="size-4" />
                 </div>
               </div>
               <div className=" flex items-scenter justify-center  flex-col space-y-0.5 ">
@@ -69,7 +99,7 @@ function Branding() {
             <div className="w-full grid grid-cols-[40px_1fr_auto] pb-3 gap-3">
               <div className="flex items-center justify-center">
                 <div className="bg-stone-100  rounded-md px-2 py-2">
-                  <LayoutTemplate />
+                  <LayoutDashboard className="size-4" />
                 </div>
               </div>
               <div className=" flex items-scenter justify-center  flex-col space-y-0.5 ">
@@ -130,7 +160,7 @@ function Branding() {
             <div className="w-full grid grid-cols-[40px_1fr_auto] pb-3 gap-3">
               <div className="flex items-center justify-center">
                 <div className="bg-stone-100  rounded-md px-2 py-2">
-                  <Sticker />
+                  <Sticker className="size-4" />
                 </div>
               </div>
               <div className=" flex items-scenter justify-center  flex-col space-y-0.5 ">
@@ -159,6 +189,175 @@ function Branding() {
               </div>
             </div>
           </section>
+
+          <section className="w-full">
+            <div className="w-full grid grid-cols-[40px_1fr_auto] pb-3 gap-3">
+              <div className="flex items-center justify-center">
+                <div className="bg-stone-100  rounded-md px-2 py-2">
+                  <Pipette className="size-4" />
+                </div>
+              </div>
+              <div className=" flex items-scenter justify-center  flex-col space-y-0.5 ">
+                <h3 className="text-[14px] font-medium text-stone-800 capitalize leading-none">
+                  Primary Color
+                </h3>
+                <p className=" capitalize text-stone-500 text-[13px] leading-relaxed">
+                  Primary color in Player
+                </p>
+              </div>
+              <div className=" flex items-center justify-center  pr-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <div
+                      style={{
+                        background: playerSettings.branding.primaryColor,
+                      }}
+                      className="rounded-full size-5"
+                    ></div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full  bg-transparent shadow-none outline-none  flex items-center justify-center">
+                    <Sketch
+                      className="m-0"
+                      // style={{ marginLeft: 20 }}
+                      color={playerSettings.branding.primaryColor}
+                      onChange={(color) => {
+                        handleBrandingChange("primaryColor", color.hex);
+                      }}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* {playerSettings.branding.primaryColor} */}
+              </div>
+            </div>
+          </section>
+
+          <section className="w-full">
+            <div className="w-full grid grid-cols-[40px_1fr_auto] pb-3 gap-3">
+              <div className="flex items-center justify-center">
+                <div className="bg-stone-100  rounded-md px-2 py-2">
+                  <SprayCan className="size-4" />
+                </div>
+              </div>
+              <div className=" flex items-scenter justify-center  flex-col space-y-0.5 ">
+                <h3 className="text-[14px] font-medium text-stone-800 capitalize leading-none">
+                  Accent Color
+                </h3>
+                <p className=" capitalize text-stone-500 text-[13px] leading-relaxed">
+                  Accent color in Player
+                </p>
+              </div>
+              <div className=" flex items-center justify-center  pr-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <div
+                      style={{
+                        background: playerSettings.branding.accentColor,
+                      }}
+                      className="rounded-full size-5"
+                    ></div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full  bg-transparent shadow-none outline-none  flex items-center justify-center">
+                    <Sketch
+                      className="m-0"
+                      // style={{ marginLeft: 20 }}
+                      color={playerSettings.branding.accentColor}
+                      onChange={(color) => {
+                        handleBrandingChange("accentColor", color.hex);
+                      }}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* {playerSettings.branding.primaryColor} */}
+              </div>
+            </div>
+          </section>
+          <section className="w-full">
+            <div className="w-full grid grid-cols-[40px_1fr_auto] pb-3 gap-3">
+              <div className="flex items-center justify-center">
+                <div className="bg-stone-100  rounded-md px-2 py-2">
+                  <Baseline className="size-4" />
+                </div>
+              </div>
+              <div className=" flex items-scenter justify-center  flex-col space-y-0.5 ">
+                <h3 className="text-[14px] font-medium text-stone-800 capitalize leading-none">
+                  Text and icon Color
+                </h3>
+                <p className=" capitalize text-stone-500 text-[13px] leading-relaxed">
+                  text color in Player
+                </p>
+              </div>
+              <div className=" flex items-center justify-center  pr-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <div
+                      style={{
+                        background: playerSettings.branding.iconColor,
+                      }}
+                      className="rounded-full size-5"
+                    ></div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full  bg-transparent shadow-none outline-none  flex items-center justify-center">
+                    <Sketch
+                      className="m-0"
+                      // style={{ marginLeft: 20 }}
+                      color={playerSettings.branding.accentColor}
+                      onChange={(color) => {
+                        handleBrandingChange("iconColor", color.hex);
+                      }}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* {playerSettings.branding.primaryColor} */}
+              </div>
+            </div>
+          </section>
+
+          <section className="w-full">
+            <div className="w-full grid grid-cols-[40px_1fr_auto] pb-3 gap-3">
+              <div className="flex items-center justify-center">
+                <div className="bg-stone-100  rounded-md px-2 py-2">
+                  <Brush className="size-4" />
+                </div>
+              </div>
+              <div className=" flex items-scenter justify-center  flex-col space-y-0.5 ">
+                <h3 className="text-[14px] font-medium text-stone-800 capitalize leading-none">
+                  Background Color
+                </h3>
+                <p className=" capitalize text-stone-500 text-[13px] leading-relaxed">
+                  Background Color in Player
+                </p>
+              </div>
+              <div className=" flex items-center justify-center  pr-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <div
+                      style={{
+                        background: playerSettings.branding.backgroundColor,
+                      }}
+                      className="rounded-full size-5"
+                    ></div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full  bg-transparent shadow-none outline-none  flex items-center justify-center">
+                    <Sketch
+                      className="m-0"
+                      // style={{ marginLeft: 20 }}
+                      color={playerSettings.branding.backgroundColor}
+                      onChange={(color) => {
+                        handleBrandingChange("backgroundColor", color.hex);
+                      }}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* {playerSettings.branding.primaryColor} */}
+              </div>
+            </div>
+          </section>
+
+          
         </div>
       </div>
     </div>

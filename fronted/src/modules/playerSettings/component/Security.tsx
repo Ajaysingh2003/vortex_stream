@@ -1,5 +1,5 @@
 import React from "react";
-import { advanceType, securityType, useSetting } from "./Settings";
+import { securityType, useSetting } from "./Settings";
 import {
   Copyright,
   ImageUp,

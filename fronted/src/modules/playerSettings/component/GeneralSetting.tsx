@@ -1,6 +1,6 @@
 import React from "react";
 import ItemRow from "./ItemRow";
-import { Captions, Infinity, Play, PlayCircle, Timer } from "lucide-react";
+import { Captions, ExternalLink, Infinity, Play, PlayCircle, Timer } from "lucide-react";
 // import { useConsoleContext } from "@/modules/console/context/ConsoleContext";
 import { generalType, useSetting } from "./Settings";
 
@@ -28,33 +28,41 @@ function GeneralSetting() {
 
   console.log(playerSettings, "uyuy");
   let item: GeneralItemConfig[] = [
+
+    {
+      scope: "ctaEnabled",
+      label: "cta enabled",
+      description: "Enable Cta on the video",
+      // onChange: () => {},
+      icon: <ExternalLink className="size-4" />,
+    },
     {
       scope: "autoplay",
       label: "autoplay",
       description: "Automatically play the video when the player loads.",
       // onChange: () => {},
-      icon: <Play className="size-5" />,
+      icon: <Play className="size-4" />,
     },
     {
       scope: "preload",
       label: "preload video",
       description:
         "Preload video metadata when the player loads, enabling faster playback.",
-      icon: <Timer className="size-5" />,
+      icon: <Timer className="size-4" />,
     },
     {
       scope: "loop",
       label: "Loop",
       description: "video will restart when it reaches the end ",
       // onChange: () => {},
-      icon: <Infinity className="" />,
+      icon: <Infinity className="size-4" />,
     },
     {
       scope: "captions",
       label: "captions",
       description: "Enable Captions",
       // onChange: () => {},
-      icon: <Captions className="size-5" />,
+      icon: <Captions className="size-4" />,
     },
   ];
 
