@@ -5,13 +5,15 @@ import { userRouter } from "@/modules/user/server/procedures";
 import { videoRouter } from "@/modules/video/server/procedures";
 import { folderRouter } from "@/modules/folder/server/procedures";
 import { billingRouter } from "@/modules/billing/server/procedures";
+import { playerRouter } from "@/modules/embed/server/procedures";
 export const appRouter = createTRPCRouter({
 
   upload:uploadsRouter,
   user:userRouter,
   video:videoRouter,
   billing:billingRouter,
-  folder:folderRouter
+  folder:folderRouter,
+  videoPlayer:playerRouter
 });
 
 export type AppRouter = typeof appRouter;

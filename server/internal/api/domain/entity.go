@@ -121,13 +121,13 @@ type Workspaces struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 	Videos    []Video        `gorm:"foreignKey:WorkspaceID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
 	Folders []Folder `gorm:"foreignKey:WorkspaceID" json:"folders,omitempty"`
-	PlayerSettings *PlayerSettings `gorm:"foreignKey:WorkspaceId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"playerSettings,omitempty"`
+	PlayerSettings *PlayerSettings `gorm:"foreignKey:WorkspaceID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"playerSettings,omitempty"`
 }
 
 type PlayerSettings struct {
 	ID uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 
-	WorkspaceId uuid.UUID `gorm:"type:uuid;uniqueIndex" json:"workspaceId"`
+	WorkspaceID uuid.UUID `gorm:"type:uuid;uniqueIndex" json:"workspaceId"`
 
 	GeneralSettings  datatypes.JSON `json:"general_settings" gorm:"type:jsonb;default:'{}'"`
 	ControlSettings  datatypes.JSON `json:"control_settings" gorm:"type:jsonb;default:'{}'"`

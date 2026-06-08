@@ -29,10 +29,20 @@ import {
 import ProfileMenu from "./ProfileMenu";
 import { cn } from "@/lib/utils"; // Standard shadcn helper utility
 import SidebarStorage from "./SidebarStorage";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+import { WorkspaceType } from "@/modules/types";
 
 export function AppSidebar() {
+
+  const trpc=useTRPC()
+  const {data:workspace}=useSuspenseQuery(trpc.user.getWorkspace.queryOptions())
+
+  const workspaceData= workspace as WorkspaceType
   const { open } = useSidebar();
   const pathName = usePathname();
+
+
 
   const menuItems = [
     {
@@ -63,7 +73,7 @@ export function AppSidebar() {
     },
     {
       title: "Player Setting",
-      href: "/console/Video-player/setting",
+      href: `/console/player/settings`,
       icon: TvMinimalPlay,
     },
     {
