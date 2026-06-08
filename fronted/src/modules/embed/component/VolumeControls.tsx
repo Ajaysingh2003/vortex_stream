@@ -1,8 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from "react";
 
-function VolumeControls({videoRef}:{videoRef:React.RefObject<HTMLVideoElement | null>;}) {
-
-    const [volume, setVolume] = useState(1); // 1 = 100% volume
+function VolumeControls({
+  videoRef,
+  iconColor
+}: {
+  videoRef: React.RefObject<HTMLVideoElement | null>;
+  iconColor:string
+}) {
+  const [volume, setVolume] = useState(1); // 1 = 100% volume
   const [isMuted, setIsMuted] = useState(false);
   const [showSlider, setShowSlider] = useState(false);
   const sliderContainerRef = useRef<HTMLDivElement>(null);
@@ -14,8 +19,7 @@ function VolumeControls({videoRef}:{videoRef:React.RefObject<HTMLVideoElement | 
     }
   }, [videoRef]);
 
-
-  console.log(volume,"video-volume")
+  console.log(volume, "video-volume");
   // Handle slider drag interaction
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
@@ -40,14 +44,13 @@ function VolumeControls({videoRef}:{videoRef:React.RefObject<HTMLVideoElement | 
   };
 
   return (
-    <div 
+    <div
       className="relative flex flex-col items-center"
       onMouseEnter={() => setShowSlider(true)}
       onMouseLeave={() => setShowSlider(false)}
     >
-      {/* 🚀 THE VIMEO OVERLAY PANEL (Takes up zero row space) */}
-      {showSlider && (
-        <div 
+      {
+       showSlider && <div
           ref={sliderContainerRef}
           className="absolute bottom-full mb-3 flex flex-col items-center bg-[#141212] border border-white/10 px-3 py-4 rounded-md shadow-2xl h-28 w-10 z-50 animate-slideUp"
         >
@@ -61,33 +64,75 @@ function VolumeControls({videoRef}:{videoRef:React.RefObject<HTMLVideoElement | 
             onChange={handleVolumeChange}
             className="cursor-pointer accent-[#3B7BFB] h-full"
             style={{
-              WebkitAppearance: 'slider-vertical', // Standard vertical execution
-            //   appearance: 'slider-vertical',
-              width: '4px',
+              WebkitAppearance: "slider-vertical", // Standard vertical execution
+              //   appearance: 'slider-vertical',
+              width: "4px",
             }}
           />
         </div>
-      )}
+      }
 
       {/* THE MUTE/UNMUTE BUTTON TRIGGER */}
-      <button 
+      <button
         onClick={toggleMute}
-        className="text-white/80 hover:text-[#3B7BFB] p-2 transition-colors duration-200 focus:outline-none"
+        style={{color:iconColor}}
+        className="text-white/80 w-full h-full p-2 transition-colors duration-200 focus:outline-none"
         aria-label="Volume Control"
       >
         {isMuted || volume === 0 ? (
           // Muted Icon
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="22" y1="9" x2="16" y2="15"></line><line x1="16" y1="9" x2="22" y2="15"></line></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="22" y1="9" x2="16" y2="15"></line>
+            <line x1="16" y1="9" x2="22" y2="15"></line>
+          </svg>
         ) : volume < 0.5 ? (
           // Low Volume Icon
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
         ) : (
           // High Volume Icon
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
         )}
       </button>
     </div>
-  )
+  );
 }
 
-export default VolumeControls
+export default VolumeControls;
