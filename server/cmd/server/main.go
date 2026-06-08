@@ -8,6 +8,7 @@ import (
 	"time"
 
 	uploadHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/handler"
+	playerHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/player/handler"
 	billingHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/handler"
 	videoHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/handler"
 	folderHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/handler"
@@ -16,13 +17,16 @@ import (
 	folderRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/repository"
 	subscriptionRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/repository"
 	userUsageRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/repository"
+	playerRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/player/repository"
 	uploadRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/routes"
 	billingRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/routes"
 	videosRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/routes"
 	folderRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/routes"
+	playerRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/player/routes"
 	serviceUpload "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/services"
 	videoService "github.com/ajaysingh2003/vortex-stream/internal/modules/videos/services"
 	folderService "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/services"
+	playerService "github.com/ajaysingh2003/vortex-stream/internal/modules/player/services"
 	billingService "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/services"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/handler"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
@@ -50,7 +54,7 @@ func main() {
 		log.Fatal("JWT_SECRET_KEY is missing")
 	}
 	jwtToken := utils.NewJwtMaker(secretKey)
-	
+	playerRepo:=playerRepository.NewPostgresPlayerRepository(database)
 	userRepo:=repository.NewPostgresUserRepository(database)
 	accountRepo:=repository.NewAccountRepo(database)
 	videoRepo:=videoRepository.NewPostgresVideoRepository(database)
@@ -58,6 +62,7 @@ func main() {
 	folderRepo:=folderRepository.NewFolderRepo(database)
 	subscriptionRepo:=subscriptionRepository.NewPostgresSubscriptionRepository(database)
 	userUsageRepo:=userUsageRepository.NewPostgresUsageRepository(database)
+	playerService:=playerService.NewPlayerService(workspaceRepo,userRepo,playerRepo)
 	userService:=services.NewUserService(userRepo,jwtToken,workspaceRepo,database,accountRepo)
 	folderService:=folderService.NewFolderService(folderRepo, userRepo, workspaceRepo, videoRepo)
 	workspaceService:=services.NewWorkspaceService(userRepo,workspaceRepo);
@@ -73,6 +78,13 @@ func main() {
 		 UploadService: uploadService,
 		 UserRepo: userRepo,
 	}
+	
+	playerdhandler:=&playerHandler.PlayerHandler{
+		PlayerService:playerService,
+		// playerService:playerService,
+	}
+
+
 	
 	videohandler:=&videoHandler.VideoHandler{
 		VideoService:videoService,
@@ -107,7 +119,7 @@ func main() {
 	videosRoutes.SetupRouter(r,videohandler,jwtToken)
 	folderRoutes.SetupRouter(r,folderhandler,jwtToken)
 	billingRoutes.SetupRouter(r,*billingHandler,jwtToken)
-
+	playerRoutes.SetupRouter(r, playerdhandler,jwtToken)
 
 	if err := r.Run(":3000"); err != nil {
 		log.Fatal("Failed to start server:", err)

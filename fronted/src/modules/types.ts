@@ -162,3 +162,59 @@ export interface FeatureItem {
   // unit?: 'workspace' | 'mb' | 'gb' | 'hours';
   // icon: 'WorkIcon' | 'DatabaseIcon' | 'PlayIcon' | 'TransferIcon';
 }
+
+
+
+
+
+
+export type generalType = {
+  ctaEnabled:boolean,
+  autoplay: boolean;
+  preload: boolean;
+  loop: boolean;
+  captions: boolean;
+};
+
+export type controlsType = {
+  downloadButton: boolean;
+  disableSeekbar: boolean;
+  showControls: boolean;
+  skipForward: boolean;
+  skipBackward: boolean;
+  fullScreen: boolean;
+  volume: boolean;
+};
+
+export type brandingType = {
+  logoUrl: string;
+  logoPosition: string;
+  logoWidth: number;
+  primaryColor:string;
+  accentColor:string;
+  iconColor:string;
+  backgroundColor:string;
+};
+
+export type securityType = {
+  watermarkEnabled: boolean;
+  watermarkTextType: "viewer_email" | "viewer_ip" | "none";
+  watermarkImage:string;
+};
+
+export type ctaType = {
+  
+  ctaEnabled: boolean;
+  timeTrigger: number;
+  heading: string;
+  buttonText: string;
+  redirectUrl: string;
+};
+
+export type VideoPlayerSettings = {
+  general: generalType;
+  controls: controlsType;
+  branding: brandingType;
+  security:securityType
+};
+

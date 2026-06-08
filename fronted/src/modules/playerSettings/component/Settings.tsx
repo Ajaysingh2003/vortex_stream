@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import {
   Bolt,
+  CarTaxiFront,
   FilePenLine,
   Settings2,
   ShieldEllipsis,
@@ -9,6 +10,8 @@ import {
 } from "lucide-react";
 import React, { createContext, useContext, useState } from "react";
 import SettingsContent from "./SettingsContent";
+import { ColorResult } from "@uiw/react-color";
+import { VideoPlayerSettings } from "@/modules/types";
 
 interface PlayerContextType {
   selectedOption: string;
@@ -17,94 +20,21 @@ interface PlayerContextType {
   setPlayerSettings: React.Dispatch<React.SetStateAction<VideoPlayerSettings>>;
 }
 
-export type generalType = {
-  autoplay: boolean;
-  preload: boolean;
-  loop: boolean;
-  captions: boolean;
-};
-
-export type controlsType = {
-  downloadButton: boolean;
-  disableSeekbar: boolean;
-  showControls: boolean;
-  skipForward: boolean;
-  skipBackward: boolean;
-  fullScreen: boolean;
-  volume: boolean;
-};
-
-export type brandingType = {
-  logoUrl: string;
-  logoPosition: string;
-  logoWidth: number;
-};
-
-export type securityType = {
-  watermarkEnabled: boolean;
-  watermarkTextType: "viewer_email" | "viewer_ip" | "none";
-  watermarkImage:string;
-};
-
-export type advanceType = {
-  
-  ctaEnabled: boolean;
-  timeTrigger: number;
-  heading: string;
-  buttonText: string;
-  redirectUrl: string;
-};
-
-export type VideoPlayerSettings = {
-  general: generalType;
-  controls: controlsType;
-  branding: brandingType;
-  security:securityType
-  advance: advanceType;
-};
-
 const settingContext = createContext<PlayerContextType | null>(null);
 
-export function Settings({ children }: { children: React.ReactNode }) {
+export function Settings({
+  children,
+  playerSettings,
+  setPlayerSettings,
+}: {
+  children: React.ReactNode;
+  playerSettings: VideoPlayerSettings;
+  setPlayerSettings: React.Dispatch<React.SetStateAction<VideoPlayerSettings>>;
+}) {
   const [selectedOption, setSelectOption] = useState<string>("general");
 
   // const [playerSettings,setPlayerSettings]=useState<VideoPlayerSettings>()
 
-  const [playerSettings, setPlayerSettings] = useState<VideoPlayerSettings>({
-    general: {
-      autoplay: false,
-      preload: true,
-      loop: false,
-      captions: false,
-    },
-    controls: {
-      downloadButton: false, // Usually hidden by default for SaaS protection
-      disableSeekbar: false, // Allowed by default so viewers can skip
-      showControls: true, // Interface visible
-      skipForward: true,
-      skipBackward: true,
-      fullScreen: true,
-      volume: true,
-    },
-    branding: {
-      logoUrl: "",
-      logoPosition: "top_right",
-      logoWidth: 50, // Balanced standard sizing in pixels
-    },
-    advance: {
-     
-      ctaEnabled: false,
-      timeTrigger: 30,
-      heading: "",
-      buttonText: "",
-      redirectUrl: "",
-    },
-    security:{
-       watermarkEnabled: false,
-      watermarkTextType: "none",
-      watermarkImage:"",
-    }
-  });
   return (
     <settingContext.Provider
       value={{
@@ -140,10 +70,6 @@ const Menu = () => {
     {
       label: "security",
       icon: <ShieldEllipsis className="size-4" />,
-    },
-    {
-      label: "advanced",
-      icon: <Settings2 className="size-4" />,
     },
   ];
 

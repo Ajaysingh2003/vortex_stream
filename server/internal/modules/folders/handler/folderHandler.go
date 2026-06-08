@@ -19,10 +19,10 @@ type FolderHandler struct {
 	UserService userServices.UserServiceInterface
 }
 
-func (h *FolderHandler) Create (c *gin.Context){
+func (h *FolderHandler)Create (c *gin.Context){
 
 	workspaceIDRaw:=c.Param("workspaceID")
-
+	
 	workspaceID, err := uuid.Parse(workspaceIDRaw)
 	if err!=nil{
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Workspace ID","success":false})
