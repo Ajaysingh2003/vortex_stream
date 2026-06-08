@@ -2,7 +2,8 @@ import React from "react";
 import ItemRow from "./ItemRow";
 import { Captions, ExternalLink, Infinity, Play, PlayCircle, Timer } from "lucide-react";
 // import { useConsoleContext } from "@/modules/console/context/ConsoleContext";
-import { generalType, useSetting } from "./Settings";
+import {  useSetting } from "./Settings";
+import { generalType } from "@/modules/types";
 
 interface GeneralItemConfig {
   scope: keyof generalType;

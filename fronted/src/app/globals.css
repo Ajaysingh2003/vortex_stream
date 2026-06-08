@@ -307,3 +307,41 @@ body{
   /* Optional: Ensures the gradient looks smooth on low-res screens */
   -webkit-print-color-adjust: exact;
 }
+
+
+
+
+.volume-popup-slider {
+  position: absolute;
+  bottom: 100%; /* Pushes it directly above the icon button */
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  
+  /* Give it a crisp dark background overlay */
+  background: #191717;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 6px;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  
+  /* State animations */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* 🚀 Rotate the slider to run up-and-down rather than left-to-right */
+.volume-popup-slider media-volume-range {
+  writing-mode: vertical-lr;
+  direction: rtl; /* Makes up turn up the volume, down turn it down */
+  height: 80px;
+  width: 4px;
+}
+
+/* 🚀 SHOW THE SLIDER ON HOVER: Exactly like Vimeo */
+.media-volume-container:hover .volume-popup-slider {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}

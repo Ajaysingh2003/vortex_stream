@@ -184,6 +184,11 @@ export type controlsType = {
   skipBackward: boolean;
   fullScreen: boolean;
   volume: boolean;
+  playbackRate:boolean;
+  pipButton:boolean;
+  muteButton:boolean;
+
+  // captionButton:boolean;
 };
 
 export type brandingType = {
@@ -218,3 +223,33 @@ export type VideoPlayerSettings = {
   security:securityType
 };
 
+
+export interface VideoAsset {
+  id: string;
+  title: string;
+  videoKey: string;
+  size: number;
+  duration: number;
+  isPrivate: boolean;
+  status: string;
+  thumbnail: string;
+  masterKey: string;
+  resolutions: string[] | any[];
+  folderId: string | null;
+  WorkspaceId: string;
+  createdAt: string;
+  updatedAt: string; 
+  
+}
+
+
+
+export interface VideoPlayerMetaData{
+  id:string,
+  workspaceId:string,
+  general_settings:generalType,
+  control_settings:controlsType,
+  branding_settings:brandingType,
+  security_settings:securityType,
+  advanced_settings:any
+}
