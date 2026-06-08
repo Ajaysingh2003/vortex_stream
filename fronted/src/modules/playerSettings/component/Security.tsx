@@ -1,5 +1,5 @@
 import React from "react";
-import { securityType, useSetting } from "./Settings";
+import { useSetting } from "./Settings";
 import {
   Copyright,
   ImageUp,
@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ItemRow from "./ItemRow";
+import { securityType } from "@/modules/types";
 
 function Security() {
   const { playerSettings, setPlayerSettings } = useSetting()!;

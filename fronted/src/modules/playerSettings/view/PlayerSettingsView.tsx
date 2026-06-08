@@ -28,6 +28,11 @@ function PlayerSettingsView() {
       skipBackward: true,
       fullScreen: true,
       volume: true,
+
+      playbackRate: false,
+      pipButton: false,
+      muteButton: false,
+      
     },
     branding: {
       logoUrl: "",
@@ -45,25 +50,32 @@ function PlayerSettingsView() {
     },
   });
 
-  const trpc=useTRPC()
-  const {data:workspace}=useSuspenseQuery(trpc.user.getWorkspace.queryOptions())
-  const workspaceData = workspace as WorkspaceType
-  const playerMutate=useMutation(trpc.videoPlayer.createVideoPlayerSettings.mutationOptions({
-    onError:(err)=>{
-        toast.error(err.message || "Something went wrong")
-    },
-    onSuccess:()=>{
-        
-        toast.success("Changes Saved.")
-    }
-  }))
+  const trpc = useTRPC();
+  const { data: workspace } = useSuspenseQuery(
+    trpc.user.getWorkspace.queryOptions(),
+  );
+  const workspaceData = workspace as WorkspaceType;
+  const playerMutate = useMutation(
+    trpc.videoPlayer.createVideoPlayerSettings.mutationOptions({
+      onError: (err) => {
+        toast.error(err.message || "Something went wrong");
+      },
+      onSuccess: () => {
+        toast.success("Changes Saved.");
+      },
+    }),
+  );
 
-
-  const handleChanges= async ()=>{
-
-    if (!workspaceData.id) return 
-    await playerMutate.mutateAsync({workspace_id:workspaceData.id,general:playerSettings.general,control:playerSettings.controls,security:playerSettings.security,branding:playerSettings.branding})
-  }
+  const handleChanges = async () => {
+    if (!workspaceData.id) return;
+    await playerMutate.mutateAsync({
+      workspace_id: workspaceData.id,
+      general: playerSettings.general,
+      control: playerSettings.controls,
+      security: playerSettings.security,
+      branding: playerSettings.branding,
+    });
+  };
   return (
     <div className=" w-full h-full px-4  p-3 md:px-8  md:py-4">
       {/* {JSON.stringify(playerSettings, null, 2)} */}
@@ -81,7 +93,12 @@ function PlayerSettingsView() {
             <RotateCcw className="size-4" />{" "}
             <span className="text-sm tracking-tight">Reset to default</span>
           </Button>
-          <Button disabled={playerMutate.isPending} onClick={handleChanges} style={{padding:"10px"}} className="rounded-lg font-heading font-bold text-sm md:text-sm tracking-wide md:-tracking-wide bg-[#7067f3]  bg-primary-btn px-2">
+          <Button
+            disabled={playerMutate.isPending}
+            onClick={handleChanges}
+            style={{ padding: "10px" }}
+            className="rounded-lg font-heading font-bold text-sm md:text-sm tracking-wide md:-tracking-wide bg-[#7067f3]  bg-primary-btn px-2"
+          >
             {" "}
             <Save className="size-4" /> Save Changes
           </Button>

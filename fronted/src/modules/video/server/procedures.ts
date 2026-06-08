@@ -27,7 +27,7 @@ export const videoRouter = createTRPCRouter({
         console.log(res.data, "res");
 
         
-        return res.data;
+        return res.data.data;
       } catch (error: any) {
 
         // return error?.response?.data
