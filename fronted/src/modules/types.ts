@@ -164,66 +164,6 @@ export interface FeatureItem {
 }
 
 
-
-
-
-
-export type generalType = {
-  ctaEnabled:boolean,
-  autoplay: boolean;
-  preload: boolean;
-  loop: boolean;
-  captions: boolean;
-};
-
-export type controlsType = {
-  downloadButton: boolean;
-  disableSeekbar: boolean;
-  showControls: boolean;
-  skipForward: boolean;
-  skipBackward: boolean;
-  fullScreen: boolean;
-  volume: boolean;
-  playbackRate:boolean;
-  pipButton:boolean;
-  muteButton:boolean;
-
-  // captionButton:boolean;
-};
-
-export type brandingType = {
-  logoUrl: string;
-  logoPosition: string;
-  logoWidth: number;
-  primaryColor:string;
-  accentColor:string;
-  iconColor:string;
-  backgroundColor:string;
-};
-
-export type securityType = {
-  watermarkEnabled: boolean;
-  watermarkTextType: "viewer_email" | "viewer_ip" | "none";
-  watermarkImage:string;
-};
-
-export type ctaType = {
-  
-  ctaEnabled: boolean;
-  timeTrigger: number;
-  heading: string;
-  buttonText: string;
-  redirectUrl: string;
-};
-
-export type VideoPlayerSettings = {
-  general: generalType;
-  controls: controlsType;
-  branding: brandingType;
-  security:securityType
-};
-
-
 export interface VideoAsset {
   id: string;
   title: string;
@@ -253,3 +193,133 @@ export interface VideoPlayerMetaData{
   security_settings:securityType,
   advanced_settings:any
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export type generalType = {
+  ctaEnabled: boolean;
+  autoplay: boolean;
+  preload: boolean;
+  loop: boolean;
+  captions: boolean;
+};
+
+export type controlsType = {
+  downloadButton: boolean;
+  disableSeekbar: boolean;
+  showControls: boolean;
+  skipForward: boolean;
+  skipBackward: boolean;
+  fullScreen: boolean;
+  volume: boolean;
+  playbackRate: boolean;
+  pipButton: boolean;
+  muteButton: boolean;
+};
+
+export type brandingType = {
+  logoUrl: string;
+  logoPosition: string;
+  logoWidth: number;
+  primaryColor: string;
+  accentColor: string;
+  iconColor: string;
+  backgroundColor: string;
+};
+
+export type securityType = {
+  watermarkEnabled: boolean;
+  watermarkTextType: "viewer_email" | "viewer_ip" | "none";
+  watermarkImage: string;
+};
+
+export type ctaType = {
+  ctaEnabled: boolean;
+  timeTrigger: number;
+  heading: string;
+  buttonText: string;
+  redirectUrl: string;
+};
+
+export type VideoPlayerSettings = {
+  general: generalType;
+  controls: controlsType;
+  branding: brandingType;
+  security: securityType;
+  cta?: ctaType;
+};
+
+export interface VideoAsset {
+  id: string;
+  title: string;
+  videoKey: string;
+  size: number;
+  duration: number;
+  isPrivate: boolean;
+  status: string;
+  thumbnail: string;
+  masterKey: string;
+  resolutions: string[] | any[];
+  folderId: string | null;
+  WorkspaceId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// {
+//     cta?: ctaType;
+//     captions?: CaptionTrack[];
+//     viewerEmail?: string;
+//     viewerIp?: string;
+//     signedDownloadUrl?: string;
+//   } | null;
+
+export interface VideoPlayerMetaData {
+  id: string;
+  workspaceId: string;
+  general_settings: generalType;
+  control_settings: controlsType;
+  branding_settings: brandingType;
+  security_settings: securityType;
+  advanced_settings: any
+}
+
+type CaptionTrack = {
+  src: string;
+  label: string;
+  srcLang: string;
+  default?: boolean;
+};
+
+export type PlayerSource = {
+  label: string;
+  src: string;
+  type?: "video/mp4" | "application/x-mpegURL";
+};
+
+export type ProductionVideoPlayerProps = {
+  asset: VideoAsset;
+  player: VideoPlayerMetaData;
+  cdnBaseUrl: string;
+  className?: string;
+  onProgress?: (payload: { videoId: string; currentTime: number }) => void;
+  onEnded?: (payload: { videoId: string }) => void;
+};
