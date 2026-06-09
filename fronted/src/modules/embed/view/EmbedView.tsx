@@ -19,8 +19,8 @@ function EmbedView({ videoId }: { videoId: string }) {
   // }
 
   return (
-    <div className='w-full h-full relative' >
-      <div className='w-full h-full'>
+    <div className='w-full h-full  relative' >
+      <div className='w-full bg-red-300 h-full'>
         <VideoPlayer videoId={videoId}/>
       </div>
     </div>

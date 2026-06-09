@@ -23,126 +23,24 @@ import {
   MediaTimeRange,
   MediaVolumeRange,
 } from "media-chrome/react";
-import Hls from "hls.js";
-import {
-  Download,
-  ListVideo,
-  Pause,
-  Play,
-  RotateCcw,
-  Settings,
-  X,
-} from "lucide-react";
+import { Pause, Play } from "lucide-react";
 
+import { motion } from "motion/react";
 import VolumeControls from "./VolumeControls";
-
-export type generalType = {
-  ctaEnabled: boolean;
-  autoplay: boolean;
-  preload: boolean;
-  loop: boolean;
-  captions: boolean;
-};
-
-export type controlsType = {
-  downloadButton: boolean;
-  disableSeekbar: boolean;
-  showControls: boolean;
-  skipForward: boolean;
-  skipBackward: boolean;
-  fullScreen: boolean;
-  volume: boolean;
-  playbackRate: boolean;
-  pipButton: boolean;
-  muteButton: boolean;
-};
-
-export type brandingType = {
-  logoUrl: string;
-  logoPosition: string;
-  logoWidth: number;
-  primaryColor: string;
-  accentColor: string;
-  iconColor: string;
-  backgroundColor: string;
-};
-
-export type securityType = {
-  watermarkEnabled: boolean;
-  watermarkTextType: "viewer_email" | "viewer_ip" | "none";
-  watermarkImage: string;
-};
-
-export type ctaType = {
-  ctaEnabled: boolean;
-  timeTrigger: number;
-  heading: string;
-  buttonText: string;
-  redirectUrl: string;
-};
-
-export type VideoPlayerSettings = {
-  general: generalType;
-  controls: controlsType;
-  branding: brandingType;
-  security: securityType;
-  cta?: ctaType;
-};
-
-export interface VideoAsset {
-  id: string;
-  title: string;
-  videoKey: string;
-  size: number;
-  duration: number;
-  isPrivate: boolean;
-  status: string;
-  thumbnail: string;
-  masterKey: string;
-  resolutions: string[] | any[];
-  folderId: string | null;
-  WorkspaceId: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface VideoPlayerMetaData {
-  id: string;
-  workspaceId: string;
-  general_settings: generalType;
-  control_settings: controlsType;
-  branding_settings: brandingType;
-  security_settings: securityType;
-  advanced_settings: {
-    cta?: ctaType;
-    captions?: CaptionTrack[];
-    viewerEmail?: string;
-    viewerIp?: string;
-    signedDownloadUrl?: string;
-  } | null;
-}
-
-type CaptionTrack = {
-  src: string;
-  label: string;
-  srcLang: string;
-  default?: boolean;
-};
-
-type PlayerSource = {
-  label: string;
-  src: string;
-  type?: "video/mp4" | "application/x-mpegURL";
-};
-
-type ProductionVideoPlayerProps = {
-  asset: VideoAsset;
-  player: VideoPlayerMetaData;
-  cdnBaseUrl: string;
-  className?: string;
-  onProgress?: (payload: { videoId: string; currentTime: number }) => void;
-  onEnded?: (payload: { videoId: string }) => void;
-};
+import {
+  brandingType,
+  ProductionVideoPlayerProps,
+  
+  VideoPlayerMetaData,
+} from "@/modules/types";
+import {
+  buildSources,
+  CtaOverlay,
+  joinCdnUrl,
+  LogoOverlay,
+  useHlsSource,
+  Watermark,
+} from "./temp";
 
 const DEFAULT_BRAND: brandingType = {
   logoUrl: "",
@@ -154,224 +52,8 @@ const DEFAULT_BRAND: brandingType = {
   backgroundColor: "#050608",
 };
 
-const chromeButtonClass =
-  "grid h-9 w-9 shrink-0 place-items-center rounded-md text-[color:var(--vp-icon)] transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--vp-accent)]";
-
 function cx(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
-}
-
-function joinCdnUrl(baseUrl: string, key: string) {
-  if (!key) return "";
-  if (/^https?:\/\//i.test(key)) return key;
-  return `${baseUrl.replace(/\/$/, "")}/${key.replace(/^\//, "")}`;
-}
-
-function parseSourceType(src: string): PlayerSource["type"] {
-  return src.includes(".m3u8") ? "application/x-mpegURL" : "video/mp4";
-}
-
-function buildSources(asset: VideoAsset, cdnBaseUrl: string): PlayerSource[] {
-  const masterSrc = joinCdnUrl(cdnBaseUrl, asset.masterKey || asset.videoKey);
-  const sources: PlayerSource[] = masterSrc
-    ? [
-        {
-          label: asset.masterKey?.includes(".m3u8") ? "Auto" : "Original",
-          src: masterSrc,
-          type: parseSourceType(masterSrc),
-        },
-      ]
-    : [];
-
-  for (const item of asset.resolutions || []) {
-    if (typeof item === "string") {
-      const src = joinCdnUrl(cdnBaseUrl, item);
-      sources.push({
-        label: item.match(/(\d{3,4}p)/)?.[1] || "MP4",
-        src,
-        type: parseSourceType(src),
-      });
-      continue;
-    }
-
-    if (item?.url || item?.key) {
-      const src = joinCdnUrl(cdnBaseUrl, item.url || item.key);
-      sources.push({
-        label: item.label || item.quality || item.resolution || "MP4",
-        src,
-        type: parseSourceType(src),
-      });
-    }
-  }
-
-  const source = Array.from(
-    new Map(
-      sources
-        .filter((source) => source.src)
-        .map((source) => [source.src, source]),
-    ).values(),
-  );
-
-  console.log(source, "789456123");
-  return source;
-}
-
-function useHlsSource(
-  videoRef: React.RefObject<HTMLVideoElement | null>,
-  source?: PlayerSource,
-) {
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !source?.src) return;
-
-    if (source.type !== "application/x-mpegURL") {
-      video.src = source.src;
-      return;
-    }
-
-    if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = source.src;
-      return;
-    }
-
-    if (!Hls.isSupported()) return;
-
-    const hls = new Hls({
-      enableWorker: true,
-      lowLatencyMode: true,
-      backBufferLength: 90,
-    });
-
-    hls.loadSource(source.src);
-    hls.attachMedia(video);
-
-    return () => hls.destroy();
-  }, [source, videoRef]);
-}
-
-function OverlayButton({
-  children,
-  label,
-  onClick,
-}: {
-  children: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      className={chromeButtonClass}
-      type="button"
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
-}
-
-function LogoOverlay({ branding }: { branding: brandingType }) {
-  if (!branding.logoUrl) return null;
-
-  const positionClass: Record<string, string> = {
-    "top-left": "left-4 top-4",
-    "top-right": "right-4 top-4",
-    "bottom-left": "bottom-[74px] left-4",
-    "bottom-right": "bottom-[74px] right-4",
-  };
-
-  return (
-    <img
-      className={cx(
-        "pointer-events-none absolute z-20 h-auto max-w-[22%] drop-shadow-[0_5px_12px_rgba(0,0,0,0.35)]",
-        positionClass[branding.logoPosition] || positionClass["top-right"],
-      )}
-      src={branding.logoUrl}
-      alt=""
-      style={{ width: Math.max(32, branding.logoWidth || 80) }}
-    />
-  );
-}
-
-function Watermark({
-  security,
-  viewerEmail,
-  viewerIp,
-}: {
-  security: securityType;
-  viewerEmail?: string;
-  viewerIp?: string;
-}) {
-  if (!security.watermarkEnabled) return null;
-
-  const text =
-    security.watermarkTextType === "viewer_email"
-      ? viewerEmail
-      : security.watermarkTextType === "viewer_ip"
-        ? viewerIp
-        : "";
-
-  if (security.watermarkImage) {
-    return (
-      <img
-        className="pointer-events-none absolute left-[10%] top-[18%] z-20 h-auto w-[min(160px,22%)] select-none opacity-40"
-        src={security.watermarkImage}
-        alt=""
-      />
-    );
-  }
-
-  if (!text) return null;
-
-  return (
-    <span className="pointer-events-none absolute left-[10%] top-[18%] z-20 select-none rounded border border-white/15 bg-black/25 px-2 py-1 font-mono text-xs leading-none text-white/65 opacity-45">
-      {text}
-    </span>
-  );
-}
-
-function CtaOverlay({
-  cta,
-  accentColor,
-  onClose,
-}: {
-  cta: ctaType;
-  accentColor: string;
-  onClose: () => void;
-}) {
-  return (
-    <div
-      className="absolute inset-0 z-40 grid place-items-center bg-black/75 p-4 backdrop-blur-md"
-      role="dialog"
-      aria-modal="true"
-      aria-label={cta.heading}
-    >
-      <button
-        className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-        type="button"
-        aria-label="Close CTA"
-        onClick={onClose}
-      >
-        <X size={18} />
-      </button>
-
-      <div className="w-full max-w-[420px] rounded-lg border border-white/15 bg-[#0a0c10]/95 p-7 text-center shadow-2xl shadow-black/40">
-        <p className="mb-5 text-balance text-xl font-bold leading-tight text-white sm:text-2xl">
-          {cta.heading}
-        </p>
-        <a
-          className="inline-flex min-h-11 items-center justify-center rounded-md px-5 text-sm font-bold text-[#061015] no-underline transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          href={cta.redirectUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ backgroundColor: accentColor }}
-        >
-          {cta.buttonText || "Learn more"}
-        </a>
-      </div>
-    </div>
-  );
 }
 
 export default function ProductionVideoPlayer({
@@ -543,10 +225,22 @@ export default function ProductionVideoPlayer({
   }, [controls.disableSeekbar, togglePlay]);
 
   return (
-    <div className={cx("w-full overflow-hidden ", className)} style={cssVars}>
+    <div
+      className={cx(
+        "w-full h-full min-h-screen flex flex-col items-center bg-black",
+        className,
+      )}
+      style={cssVars}
+    >
       <MediaController
-        style={{ ["--media-background-color" as any]: "transparent" }}
-        className="relative z-0 aspect-video w-full abg-[color:var(--vp-bg)] font-sans"
+        style={{
+          ["--media-background-color" as any]: "transparent",
+          width: "100%",
+          height: "100%", // 🚀 FORCES vertical expansion
+          display: "flex", // 🚀 Swapped 'block' for 'flex' to keep layers organized
+          flexDirection: "column",
+        }}
+        className="relative z-0 w-full h-full max-h-screen font-sans"
       >
         <button
           type="button"
@@ -558,7 +252,7 @@ export default function ProductionVideoPlayer({
           ref={videoRef}
           // src={""}
           slot="media"
-          className="h-full w-full cursor-pointer object-contain"
+          className="h-full w-full cursor-pointer object-cover md:object-contain"
           poster={
             "https://pub-db02f4666efb4ae9b337950ff0610772.r2.dev/blogimages/4372937.webp"
           }
@@ -581,7 +275,7 @@ export default function ProductionVideoPlayer({
           ) : null}
 
           {general.captions &&
-            advanced.captions?.map((track) => (
+            advanced.captions?.map((track: any) => (
               <track
                 key={`${track.srcLang}-${track.src}`}
                 kind="subtitles"
@@ -597,25 +291,38 @@ export default function ProductionVideoPlayer({
           slot="centered-chrome"
           className="scale-125 text-[color:var(--vp-accent)]"
         />
-       { !isPlaying && <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-transparent">
-          <button
-            style={{ background: branding.primaryColor }}
-            className={cx(
-              "pointer-events-auto grid size-12 sm:size-14 md:size-18 place-items-center rounded-full border-0 bg-[color:var(--vp-accent)] text-white shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white amax-sm:h-[58px] amax-sm:w-[58px]",
-              isPlaying && "pointer-events-none opacity-0",
-            )}
-            slot="centered-chrome"
-            type="button"
-            aria-label={isPlaying ? "Pause" : "Play"}
-            onClick={togglePlay}
-          >
-            {isPlaying ? (
-              <Pause className="size-6 md:size-10" fill="currentColor" />
-            ) : (
-              <Play fill="currentColor" className="size-6 md:size-10" />
-            )}
-          </button>
-        </div>}
+        {!isPlaying && (
+          <div className="pointer-events-none  absolute inset-0 flex items-center justify-center bg-transparent">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.3, y: "-50%", x: "-50%" }}
+              animate={{ opacity: 1, scale: 1, y: "-50%", x: "-50%" }}
+              transition={{
+                type: "spring",
+                stiffness: 800,
+                damping: 25,
+                duration: 0.3,
+              }}
+            >
+              <button
+                style={{ background: branding.primaryColor }}
+                className={cx(
+                  "pointer-events-auto grid size-12 sm:size-14 md:size-20 place-items-center rounded-full border-none bg-[color:var(--vp-accent)] text-white shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white amax-sm:h-[58px] amax-sm:w-[58px]",
+                  isPlaying && "pointer-events-none opacity-0",
+                )}
+                slot="centered-chrome"
+                type="button"
+                aria-label={isPlaying ? "Pause" : "Play"}
+                onClick={togglePlay}
+              >
+                {isPlaying ? (
+                  <Pause className="size-6 md:size-10" fill="currentColor" />
+                ) : (
+                  <Play fill="currentColor" className="size-6 md:size-10" />
+                )}
+              </button>
+            </motion.div>
+          </div>
+        )}
 
         <LogoOverlay branding={branding} />
 
@@ -636,12 +343,12 @@ export default function ProductionVideoPlayer({
           />
         ) : null}
 
-        <section className="absolute bottom-0 left-0 right-0 z-30  w-full px-3 pb-3">
+        <section className="absolute overflow-visible bottom-0 left-0 right-0 z-30  w-full px-3 pb-3">
           <div
             style={{
               background: branding.backgroundColor,
             }}
-            className="flex w-full items-center justify-center px-2 h-8 rounded-lg relative overflow-visible"
+            className="flex w-full items-center justify-center px-2 h-8 rounded-lg relative overflow-visibles"
           >
             <MediaControlBar
               style={{
@@ -649,15 +356,14 @@ export default function ProductionVideoPlayer({
                 ["--media-control-hover-background" as any]: "transparent",
                 boxShadow: "none",
                 background: "transparent",
-                // 🚀 Locks execution strictly flat against the container canvas bounds
                 margin: 0,
                 bottom: 0,
               }}
-              className="w-full relative bg-transparent border-none outline-none flex items-center h-11"
+              className="w-full px-1 overflow-hiddenz relative bg-transparent min-h-full border-none space-x-2 outline-none flex items-center h-11 "
             >
               <MediaPlayButton
                 className="size-4 lg:size-5"
-                style={{ background: "transparent" }}
+                style={{ background: "" }}
               />
 
               {controls.skipBackward && (
@@ -676,11 +382,13 @@ export default function ProductionVideoPlayer({
               )}
 
               {controls.volume && (
-                <VolumeControls
-                  // className="size-4 lg:size-5"
-                  videoRef={videoRef}
-                  iconColor={branding.iconColor}
-                />
+                <div className="relative flex h-full shrink-0 items-center">
+                  <VolumeControls
+                    trackColor={branding.accentColor}
+                    videoRef={videoRef}
+                    iconColor={branding.iconColor}
+                  />
+                </div>
               )}
 
               <MediaTimeDisplay
@@ -729,3 +437,4 @@ export default function ProductionVideoPlayer({
     </div>
   );
 }
+
