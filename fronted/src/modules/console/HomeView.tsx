@@ -8,7 +8,7 @@ function HomeView() {
     <div className="px-4 py-6">
       <div>
         <iframe
-          className="h-70 border-0"
+          className="h-50 border-0"
           loading="lazy"
           title="Gumlet video player"
           src="http://localhost:4000/embed/61e7fb1b-1aeb-4863-b325-ff83d0b63e1d"

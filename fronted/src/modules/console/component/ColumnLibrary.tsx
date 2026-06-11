@@ -220,7 +220,7 @@ export const libraryColumn: ColumnDef<LibraryType>[] = [
                 unoptimized
                 src={row.original.thumbnailUrl ?? "/video-player.png"}
                 alt={row.original.name}
-                className="w-28 h-18 rounded-lg object-contain border"
+                className="w-28 h-18 rounded-lg object-cover border"
               />
             ) : (
               <div className="bg-blue-50 lg:w-28 lg:h-18 rounded-xl flex items-center justify-center">
