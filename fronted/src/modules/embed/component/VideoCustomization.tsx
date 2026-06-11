@@ -30,7 +30,6 @@ import VolumeControls from "./VolumeControls";
 import {
   brandingType,
   ProductionVideoPlayerProps,
-  
   VideoPlayerMetaData,
 } from "@/modules/types";
 import {
@@ -41,6 +40,9 @@ import {
   useHlsSource,
   Watermark,
 } from "./temp";
+import Image from "next/image";
+import BrandLogo from "./BrandLogo";
+import VideoSettings from "./VideoSettings";
 
 const DEFAULT_BRAND: brandingType = {
   logoUrl: "",
@@ -77,6 +79,7 @@ export default function ProductionVideoPlayer({
   const controls = player.control_settings;
   const branding = { ...DEFAULT_BRAND, ...player.branding_settings };
   const security = player.security_settings;
+
   const advanced: NonNullable<VideoPlayerMetaData["advanced_settings"]> =
     player.advanced_settings || {};
   const cta = advanced.cta;
@@ -224,23 +227,34 @@ export default function ProductionVideoPlayer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [controls.disableSeekbar, togglePlay]);
 
+  const handleSpeedChange = (speed: number) => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = speed;
+    }
+  };
   return (
     <div
       className={cx(
-        "w-full h-full min-h-screen flex flex-col items-center bg-black",
+        "flex h-full min-h-0 w-full flex-col items-center overflow-hidden relative",
         className,
       )}
       style={cssVars}
     >
+      {/* <div className="bg-red-200 absolute">
+      a
+      </div> */}
+
+      {/* <div className="bg-black absolute w-full h-full z-0 "/> */}
+
       <MediaController
         style={{
           ["--media-background-color" as any]: "transparent",
           width: "100%",
-          height: "100%", // 🚀 FORCES vertical expansion
-          display: "flex", // 🚀 Swapped 'block' for 'flex' to keep layers organized
+          height: "100%",
+          display: "block",
           flexDirection: "column",
         }}
-        className="relative z-0 w-full h-full max-h-screen font-sans"
+        className="relative z-0 h-full w-full font-sans"
       >
         <button
           type="button"
@@ -248,19 +262,30 @@ export default function ProductionVideoPlayer({
           aria-label={isPlaying ? "Pause video" : "Play video"}
           onClick={togglePlay}
         />
+
+        {!hasStarted && poster && (
+          <Image
+            height={100}
+            width={100}
+            unoptimized
+            src={
+              "https://pub-db02f4666efb4ae9b337950ff0610772.r2.dev/blogimages/IMG_20240527_091317-1200x630.jpg"
+            }
+            alt="Video Thumbnail Placeholder"
+            className="absolute inset-0 z-20 w-full h-full cursor-pointer poster-img object-contain lg:object-covezr bg-black"
+            onClick={togglePlay}
+          />
+        )}
+
         <video
           ref={videoRef}
-          // src={""}
           slot="media"
-          className="h-full w-full cursor-pointer object-cover md:object-contain"
-          poster={
-            "https://pub-db02f4666efb4ae9b337950ff0610772.r2.dev/blogimages/4372937.webp"
-          }
+          className="h-full w-full cursor-pointer  video-ref-embed object-contain bg-black"
           playsInline
           muted={general.autoplay}
           autoPlay={general.autoplay}
           loop={general.loop}
-          preload={general.preload ? "auto" : "metadata"}
+          preload={general.autoplay ? "auto" : "none"}
           crossOrigin="anonymous"
           controlsList={
             asset.isPrivate ? "nodownload noplaybackrate" : undefined
@@ -292,8 +317,9 @@ export default function ProductionVideoPlayer({
           className="scale-125 text-[color:var(--vp-accent)]"
         />
         {!isPlaying && (
-          <div className="pointer-events-none  absolute inset-0 flex items-center justify-center bg-transparent">
+          <div className="pointer-events-none relative w-full h-full inset-0 flex items-center justify-center bg-transparent">
             <motion.div
+              className="absolute z-20  translate-1/2"
               initial={{ opacity: 0, scale: 0.3, y: "-50%", x: "-50%" }}
               animate={{ opacity: 1, scale: 1, y: "-50%", x: "-50%" }}
               transition={{
@@ -306,7 +332,7 @@ export default function ProductionVideoPlayer({
               <button
                 style={{ background: branding.primaryColor }}
                 className={cx(
-                  "pointer-events-auto grid size-12 sm:size-14 md:size-20 place-items-center rounded-full border-none bg-[color:var(--vp-accent)] text-white shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white amax-sm:h-[58px] amax-sm:w-[58px]",
+                  "  pointer-events-auto grid size-12 sm:size-14 md:size-20 place-items-center rounded-full border-none bg-[color:var(--vp-accent)] text-white shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white amax-sm:h-[58px] amax-sm:w-[58px]",
                   isPlaying && "pointer-events-none opacity-0",
                 )}
                 slot="centered-chrome"
@@ -343,12 +369,12 @@ export default function ProductionVideoPlayer({
           />
         ) : null}
 
-        <section className="absolute overflow-visible bottom-0 left-0 right-0 z-30  w-full px-3 pb-3">
+        <section className="absolute bottom-0 left-0 right-0 z-30 w-full overflow-visible px-2 pb-1 sm:px-3 sm:pb-3">
           <div
             style={{
               background: branding.backgroundColor,
             }}
-            className="flex w-full items-center justify-center px-2 h-8 rounded-lg relative overflow-visibles"
+            className="relative flex max-h-6 min-h-8 md:max-h-full md:min-h-10 w-full items-center justify-center overflow-visible rounded-lg px-1.5 sm:px-2"
           >
             <MediaControlBar
               style={{
@@ -359,30 +385,30 @@ export default function ProductionVideoPlayer({
                 margin: 0,
                 bottom: 0,
               }}
-              className="w-full px-1 overflow-hiddenz relative bg-transparent min-h-full border-none space-x-2 outline-none flex items-center h-11 "
+              className="relative flex md:h-10 md:min-h-10 w-full min-w-0 items-center gap-1 overflow-visible border-none bg-transparent px-0.5 outline-none sm:gap-2 sm:px-1"
             >
               <MediaPlayButton
-                className="size-4 lg:size-5"
-                style={{ background: "" }}
+                className=" size-4 md:size-5  lg:size-6 shrink-0"
+                style={{ background: "transparent" }}
               />
 
               {controls.skipBackward && (
                 <MediaSeekBackwardButton
-                  className="size-4 lg:size-5"
+                  className="hidden  size-4 md:size-5  lg:size-6 shrink-0 sm:block"
                   style={{ background: "transparent" }}
                   seekOffset={10}
                 />
               )}
               {controls.skipForward && (
                 <MediaSeekForwardButton
-                  className="size-4 lg:size-5"
+                  className="hidden  size-4 md:size-5  lg:size-6 shrink-0 sm:block"
                   seekOffset={10}
                   style={{ background: "transparent" }}
                 />
               )}
 
               {controls.volume && (
-                <div className="relative flex h-full shrink-0 items-center">
+                <div className="relative flex h-full w-8 shrink-0 items-center justify-center">
                   <VolumeControls
                     trackColor={branding.accentColor}
                     videoRef={videoRef}
@@ -392,44 +418,51 @@ export default function ProductionVideoPlayer({
               )}
 
               <MediaTimeDisplay
-                className="size-4 lg:size-5"
+                className="hidden shrink-0 px-1 text-[12.40px] md:text-[14px] lg:text-[16px] leading-none sm:block font-medium"
                 remaining={false}
                 show-duration={false}
-                style={{ background: "transparent", color: branding.iconColor }}
+                style={{
+                  background: "transparent",
+                  color: branding.iconColor,
+                  lineHeight: "32px",
+                }}
               />
 
               <MediaTimeRange
-                className="size-4 lg:size-5"
+                className="h-8 min-w-0 flex-1"
                 style={{ background: "transparent" }}
               />
 
+              <VideoSettings handleSpeedChange={handleSpeedChange} handleQualityChange={handleQualityChange} iconColor={branding.iconColor} />
               {general.captions && (
                 <MediaCaptionsButton
-                  className="size-4 lg:size-5"
+                  className="hidden  size-4 md:size-5  lg:size-6 shrink-0 sm:block"
                   style={{ background: "transparent" }}
                 />
               )}
 
               {controls.playbackRate && (
                 <MediaPlaybackRateButton
-                  className="size-4 lg:size-5"
+                  className="hidden  size-4 md:size-5  lg:size-6 shrink-0 sm:block"
                   style={{ background: "transparent" }}
                 />
               )}
 
               {controls.pipButton && (
                 <MediaPipButton
-                  className="size-4 lg:size-5"
+                  className="hidden  size-4 md:size-5  lg:size-6 shrink-0 sm:block"
                   style={{ background: "transparent" }}
                 />
               )}
 
               {controls.fullScreen && (
                 <MediaFullscreenButton
-                  className="size-4 lg:size-5"
+                  className=" size-4 md:size-5  lg:size-6 shrink-0"
                   style={{ background: "transparent" }}
                 />
               )}
+
+              {true && <BrandLogo />}
             </MediaControlBar>
           </div>
         </section>
@@ -437,4 +470,3 @@ export default function ProductionVideoPlayer({
     </div>
   );
 }
-

@@ -137,6 +137,10 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body {
+    min-height: 100%;
+  }
   body {
     @apply bg-background text-foreground;
   }
@@ -339,6 +343,25 @@ body{
   padding: 0;
   margin: 0;
 }
+
+
+
+@media (max-width: 300px) {
+  .video-ref-embed {
+    object-fit: cover !important;
+  }
+  .poster-img{
+    object-position: center;
+    object-fit: cover !important;
+  }
+}
+@media (max-width: 600px) {
+  .videoplayer-bg-black {
+    background: black;
+  }
+}
+  
+
 
 media-controller {
   display: block !important;

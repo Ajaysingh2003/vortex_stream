@@ -1,11 +1,12 @@
 import subprocess
 import os
 import sys
+
 resolutions=[
-    {"name":"1080p","width":1920,"height":1080,"bitrate":"5000k"},
-    {"name":"720p","width":1280,"height":720,"bitrate":"2800k"},
-    {"name":"480p","width":854,"height":480,"bitrate":"1400k"},
     {"name":"360p","width":640,"height":360,"bitrate":"800k"},
+    {"name":"480p","width":854,"height":480,"bitrate":"1400k"},
+    {"name":"720p","width":1280,"height":720,"bitrate":"2800k"},
+    {"name":"1080p","width":1920,"height":1080,"bitrate":"5000k"},
 ]
 
 def transcode(input_path:str,video_id :str):
@@ -21,7 +22,6 @@ def transcode(input_path:str,video_id :str):
     generate_master_playlist(output_dir)
 
     return output_dir
-
 
 def process(res:dict,input_path:str,output_path:str):
 
@@ -62,7 +62,8 @@ def process(res:dict,input_path:str,output_path:str):
     "-sc_threshold", "0",  
     
     "-f", "hls",
-    "-hls_time", "10",
+    "-hls_time", "2",
+    "-hls_flags", "independent_segments",
     "-hls_list_size", "0",
     "-hls_segment_filename", output_segments,
     "-hls_playlist_type", "vod",
@@ -91,7 +92,6 @@ def process(res:dict,input_path:str,output_path:str):
     except Exception as e:
         print(f"error: unexpected error transcoding {name} — {e}")
         sys.exit(1)
-
 
 def generate_master_playlist(output_dir: str):
     print("generating master playlist...")
