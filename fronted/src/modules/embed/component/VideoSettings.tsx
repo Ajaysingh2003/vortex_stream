@@ -8,32 +8,39 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import CustomVolum from "./CustomSpeed";
-import CustomVolume from "./CustomSpeed";
 import CustomQuality from "./CustomQuality";
 import { Button } from "@/components/ui/button";
 import CustomSpeed from "./CustomSpeed";
 import { VideoResolutionType } from "@/modules/types";
 function VideoSettings({
+  isNativeSafari,
   iconColor,
+  setSettingOpen,
   currentResolution,
   handleSpeedChange,
   handleQualityChange,
-  resolutions,
-  currentVolume
+  settingOpen,
+  currentSpeed,
 }: {
   iconColor: string;
-  currentResolution:VideoResolutionType | null;
-  handleSpeedChange: (e:number) => void;
-  handleQualityChange: (e:VideoResolutionType | null) => void;
-  resolutions:VideoResolutionType[];
-  currentVolume:number
+  setSettingOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  currentResolution: VideoResolutionType | null;
+  handleSpeedChange: (e: number) => void;
+  handleQualityChange: (e: VideoResolutionType) => void;
+  settingOpen: boolean;
+  currentSpeed: number;
+  isNativeSafari: boolean;
 }) {
   const [selected, setSelected] = useState<"speed" | "quality" | null>();
 
   return (
     <div className="">
-      <Popover>
+      <Popover
+        open={settingOpen}
+        onOpenChange={(e) => {
+          setSettingOpen(e);
+        }}
+      >
         <PopoverTrigger asChild>
           <button className="">
             <Settings
@@ -61,31 +68,44 @@ function VideoSettings({
           )}
 
           {selected == "speed" ? (
-            <CustomSpeed currentVolume={currentVolume} handleSpeedChange={handleSpeedChange} />
-          ) : selected == "quality" ? (
-            <CustomQuality resolutions={resolutions} currentResolution={currentResolution}  handleQualityChange={handleQualityChange} />
+            <CustomSpeed
+              currentSpeed={currentSpeed}
+              handleSpeedChange={handleSpeedChange}
+            />
+          ) : selected == "quality" && !isNativeSafari ? (
+            <CustomQuality
+              currentResolution={currentResolution}
+              handleQualityChange={handleQualityChange}
+            />
           ) : (
             <div className="flex items-center flex-col gap-0">
-              <Button
-                className="w-full text-md tracking-wider flex items-center justify-between  rounded-md bg-transparent capitalize hover:bg-white/30"
-                onClick={() => setSelected("quality")}
-              >
-                <span>{" Quality "} </span>
-                {  currentResolution ==null && <span className="flex items-center gap-1">
-                  {"Auto "} <ChevronRight className="size-3" />
-                </span>}
-                {  currentResolution !=null && <span className="flex items-center gap-1">
-                  {currentResolution.resolution} <ChevronRight className="size-3" />
-                </span>}
-                
-              </Button>
+              {
+               !isNativeSafari &&  <Button
+                  className="w-full text-md tracking-wider flex items-center justify-between  rounded-md bg-transparent capitalize hover:bg-white/30"
+                  onClick={() => setSelected("quality")}
+                >
+                  <span>{" Quality "} </span>
+                  {currentResolution == null && (
+                    <span className="flex items-center gap-1">
+                      {"Auto "} <ChevronRight className="size-3" />
+                    </span>
+                  )}
+                  {currentResolution != null && (
+                    <span className="flex items-center gap-1">
+                      {currentResolution.resolution}{" "}
+                      <ChevronRight className="size-3" />
+                    </span>
+                  )}
+                </Button>
+              }
+
               <Button
                 className="w-full text-md tracking-wider flex items-center justify-between  rounded-md bg-transparent capitalize hover:bg-white/30"
                 onClick={() => setSelected("speed")}
               >
                 <span>{" speed "}</span>
                 <span className="flex items-center gap-1">
-                  {"Auto"} <ChevronRight className="size-3" />
+                  {`${currentSpeed}x`} <ChevronRight className="size-3" />
                 </span>
               </Button>
             </div>

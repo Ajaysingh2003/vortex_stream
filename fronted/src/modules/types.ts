@@ -165,13 +165,8 @@ export interface FeatureItem {
 
 
 export type VideoResolutionType={
-
-  id:string;
-  video_id:string;
+  index:number
   resolution:string;
-  playlist_path:string;
-  size:null;
-  created_at:string
 
 }
 
@@ -205,25 +200,6 @@ export interface VideoPlayerMetaData{
   security_settings:securityType,
   advanced_settings:any
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 export type generalType = {

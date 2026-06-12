@@ -92,14 +92,16 @@ export default function ProductionVideoPlayer({
   );
 
   const selectedSource = sources[selectedSourceIndex] || sources[0];
-  const [currentVolume, setCurrentVolume] = useState<number>(0);
+  const [currentSpeed, setCurrentSpeed ] = useState<number>(1);
   console.log(selectedSource, "ocean");
+
   const poster = asset.thumbnail
     ? joinCdnUrl(cdnBaseUrl, asset.thumbnail)
     : undefined;
+  console.log()
+  const { hlsRef, isSupported , isNativeSafari } = useHlsSource(videoRef, selectedSource);
 
-  useHlsSource(videoRef, selectedSource);
-
+  console.log(isSupported,"lollolajay")
   const cssVars = {
     "--vp-primary": branding.primaryColor,
     "--vp-accent": branding.accentColor,
@@ -157,34 +159,13 @@ export default function ProductionVideoPlayer({
   }, [asset.id, cta, general.ctaEnabled, onProgress]);
 
   const handleQualityChange = useCallback(
-    (resolutions: VideoResolutionType | null) => {
-      const video = videoRef.current;
-
-      if (!video) return;
-
-      const wasPlaying = !video.paused;
-      const currentTime = video.currentTime;
-      console.log(currentTime,200) 
-      const currentQualityUrl= resolutions?.playlist_path !=null ? cdnBaseUrl+resolutions.playlist_path : null
-      const masterUrl=cdnBaseUrl + asset.masterKey
-
+    (resolution: VideoResolutionType) => {
+      if (!hlsRef.current) return;
       setSettingsOpen(false);
-      setCurrentResolution(resolutions);
-
-      const nextQualityVersion=currentQualityUrl || masterUrl
-      
-      video.src=nextQualityVersion
-      
-      video.addEventListener("loadedmetadata",async()=>{
-        video.currentTime=currentTime
-
-        if (wasPlaying) {
-          await video.play()
-        }
-      },{once:true})
-
+      setCurrentResolution(resolution);
+      hlsRef.current.currentLevel = resolution.index || -1;
     },
-    [],
+    [cdnBaseUrl, asset.masterKey],
   );
 
   useEffect(() => {
@@ -248,7 +229,9 @@ export default function ProductionVideoPlayer({
   const handleSpeedChange = (speed: number) => {
     if (videoRef.current) {
       videoRef.current.playbackRate = speed;
-      setCurrentVolume((e) => speed);
+
+      setCurrentSpeed(speed);
+      setSettingsOpen(false);
     }
   };
 
@@ -298,6 +281,7 @@ export default function ProductionVideoPlayer({
         )} */}
 
         <video
+          poster= {asset.thumbnail}
           ref={videoRef}
           slot="media"
           className="h-full w-full cursor-pointer  video-ref-embed object-contain bg-black"
@@ -453,14 +437,18 @@ export default function ProductionVideoPlayer({
                 style={{ background: "transparent" }}
               />
 
-              <VideoSettings
-                currentVolume={currentVolume}
-                currentResolution={currentResolution}
-                resolutions={asset.resolutions}
-                handleSpeedChange={handleSpeedChange}
-                handleQualityChange={handleQualityChange}
-                iconColor={branding.iconColor}
-              />
+              {
+                <VideoSettings
+                  isNativeSafari={isNativeSafari}
+                  currentSpeed={currentSpeed}
+                  currentResolution={currentResolution}
+                  settingOpen={settingsOpen}
+                  setSettingOpen={setSettingsOpen}
+                  handleSpeedChange={handleSpeedChange}
+                  handleQualityChange={handleQualityChange}
+                  iconColor={branding.iconColor}
+                />
+              }
 
               {general.captions && (
                 <MediaCaptionsButton
