@@ -1,4 +1,10 @@
-import { brandingType, ctaType, PlayerSource, securityType, VideoAsset } from "@/modules/types";
+import {
+  brandingType,
+  ctaType,
+  PlayerSource,
+  securityType,
+  VideoAsset,
+} from "@/modules/types";
 import { cx } from "class-variance-authority";
 import { X } from "lucide-react";
 import { useEffect } from "react";
@@ -14,7 +20,10 @@ export function parseSourceType(src: string): PlayerSource["type"] {
   return src.includes(".m3u8") ? "application/x-mpegURL" : "video/mp4";
 }
 
-export function buildSources(asset: VideoAsset, cdnBaseUrl: string): PlayerSource[] {
+export function buildSources(
+  asset: VideoAsset,
+  cdnBaseUrl: string,
+): PlayerSource[] {
   const masterSrc = joinCdnUrl(cdnBaseUrl, asset.masterKey || asset.videoKey);
   const sources: PlayerSource[] = masterSrc
     ? [
@@ -25,7 +34,7 @@ export function buildSources(asset: VideoAsset, cdnBaseUrl: string): PlayerSourc
         },
       ]
     : [];
-
+      
   for (const item of asset.resolutions || []) {
     if (typeof item === "string") {
       const src = joinCdnUrl(cdnBaseUrl, item);
@@ -85,9 +94,16 @@ export function useHlsSource(
       backBufferLength: 90,
     });
 
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      console.log(hls.levels);
+    });
+
     hls.loadSource(source.src);
     hls.attachMedia(video);
-
+    
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+  console.log(hls.levels,"");
+});
     return () => hls.destroy();
   }, [source, videoRef]);
 }
@@ -101,10 +117,8 @@ export function OverlayButton({
   label: string;
   onClick: () => void;
 }) {
-
-    const chromeButtonClass =
-  "grid h-9 w-9 shrink-0 place-items-center rounded-md text-[color:var(--vp-icon)] transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--vp-accent)]";
-
+  const chromeButtonClass =
+    "grid h-9 w-9 shrink-0 place-items-center rounded-md text-[color:var(--vp-icon)] transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--vp-accent)]";
 
   return (
     <button

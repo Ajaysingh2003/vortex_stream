@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
+
 function VolumeControls({
   videoRef,
   iconColor,

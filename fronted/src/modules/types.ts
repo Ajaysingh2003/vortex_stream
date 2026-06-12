@@ -164,6 +164,18 @@ export interface FeatureItem {
 }
 
 
+export type VideoResolutionType={
+
+  id:string;
+  video_id:string;
+  resolution:string;
+  playlist_path:string;
+  size:null;
+  created_at:string
+
+}
+
+
 export interface VideoAsset {
   id: string;
   title: string;
@@ -174,7 +186,7 @@ export interface VideoAsset {
   status: string;
   thumbnail: string;
   masterKey: string;
-  resolutions: string[] | any[];
+  resolutions: VideoResolutionType[]; 
   folderId: string | null;
   WorkspaceId: string;
   createdAt: string;
@@ -267,23 +279,6 @@ export type VideoPlayerSettings = {
   cta?: ctaType;
 };
 
-export interface VideoAsset {
-  id: string;
-  title: string;
-  videoKey: string;
-  size: number;
-  duration: number;
-  isPrivate: boolean;
-  status: string;
-  thumbnail: string;
-  masterKey: string;
-  resolutions: string[] | any[];
-  folderId: string | null;
-  WorkspaceId: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 // {
 //     cta?: ctaType;
 //     captions?: CaptionTrack[];
@@ -323,3 +318,4 @@ export type ProductionVideoPlayerProps = {
   onProgress?: (payload: { videoId: string; currentTime: number }) => void;
   onEnded?: (payload: { videoId: string }) => void;
 };
+
