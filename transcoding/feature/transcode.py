@@ -9,6 +9,7 @@ resolutions=[
     {"name":"1080p","width":1920,"height":1080,"bitrate":"5000k"},
 ]
 
+
 def transcode(input_path:str,video_id :str):
     output_dir=f"/tmp/hls/{video_id}"
     os.makedirs(output_dir,exist_ok=True)

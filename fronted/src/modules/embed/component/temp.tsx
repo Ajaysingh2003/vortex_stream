@@ -1,15 +1,15 @@
 import {
   brandingType,
   ctaType,
-  PlayerSource,
+  // PlayerSource,
   securityType,
   VideoAsset,
 } from "@/modules/types";
 import { cx } from "class-variance-authority";
 import { X } from "lucide-react";
-import { useEffect } from "react";
+// import { useEffect, useRef, useState } from "react";
 
-import Hls from "hls.js";
+// import Hls from "hls.js";
 export function joinCdnUrl(baseUrl: string, key: string) {
   if (!key) return "";
   if (/^https?:\/\//i.test(key)) return key;
@@ -68,44 +68,69 @@ export function buildSources(
   return source;
 }
 
+import { useEffect, useRef, useState } from "react";
+import Hls from "hls.js";
+
+// Assuming PlayerSource is defined somewhere in your types
+export type PlayerSource = {
+  src: string;
+  type: string;
+};
+
 export function useHlsSource(
   videoRef: React.RefObject<HTMLVideoElement | null>,
   source?: PlayerSource,
 ) {
+  const hlsRef = useRef<Hls | null>(null);
+  const [isSupported, setIsSupported] = useState(true);
+  const [isNativeSafari, setIsNativeSafari] = useState(false);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !source?.src) return;
 
+    // Reset flags on source change
+    setIsNativeSafari(false);
+    setIsSupported(true);
+
+    // Non-HLS standard progressive video (like MP4)
     if (source.type !== "application/x-mpegURL") {
       video.src = source.src;
       return;
     }
 
-    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    // Modern Safari check: If Hls.js is supported, use it for custom quality control.
+    // Otherwise, fallback to Safari's native engine.
+    if (Hls.isSupported()) {
+      const hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+        backBufferLength: 90,
+      });
+      hlsRef.current = hls;
+
+      hls.loadSource(source.src);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        console.log(hls.levels);
+      });
+
+      return () => hls.destroy();
+    } 
+    // Fallback block for iOS Safari or older macOS Safari where Hls.js won't run
+    else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = source.src;
+      setIsNativeSafari(true); // <-- Flag that native controls are running
       return;
+    } 
+    // Browser doesn't support HLS at all
+    else {
+      setIsSupported(false);
     }
-
-    if (!Hls.isSupported()) return;
-
-    const hls = new Hls({
-      enableWorker: true,
-      lowLatencyMode: true,
-      backBufferLength: 90,
-    });
-
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      console.log(hls.levels);
-    });
-
-    hls.loadSource(source.src);
-    hls.attachMedia(video);
-    
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-  console.log(hls.levels,"");
-});
-    return () => hls.destroy();
   }, [source, videoRef]);
+
+  return { hlsRef, isSupported, isNativeSafari };
 }
 
 export function OverlayButton({

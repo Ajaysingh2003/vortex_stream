@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 function CustomSpeed({
   handleSpeedChange,
-  currentVolume
+  currentSpeed
 }: {
   handleSpeedChange: (e: number) => void;
-  currentVolume:number
+  currentSpeed:number
 }) {
   const speed = [0.5, 0.75, 1, 1.25, 1.5, 2];
   return (
@@ -21,13 +21,14 @@ function CustomSpeed({
       }}
     >
       <div className="w-full flex flex-col gap-0">
-        {speed.map((e) => (
+        {speed.map((e,i) => (
           <Button
+          key={i}
             className="w-full text-sm md:text-md tracking-wider flex items-center justify-start cursor-pointer  rounded-md bg-transparent capitalize hover:bg-white/30"
             onClick={() => handleSpeedChange(e)}
           >
             <span className="w-4 flex justify-center">
-              {currentVolume === e && (
+              {currentSpeed === e && (
                 <Check className="size-4" />
               )}
             </span>
