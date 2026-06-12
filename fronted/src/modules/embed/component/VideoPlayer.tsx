@@ -19,12 +19,11 @@ function VideoPlayer({ videoId }: { videoId: string }) {
   );
 
   const playerMetaData = player as VideoPlayerMetaData;
-
+  
   return (
     <div className="h-full w-full">
       <ProductionVideoPlayer
         asset={videoData}
-        
         player={playerMetaData}
         cdnBaseUrl="https://pub-12dc6da8688f4147b2b3d9ded1fb45c4.r2.dev/"
       />

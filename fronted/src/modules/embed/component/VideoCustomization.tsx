@@ -31,6 +31,7 @@ import {
   brandingType,
   ProductionVideoPlayerProps,
   VideoPlayerMetaData,
+  VideoResolutionType,
 } from "@/modules/types";
 import {
   buildSources,
@@ -74,7 +75,8 @@ export default function ProductionVideoPlayer({
   const [showCta, setShowCta] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedSourceIndex, setSelectedSourceIndex] = useState(0);
-
+  const [currentResolution, setCurrentResolution] =
+    useState<VideoResolutionType | null>(null);
   const general = player.general_settings;
   const controls = player.control_settings;
   const branding = { ...DEFAULT_BRAND, ...player.branding_settings };
@@ -88,8 +90,9 @@ export default function ProductionVideoPlayer({
     () => buildSources(asset, cdnBaseUrl),
     [asset, cdnBaseUrl],
   );
-  const selectedSource = sources[selectedSourceIndex] || sources[0];
 
+  const selectedSource = sources[selectedSourceIndex] || sources[0];
+  const [currentVolume, setCurrentVolume] = useState<number>(0);
   console.log(selectedSource, "ocean");
   const poster = asset.thumbnail
     ? joinCdnUrl(cdnBaseUrl, asset.thumbnail)
@@ -153,21 +156,36 @@ export default function ProductionVideoPlayer({
     }
   }, [asset.id, cta, general.ctaEnabled, onProgress]);
 
-  const handleQualityChange = useCallback((index: number) => {
-    const video = videoRef.current;
-    const wasPlaying = video ? !video.paused : false;
-    const currentTime = video?.currentTime || 0;
+  const handleQualityChange = useCallback(
+    (resolutions: VideoResolutionType | null) => {
+      const video = videoRef.current;
 
-    setSelectedSourceIndex(index);
-    setSettingsOpen(false);
+      if (!video) return;
 
-    requestAnimationFrame(() => {
-      const nextVideo = videoRef.current;
-      if (!nextVideo) return;
-      nextVideo.currentTime = currentTime;
-      if (wasPlaying) void nextVideo.play();
-    });
-  }, []);
+      const wasPlaying = !video.paused;
+      const currentTime = video.currentTime;
+      console.log(currentTime,200) 
+      const currentQualityUrl= resolutions?.playlist_path !=null ? cdnBaseUrl+resolutions.playlist_path : null
+      const masterUrl=cdnBaseUrl + asset.masterKey
+
+      setSettingsOpen(false);
+      setCurrentResolution(resolutions);
+
+      const nextQualityVersion=currentQualityUrl || masterUrl
+      
+      video.src=nextQualityVersion
+      
+      video.addEventListener("loadedmetadata",async()=>{
+        video.currentTime=currentTime
+
+        if (wasPlaying) {
+          await video.play()
+        }
+      },{once:true})
+
+    },
+    [],
+  );
 
   useEffect(() => {
     const video = videoRef.current;
@@ -230,8 +248,10 @@ export default function ProductionVideoPlayer({
   const handleSpeedChange = (speed: number) => {
     if (videoRef.current) {
       videoRef.current.playbackRate = speed;
+      setCurrentVolume((e) => speed);
     }
   };
+
   return (
     <div
       className={cx(
@@ -263,7 +283,7 @@ export default function ProductionVideoPlayer({
           onClick={togglePlay}
         />
 
-        {!hasStarted && poster && (
+        {/* {!hasStarted && poster && (
           <Image
             height={100}
             width={100}
@@ -275,7 +295,7 @@ export default function ProductionVideoPlayer({
             className="absolute inset-0 z-20 w-full h-full cursor-pointer poster-img object-contain lg:object-covezr bg-black"
             onClick={togglePlay}
           />
-        )}
+        )} */}
 
         <video
           ref={videoRef}
@@ -433,7 +453,15 @@ export default function ProductionVideoPlayer({
                 style={{ background: "transparent" }}
               />
 
-              <VideoSettings handleSpeedChange={handleSpeedChange} handleQualityChange={handleQualityChange} iconColor={branding.iconColor} />
+              <VideoSettings
+                currentVolume={currentVolume}
+                currentResolution={currentResolution}
+                resolutions={asset.resolutions}
+                handleSpeedChange={handleSpeedChange}
+                handleQualityChange={handleQualityChange}
+                iconColor={branding.iconColor}
+              />
+
               {general.captions && (
                 <MediaCaptionsButton
                   className="hidden  size-4 md:size-5  lg:size-6 shrink-0 sm:block"

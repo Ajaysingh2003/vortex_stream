@@ -13,16 +13,23 @@ import CustomVolume from "./CustomSpeed";
 import CustomQuality from "./CustomQuality";
 import { Button } from "@/components/ui/button";
 import CustomSpeed from "./CustomSpeed";
+import { VideoResolutionType } from "@/modules/types";
 function VideoSettings({
   iconColor,
+  currentResolution,
   handleSpeedChange,
   handleQualityChange,
+  resolutions,
+  currentVolume
 }: {
   iconColor: string;
+  currentResolution:VideoResolutionType | null;
   handleSpeedChange: (e:number) => void;
-  handleQualityChange: (e:number) => void;
+  handleQualityChange: (e:VideoResolutionType | null) => void;
+  resolutions:VideoResolutionType[];
+  currentVolume:number
 }) {
-  const [selected, setSelected] = useState<"volume" | "quality" | null>();
+  const [selected, setSelected] = useState<"speed" | "quality" | null>();
 
   return (
     <div className="">
@@ -53,10 +60,10 @@ function VideoSettings({
             </PopoverHeader>
           )}
 
-          {selected == "volume" ? (
-            <CustomSpeed handleSpeedChange={handleSpeedChange} />
+          {selected == "speed" ? (
+            <CustomSpeed currentVolume={currentVolume} handleSpeedChange={handleSpeedChange} />
           ) : selected == "quality" ? (
-            <CustomQuality handleQualityChange={handleQualityChange} />
+            <CustomQuality resolutions={resolutions} currentResolution={currentResolution}  handleQualityChange={handleQualityChange} />
           ) : (
             <div className="flex items-center flex-col gap-0">
               <Button
@@ -64,15 +71,19 @@ function VideoSettings({
                 onClick={() => setSelected("quality")}
               >
                 <span>{" Quality "} </span>
-                <span className="flex items-center gap-1">
+                {  currentResolution ==null && <span className="flex items-center gap-1">
                   {"Auto "} <ChevronRight className="size-3" />
-                </span>
+                </span>}
+                {  currentResolution !=null && <span className="flex items-center gap-1">
+                  {currentResolution.resolution} <ChevronRight className="size-3" />
+                </span>}
+                
               </Button>
               <Button
                 className="w-full text-md tracking-wider flex items-center justify-between  rounded-md bg-transparent capitalize hover:bg-white/30"
-                onClick={() => setSelected("volume")}
+                onClick={() => setSelected("speed")}
               >
-                <span>{" Volume "}</span>
+                <span>{" speed "}</span>
                 <span className="flex items-center gap-1">
                   {"Auto"} <ChevronRight className="size-3" />
                 </span>
