@@ -16,20 +16,7 @@ function HomeView() {
         ></iframe>
       </div>
 
-      <input
-        type="range"
-        min="0"
-        max="1"
-        step="0.05"
-        // value={? 0 }
-        // onChange={handleVolumeChange}
-        className="cursor-pointer volume-range appearance-none  bg-red-200  p-0 size-3 h-full"
-        style={{
-          WebkitAppearance: "slider-vertical",
-          width: "4px" /* The total height of your slider */,
-          // height: "12px",
-        }}
-      />
+     
     </div>
   );
 }

@@ -40,7 +40,7 @@ function CustomQuality({
             onClick={() => handleQualityChange(e)}
           >
             <span className="w-4 flex justify-center">
-              {currentResolution?.resolution === e.resolution && (
+              {currentResolution?.resolution === e.resolution  && (
                 <Check className="size-4" />
               )}
             </span>

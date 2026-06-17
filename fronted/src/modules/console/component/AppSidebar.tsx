@@ -15,6 +15,21 @@ import {
 } from "lucide-react";
 
 import {
+  Setting07Icon,
+  ConversationIcon,
+  AnalyticsUpIcon,
+  SubtitleIcon,
+} from "@hugeicons/core-free-icons";
+import {
+  GalleryThumbnailsIcon,
+  SlidersHorizontal,
+  MonitorPlay,
+  Link2,
+  BookMarked,
+  MousePointerClick,
+} from "lucide-react";
+
+import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -32,6 +47,7 @@ import SidebarStorage from "./SidebarStorage";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { WorkspaceType } from "@/modules/types";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 export function AppSidebar() {
 
@@ -88,6 +104,65 @@ export function AppSidebar() {
     },
   ];
 
+
+  const TABS = [
+  // {
+  //   value: "general",
+  //   label: "General",
+  //   icon: "hugeicons",
+  //   hugeIcon: Setting07Icon,
+  // },
+  {
+    value: "thumbnail",
+    label: "Thumbnail",
+    icon: "lucide",
+    lucideIcon: GalleryThumbnailsIcon,
+  },
+  {
+    value: "form",
+    label: "Form's",
+    icon: "lucide",
+    lucideIcon: SlidersHorizontal,
+  },
+  {
+    value: "analytics",
+    label: "Analytics",
+    icon: "hugeicons",
+    hugeIcon: AnalyticsUpIcon,
+  },
+  {
+    value: "end_screen",
+    label: "End screen",
+    icon: "lucide",
+    lucideIcon: MonitorPlay,
+  },
+  {
+    value: "subtitle",
+    label: "Subtitles",
+    icon: "hugeicons",
+    hugeIcon: SubtitleIcon,
+  },
+  {
+    value: "chapter",
+    label: "Chapters",
+    icon: "lucide",
+    lucideIcon: BookMarked,
+  },
+  { value: "cta", label: "CTA", icon: "lucide", lucideIcon: MousePointerClick },
+  {
+    value: "review_link",
+    label: "Share link",
+    icon: "lucide",
+    lucideIcon: Link2,
+  },
+  {
+    value: "comment",
+    label: "Comments",
+    icon: "hugeicons",
+    hugeIcon: ConversationIcon,
+  },
+  ] as const;
+
   return (
     <Sidebar 
       className="max-w-64 border-r-[0.5px] border-stone-200 font-content bg-surface tracking-tight" 
@@ -98,7 +173,41 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="bg-surface">
-        <SidebarGroup>
+
+        {
+        pathName.includes("/video") &&  <SidebarGroup  className="space-y-1">
+            {
+              TABS.map((item)=>{
+                return <SidebarMenuButton key={item.label} className={cn(
+                        "pl-4 transition-all duration-150 ease-in-out hover:bg-black/5",
+                        false&& "bg-black/5 font-semibold text-slate-900"
+                      )}>
+                  <Link href={`?setting_scope=${item.value}`} className="flex items-center gap-4">
+                        {item.icon === "hugeicons" ? (
+                  <HugeiconsIcon
+                    icon={(item as any).hugeIcon}
+                    size={18}
+                    strokeWidth={1.6}
+                    className="shrink-0 size-6"
+                  />
+                ) : (
+                  React.createElement((item as any).lucideIcon, {
+                    size: 15,
+                    strokeWidth: 1.6,
+                    className: "shrink-0",
+                  })
+                )}
+                        <span className="text-accent tracking-wide font-heading">
+                          {item.label}
+                        </span>
+                      </Link>
+                </SidebarMenuButton>
+              })
+            }
+          </SidebarGroup>
+        }
+
+       { !pathName.includes("/video") && <SidebarGroup>
           <SidebarGroupContent className="pt-4z md:pt-z2">
             <SidebarMenu className="space-y-1">
               
@@ -112,7 +221,6 @@ export function AppSidebar() {
 
                 return (
                   <SidebarMenuItem key={item.href}>
-                    {/* 💡 asChild forwards custom active class properties straight down to Next's Link */}
                     <SidebarMenuButton
                       asChild
                       className={cn(
@@ -133,7 +241,8 @@ export function AppSidebar() {
 
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup>}
+
         <SidebarGroup className="mt-10 md:mt-24 pl-4">
           <SidebarStorage/>
         </SidebarGroup>

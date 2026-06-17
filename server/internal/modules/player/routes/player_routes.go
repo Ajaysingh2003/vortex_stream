@@ -17,8 +17,8 @@ func SetupRouter(r *gin.Engine,Playerhandler *handler.PlayerHandler,jwtMaker *ut
 	workspace:=api.Group("/workspace")
 
 	 {
-		workspace.PATCH("/:workspaceID/player/settings",middleware.AuthMiddleware(jwtMaker),Playerhandler.UpdatePlayer)
-		workspace.GET("/:workspaceID/player/settings",Playerhandler.GetPlayer)
+		workspace.PATCH("/:workspaceId/player/settings",middleware.AuthMiddleware(jwtMaker),Playerhandler.UpdatePlayer)
+		workspace.GET("/:workspaceId/player/settings",Playerhandler.GetPlayer)
 	 }
 	return r
 }

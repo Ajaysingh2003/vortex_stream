@@ -295,3 +295,16 @@ export type ProductionVideoPlayerProps = {
   onEnded?: (payload: { videoId: string }) => void;
 };
 
+
+
+
+
+
+export interface formFieldType{
+  label:string,
+  scope:string,
+  type: "dropdown" | "checkbox" | "text",
+  position:string
+}
+
+

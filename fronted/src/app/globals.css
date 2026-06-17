@@ -155,13 +155,14 @@
 .font-subheading{
   font-family: var(--font-subheading);
 }
+
 .font-content{
   font-family: var(--font-content);
 }
+
 body{
   font-family: var(--font-content);
 }
-
 
 .brand-primary{
   background: red;
@@ -169,12 +170,11 @@ body{
 
 .bg-primary-btn {
   /* background-image: linear-gradient(90.48deg, rgb(250, 195, 210) 0%, #0a485f 100%); */
-  background-image: linear-gradient(110.48deg, rgba(205, 146, 245, 0.963) 0%, #350c5f 100%);
+  /* background-image: linear-gradient(110.48deg, rgba(177, 93, 233, 0.337) 0%, #2a0e46 100%); */
+  background-image: linear-gradient(10.48deg, #ffffff56 10%, #3464f5 60%);
   font-weight: 700;
   padding: 12px 24px;
-  /* border-radius: 10px; */
   border: 1px solid rgba(157, 150, 201, 0.3);
-  /* box-shadow: 0 4px 15px rgba(157, 150, 201, 0.2); */
   transition: all 0.3s ease;
   cursor: pointer;
 }
@@ -246,27 +246,67 @@ body{
 }
 
 .bg-main-btn{
-  background: rgba(77, 117, 250, 0.828);
+  /* background: rgba(213, 74, 251, 0.828); */
+  background: rgba(242, 60, 175, 0.87);
+  /* background: rgba(77, 117, 250, 0.828); */
+  border: none;
   position: relative;
+  outline: none;
   color: white;
   overflow: hidden; 
+
 }
 
 .bg-main-btn::after {
   position: absolute;
+  /* border: none; */
   content: "";
   border-radius: inherit;
   z-index: 1; 
   inset: 0px;
-  opacity: 1;
+  opacity:1;
   pointer-events: none;
   transition-property: background-color, background, border-color, color, fill, stroke, opacity, box-shadow, transform;
   transition-duration: 100ms;
   /* background-image: linear-gradient(rgba(255, 255, 255, 0.184) 0%, rgba(255, 255, 255, 0.058) 100%); */
-  background-image: linear-gradient(#ffffff25 0%, rgba(255, 255, 255, 0.228) 100%);
+  background-image: linear-gradient(#ffffff25 0%, rgba(255, 255, 255, 0.453) 100%);
+  /* background-image: linear-gradient(#ffffff25 0%, rgba(255, 255, 255, 0.539) 100%); */
+
 }
 
 
+
+.bg-main-btn:hover {
+  /* 1. Micro-scale gives a tactile "pressing out" response */
+  transform: translateY(-0.5px) scale(1); 
+  
+  /* 2. Pop the color brightness slightly instead of replacing the background hex */
+  filter: brightness(1.06); 
+  
+  /* 3. Deepen the shadow to create physical elevation depth */
+  box-shadow: 0 6px 5px rgba(242, 60, 175, 0.055);
+}
+
+.bg-main-btn:hover::after {
+  /* 4. Increase sheen opacity slightly on hover to reflect light changes */
+  opacity: 1;
+}
+
+
+.bg-main-btn:active {
+  /* Press down effect when clicked */
+  /* transform: translateY(0.5px) scale(0.95); */
+  transform: translateY(0.5px) scale(0.95);
+  box-shadow: 0 2px 6px rgba(242, 60, 175, 0.153);
+  filter: brightness(0.95);
+  transition-duration: 50ms;
+}
+
+/* Clean focus state outline for accessibility without breaking visual styles */
+.bg-main-btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
 
 
 .hidden-overlap{
