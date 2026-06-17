@@ -20,7 +20,7 @@ type PlayerHandler struct {
 
 func (h *PlayerHandler) UpdatePlayer(c *gin.Context) {
 
-	workspaceIDRaw := c.Param("workspaceID")
+	workspaceIDRaw := c.Param("workspaceId")
 
 	workspaceID, err := uuid.Parse(workspaceIDRaw)
 	if err != nil {
@@ -118,7 +118,7 @@ func (h *PlayerHandler) UpdatePlayer(c *gin.Context) {
 
 func (h *PlayerHandler) GetPlayer(c *gin.Context) {
 
-	workspaceIDRaw := c.Param("workspaceID")
+	workspaceIDRaw := c.Param("workspaceId")
 
 	workspaceID, err := uuid.Parse(workspaceIDRaw)
 	if err != nil {

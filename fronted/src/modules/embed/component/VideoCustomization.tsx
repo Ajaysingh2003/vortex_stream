@@ -76,7 +76,7 @@ export default function ProductionVideoPlayer({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedSourceIndex, setSelectedSourceIndex] = useState(0);
   const [currentResolution, setCurrentResolution] =
-    useState<VideoResolutionType | null>(null);
+    useState<VideoResolutionType>({ index:-1,resolution:"Auto"});
   const general = player.general_settings;
   const controls = player.control_settings;
   const branding = { ...DEFAULT_BRAND, ...player.branding_settings };
@@ -236,18 +236,14 @@ export default function ProductionVideoPlayer({
   };
 
   return (
-    <div
-      className={cx(
-        "flex h-full min-h-0 w-full flex-col items-center overflow-hidden relative",
-        className,
-      )}
-      style={cssVars}
-    >
-      {/* <div className="bg-red-200 absolute">
-      a
-      </div> */}
 
-      {/* <div className="bg-black absolute w-full h-full z-0 "/> */}
+      <div
+        className={cx(
+          "flex h-full min-h-0 w-full flex-col items-center overflow-hidden relative",
+          className,
+        )}
+        style={cssVars}
+      >
 
       <MediaController
         style={{
@@ -266,19 +262,19 @@ export default function ProductionVideoPlayer({
           onClick={togglePlay}
         />
 
-        {/* {!hasStarted && poster && (
+        {!hasStarted && poster && (
           <Image
             height={100}
             width={100}
             unoptimized
             src={
-              "https://pub-db02f4666efb4ae9b337950ff0610772.r2.dev/blogimages/IMG_20240527_091317-1200x630.jpg"
+              poster
             }
             alt="Video Thumbnail Placeholder"
             className="absolute inset-0 z-20 w-full h-full cursor-pointer poster-img object-contain lg:object-covezr bg-black"
             onClick={togglePlay}
           />
-        )} */}
+        )}
 
         <video
           poster= {asset.thumbnail}
@@ -483,6 +479,8 @@ export default function ProductionVideoPlayer({
           </div>
         </section>
       </MediaController>
-    </div>
+      
+       </div>
+       
   );
 }

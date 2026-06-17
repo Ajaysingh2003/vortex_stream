@@ -9,24 +9,27 @@ import BreadCumbConsole from "@/modules/console/component/BreadCumbConsole";
 function layout({ children }: { children: React.ReactNode }) {
   return (
     <ConsoleProvider>
-    <SidebarProvider>
-      <section className="flex  w-full h-full">
-        {
-          <div className=" py-8 h-full">
-            <AppSidebar />
-          </div>
-        }
+      <SidebarProvider>
+        <section className="flex  w-full h-full">
+          {
+            <div className=" py-8 h-full">
+              <AppSidebar />
+            </div>
+          }
 
-        <div className="w-full">
-          <div className="w-full py-1 px-1 md:px-2 md:py-2.5 border-stone-200 border-b flex gap-2 items-center">
-            <SidebarTrigger />
-            <div className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-700" aria-hidden="true" />
-            <BreadCumbConsole/>
+          <div className="w-full relative ">
+            <div className="w-full bg-white py-1 px-1 md:px-2 md:py-2.5 border-stone-200 border-b flex gap-2 items-center fixed">
+              <SidebarTrigger />
+              <div
+                className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-700"
+                aria-hidden="true"
+              />
+              <BreadCumbConsole />
+            </div>
+            <div className="py-10 lg:py-20 w-full h-full ">{children}</div>
           </div>
-          {children}
-        </div>
-      </section>
-    </SidebarProvider>
+        </section>
+      </SidebarProvider>
     </ConsoleProvider>
   );
 }

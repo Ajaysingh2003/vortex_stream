@@ -7,13 +7,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
+// c.JSON(http.StatusUnauthorized,)
 func AuthMiddleware(jwtMaker *utils.JwtMaker) gin.HandlerFunc {
     return func(c *gin.Context) {
         authHeader := c.GetHeader("Authorization")
 
         if authHeader == "" {
-            c.AbortWithStatusJSON(401, gin.H{"error": "missing authorization header"})
+            c.AbortWithStatusJSON(401,  gin.H{
+        "Success": false,
+        "Code":    "AUTH_TOKEN_MISSING",
+        "Message": "Authentication credentials were not provided or are invalid.",
+    })
             return
         }
 

@@ -8,6 +8,7 @@ const params = {
     .withDefault(10)
     .withOptions({ clearOnDefault: true }),
 
+  setting_scope:parseAsString.withDefault("").withOptions({clearOnDefault:true})
 }
 
 export const useLibraryFilters = () => {
