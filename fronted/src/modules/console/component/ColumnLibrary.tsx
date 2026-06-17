@@ -82,7 +82,7 @@ export const libraryColumn: ColumnDef<LibraryType>[] = [
                 ),
               );
             } else {
-              console.log("non root")
+              // console.log("non root")
               await queryClient.invalidateQueries(
                 trpc.folder.getFolderContent.infiniteQueryOptions(
                   {

@@ -4,7 +4,9 @@ import { parseAsString, parseAsInteger, createSearchParamsCache } from 'nuqs/ser
 
 export const libraryCoordinates = {
   cursor: parseAsString.withDefault(''),
-  limit: parseAsInteger.withDefault(10)
+  limit: parseAsInteger.withDefault(10),
+
+  setting_scope:parseAsString.withDefault("").withOptions({clearOnDefault:true})
 }
 
 export const loaderLibraryFilter = createSearchParamsCache(libraryCoordinates)

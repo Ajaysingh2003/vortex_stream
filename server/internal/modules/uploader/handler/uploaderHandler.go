@@ -2,7 +2,7 @@ package handler
 
 import (
 	// "encoding/json"
-	"fmt"
+	// "fmt"
 	"net/http"
 
 	// "github.com/ajaysingh2003/vortex-stream/internal/api/domain"
@@ -51,8 +51,6 @@ func (h *UploadHandler) GetSignedUrl (c *gin.Context) {
 		return
 	}
 
-	testUUid:=uuid.New()
-	fmt.Println(testUUid,"leah jaye")
 
 	
 	data,err:=h.UploadService.GetSignedUrl(c.Request.Context(), req.Files)
@@ -66,7 +64,7 @@ func (h *UploadHandler) GetSignedUrl (c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success":false,"files":data})
+	c.JSON(http.StatusOK, gin.H{"success":true,"files":data})
 }
 
 type CreateVideoReq struct {
