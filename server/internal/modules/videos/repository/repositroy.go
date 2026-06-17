@@ -71,17 +71,39 @@ func (r *postgresVideoRepository) GetByUserID (ctx context.Context, userID uuid.
 		Find(&videos).Error
 	return videos, err
 }
+func (r *postgresVideoRepository) Update(ctx context.Context, video *domain.Video) error {
+	// 1. Initialize map with universal fields that should always change on update
+	updateData := map[string]interface{}{
+		"updated_at": time.Now(),
+	}
 
-func (r *postgresVideoRepository) Update (ctx context.Context,video *domain.Video) error {
-	fmt.Print(video,"sad")
+	// 2. Only add fields to the map if they have non-zero values 
+	if video.Status != "" {
+		updateData["status"] = video.Status
+	}
+	if video.Title != "" {
+		updateData["title"] = video.Title
+	}
+	if video.Thumbnail != "" {
+		updateData["thumbnail"] = video.Thumbnail
+	}
+
+	// 3. For foreign keys/pointers, handle nil vs zero values explicitly
+	// If it's a pointer to a UUID, this checks if it's explicitly set
+	if video.FolderID != nil {
+		updateData["folder_id"] = video.FolderID
+	}
+
+	// 4. If nothing changed besides updated_at, skip hitting the DB entirely
+	if len(updateData) <= 1 {
+		return nil
+	}
+
+	// 5. Fire the update query safely
 	return r.db.WithContext(ctx).
-        Model(&domain.Video{}).
-        Where("id = ? AND workspace_id = ?", video.ID, video.WorkspaceID).
-        Updates(map[string]interface{}{
-            "status":    video.Status,
-			"title":      video.Title,
-            "updated_at": time.Now(),
-        }).Error
+		Model(&domain.Video{}).
+		Where("id = ? AND workspace_id = ?", video.ID, video.WorkspaceID).
+		Updates(updateData).Error
 }
 
 func (r *postgresVideoRepository) AddResolution (ctx context.Context, res *domain.VideoResolution) error {

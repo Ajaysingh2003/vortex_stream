@@ -23,15 +23,11 @@ export const videoRouter = createTRPCRouter({
           `${process.env.BASE_API}/v1/video/${input.videoId}`,
         );
 
-        
         console.log(res.data, "res");
 
-        
         return res.data.data;
       } catch (error: any) {
-
         // return error?.response?.data
-
 
         // console.log(error?.response?.data, "error");
 
@@ -113,6 +109,111 @@ export const videoRouter = createTRPCRouter({
       } catch (error: any) {
         console.log(error?.response?.data, "error");
 
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+          if (status === 403) code = "FORBIDDEN";
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
+
+  getVideoFromWorkspace: baseProcedure
+    .input(
+      z.object({
+        videoId: z.string(),
+        workspaceID: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const cookieStore = await cookies();
+
+        const access_token = cookieStore.get("access_token")?.value;
+
+        
+        const res = await axios.get(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceID}/video/${input.videoId}`,
+          {
+            headers:{
+              Authorization:`Bearer ${access_token}`
+            }
+          }
+        );
+
+        // console.log(res.data, "res");
+
+        return res.data.data;
+      } catch (error: any) {
+        // return error?.response?.data
+
+        // console.log(error?.response?.data, "error");
+
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+          if (status === 403) code = "FORBIDDEN";
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
+
+  UpdateVideo: baseProcedure
+    .input(
+      z.object({
+        videoId: z.string(),
+        thumbnail: z.string().optional(),
+        folderID: z.string().nullable().optional(),
+        title: z.string().optional(),
+        workspaceID: z.string(),
+      }),
+    )
+
+
+
+    .mutation(async ({ ctx, input }) => {
+      try {
+        console.log(input,"458458")
+        const cookieStore = await cookies();
+
+        const access_token = cookieStore.get("access_token")?.value;
+
+        const res = await axios.patch(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceID}/video/${input.videoId}/update`,
+          {...input},
+          {
+            headers:{
+              Authorization:`Bearer ${access_token}`
+            }
+          }
+        );
+
+        return res.data.data;
+      } catch (error: any) {
         if (axios.isAxiosError(error)) {
           const status = error.response?.status;
           let code: TRPCError["code"] = "BAD_REQUEST";

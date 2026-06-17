@@ -102,12 +102,13 @@ function LibraryView({ limit }: LibraryViewProps) {
         )
     )
 }, [queryClient, limit, workspacesData?.id])
+
 const router=useRouter()
 const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{
   console.log("row.id",row.id)
   let url=`/`
 
-  row.type == "video" ? url=`video/${row.id}` : url = `/console/content-library/folder/${row.id}`
+  row.type == "video" ? url=`/console/content-library/video/${row.id}` : url = `/console/content-library/folder/${row.id}`
 
   router.push(url)
 }
