@@ -12,7 +12,7 @@ import VideoDurationInput from "./VideoDurationInput";
 import { useTRPC } from "@/trpc/client";
 import { useParams } from "next/navigation";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { VideoAsset, WorkspaceType } from "@/modules/types";
+import { LeadForm, VideoAsset, WorkspaceType } from "@/modules/types";
 import FormFields, { formFieldType } from "./FormFields";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -21,32 +21,24 @@ import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
 type selectType = "before_video" | "during_video" | "after_video";
 
-function CaptureLeads() {
-  const [select, setSelect] = useState<selectType>("after_video");
-  const [fields, setFields] = useState<formFieldType[]>([
-    {
-      id: uuidv4(),
-      label: "email",
-      type: "text",
-      position: 2,
-      // get scope() {
-      //   return this.label.trim().toLowerCase().replace(/\s+/g, "_");
-      // },
-    },
-    {
-      id: uuidv4(),
-      label: "first name",
-      type: "text",
-      position: 2,
-      // get scope() {
-      //   return this.label.trim().toLowerCase().replace(/\s+/g, "_");
-      // },
-    },
-  ]);
+interface LeadFormType {
+  id:string
 
-  const trpc = useTRPC();
+}
+function CaptureLeads() {
+
   const params = useParams();
   const videoId = params.id;
+  const trpc = useTRPC();
+
+  const {data:leadForm}=useSuspenseQuery(trpc.video.getLeadForm.queryOptions({videoId:videoId as string}))
+
+
+  const leadFormData=leadForm as LeadForm
+
+  const [select, setSelect] = useState<selectType>(leadFormData.placement);
+  const [fields, setFields] = useState<formFieldType[]>(leadFormData.fields);
+
   const workspace = useSuspenseQuery(trpc.user.getWorkspace.queryOptions());
   const workspacedata = workspace.data as WorkspaceType;
 
@@ -69,7 +61,7 @@ function CaptureLeads() {
       }
     }),
   );
-  const [skipForm, setSkipForm] = useState(false);
+  const [skipForm, setSkipForm] = useState(leadFormData.allowSkip);
   const [showAt, setShowAt] = useState<number>(0);
   
   const handleupsertForm = async () => {
@@ -78,12 +70,10 @@ function CaptureLeads() {
       label: field.label,
       type: field.type,
       position: field.position,
-      // Fix: Force a fallback to an empty array if options is undefined
       options:
         field.options?.map((opt) => ({ id: opt.id, label: opt.label })) || null,
     }));
 
-    // Now pass 'formattedFields' instead of your raw 'fields' array!
     await videoUpsertMutate.mutateAsync({
       videoId: videoAssets.id,
       workspaceId: workspacedata.id,
@@ -96,7 +86,7 @@ function CaptureLeads() {
   return (
     <div className="w-full h-full">
       <div className="flex flex-col gap-4 pt-3 px-2">
-        {/* Header */}
+
         <div className="space-y-1 pb-3">
           <h4 className=" text-[13px] md:text-[16px] font-semibold text-neutral-800 tracking-wide capitalize">
             Capture Leads

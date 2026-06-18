@@ -212,52 +212,52 @@ type VideoDomain struct {
 
 
 type LeadForm struct {
-    ID          uuid.UUID    `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-    VideoID     uuid.UUID    `gorm:"not null;uniqueIndex;type:uuid"`
-    WorkspaceID uuid.UUID    `gorm:"not null;index;type:uuid"`
-    Placement   string    `gorm:"not null"` // before_video | during_video | after_video
-    ShowAt      *float64  `gorm:"default:null"` // seconds, only for during_video
-    AllowSkip   bool      `gorm:"default:false"`
-    CreatedAt   time.Time
-    UpdatedAt   time.Time
+    ID          uuid.UUID    `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+    VideoID     uuid.UUID    `gorm:"not null;uniqueIndex;type:uuid" json:"videoId"`
+    WorkspaceID uuid.UUID    `gorm:"not null;index;type:uuid" json:"workspaceId"`
+    Placement   string    `gorm:"not null" json:"placement"` // before_video | during_video | after_video
+    ShowAt      *float64  `gorm:"default:null" json:"showAt"` // seconds, only for during_video
+    AllowSkip   bool      `gorm:"default:false" json:"allowSkip"`
+    CreatedAt   time.Time `json:"createdAt"`
+    UpdatedAt   time.Time `json:"updatedAt"`
 
-    Fields []LeadFormField `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+    Fields []LeadFormField `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE" json:"fields" `
 }
 
 type LeadFormField struct {
-    ID       uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-    FormID   uuid.UUID `gorm:"not null;index;type:uuid"`
-    Label    string `gorm:"not null"`
+    ID       uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+    FormID   uuid.UUID `gorm:"not null;index;type:uuid" json:"formId"`
+    Label    string `gorm:"not null" json:"label"`
     // Scope    string `gorm:"not null"`
-    Type     string `gorm:"not null"` 
-    Position int    `gorm:"not null"`
+    Type     string `gorm:"not null" json:"type"` 
+    Position int    `gorm:"not null" json:"position"`
 
-    Options []LeadFormFieldOption `gorm:"foreignKey:FieldID;constraint:OnDelete:CASCADE"`
+    Options []LeadFormFieldOption `gorm:"foreignKey:FieldID;constraint:OnDelete:CASCADE" json:"options"`
 }
 
 
 type LeadFormFieldOption struct {
-    ID      uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-    FieldID uuid.UUID `gorm:"not null;index;type:uuid"`
-    Label   string `gorm:"not null"`
-    // Scope   string `gorm:"not null"`
+    ID      uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+    FieldID uuid.UUID `gorm:"not null;index;type:uuid" json:"fieldId"`
+    Label   string `gorm:"not null" json:"label"`
+
 }
 
 type LeadFormSubmission struct {
-    ID        uuid.UUID    `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-    FormID    uuid.UUID    `gorm:"not null;index;type:uuid"`
-    VideoID   uuid.UUID    `gorm:"not null;index;type:uuid"`
-    SessionID uuid.UUID    `gorm:"not null"`
-    Skipped   bool         `gorm:"default:false"`
-    CreatedAt time.Time
-    Answers []LeadFormAnswer `gorm:"foreignKey:SubmissionID;constraint:OnDelete:CASCADE"`
+    ID        uuid.UUID    `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+    FormID    uuid.UUID    `gorm:"not null;index;type:uuid" json:"formId"`
+    VideoID   uuid.UUID    `gorm:"not null;index;type:uuid" json:"videoId"`
+    SessionID uuid.UUID    `gorm:"not null" json:"sessionId"`
+    Skipped   bool         `gorm:"default:false" json:"skipped"`
+    CreatedAt time.Time `json:"createdAt"`
+    Answers []LeadFormAnswer `gorm:"foreignKey:SubmissionID;constraint:OnDelete:CASCADE" json:"answers"` 
 }
 
 
 type LeadFormAnswer struct {
-    ID           uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-    SubmissionID uuid.UUID `gorm:"not null;index;type:uuid"`
-    FieldID      uuid.UUID `gorm:"not null;type:uuid"`
+    ID           uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+    SubmissionID uuid.UUID `gorm:"not null;index;type:uuid" json:"submissionId"`
+    FieldID      uuid.UUID `gorm:"not null;type:uuid" json:"fieldId"`
     // Scope        string `gorm:"not null"` // denormalized for query convenience
-    Value        string `gorm:"not null"` // always string, cast on read
+    Value        string `gorm:"not null" json:"value" ` // always string, cast on read
 }
