@@ -8,14 +8,18 @@ import (
 	// "github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type LeadFormRepository interface {
+
 	CreateTx(ctx context.Context,tx *gorm.DB,form *domain.LeadForm) (*domain.LeadForm, error)
 	Create(ctx context.Context, form *domain.LeadForm) (*domain.LeadForm,error) 
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.LeadForm, error)
 	Update(ctx context.Context, lead *domain.LeadForm) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	UpsertTx(ctx context.Context,tx *gorm.DB ,form *domain.LeadForm) (*domain.LeadForm,error)
+
 }
 
 type postgresLeadFormRepository struct {
@@ -66,3 +70,39 @@ func (r *postgresLeadFormRepository) Delete(ctx context.Context, id uuid.UUID) e
 	return r.db.WithContext(ctx).Delete(&domain.LeadForm{}, "id = ?", id).Error
 }
 
+
+
+func (r *postgresLeadFormRepository) UpsertTx(ctx context.Context, tx *gorm.DB ,form *domain.LeadForm) (*domain.LeadForm, error) {
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		
+		err := tx.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "video_id"}},
+			DoUpdates: clause.AssignmentColumns([]string{"placement", "show_at", "allow_skip", "updated_at"}),
+		}).Create(form).Error
+		
+		if err != nil {
+			return err
+		}
+
+		if err := tx.Where("form_id = ?", form.ID).Delete(&domain.LeadFormField{}).Error; err != nil {
+			return err
+		}
+
+		// 3. Re-save the incoming fields list along with their nested option slices.
+		// Because we're passing the pre-populated child entities attached to the form struct,
+		// GORM natively iterates down the tree arrays and writes them out cleanly.
+		if len(form.Fields) > 0 {
+			if err := tx.Create(&form.Fields).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return form, nil
+}

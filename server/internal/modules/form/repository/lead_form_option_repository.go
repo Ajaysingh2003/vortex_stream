@@ -3,13 +3,16 @@ package repository
 import (
 	"context"
 	"errors"
+
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type LeadFormOptionRepository interface {
-	CreateTx(ctx context.Context,tx *gorm.DB,option *domain.LeadFormFieldOption) (*domain.LeadFormFieldOption, error)
+	CreateTx(ctx context.Context,tx *gorm.DB,option []*domain.LeadFormFieldOption) ([]*domain.LeadFormFieldOption, error)
+	UpsertTx(ctx context.Context,tx *gorm.DB,option []*domain.LeadFormFieldOption) ([]*domain.LeadFormFieldOption, error)
 	Create(ctx context.Context, option *domain.LeadFormFieldOption) (*domain.LeadFormFieldOption,error) 
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.LeadFormFieldOption, error)
 	Update(ctx context.Context, lead *domain.LeadFormFieldOption) error
@@ -24,7 +27,25 @@ func NewPostgresLeadFormOptionRepository(db *gorm.DB) LeadFormOptionRepository {
 	return &postgresLeadFormOptionRepository{db: db}
 }
 
-func (r *postgresLeadFormOptionRepository) CreateTx(ctx context.Context,tx *gorm.DB,option *domain.LeadFormFieldOption)(*domain.LeadFormFieldOption, error){
+func (r *postgresLeadFormOptionRepository) UpsertTx(ctx context.Context, tx *gorm.DB, options []*domain.LeadFormFieldOption) ([]*domain.LeadFormFieldOption, error) {
+	if len(options) == 0 {
+		return options, nil
+	}
+
+	// Performs batch insert or updates labels, scopes, and positions if the Option ID already exists.
+	err := tx.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"label", "position"}),
+	}).Create(&options).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return options, nil
+}
+
+func (r *postgresLeadFormOptionRepository) CreateTx(ctx context.Context,tx *gorm.DB,option []*domain.LeadFormFieldOption)([]*domain.LeadFormFieldOption, error){
 
 	if err := tx.WithContext(ctx).Create(option).Error; err != nil {
         return nil, err
