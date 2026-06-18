@@ -62,7 +62,7 @@ function CaptureLeads() {
     }),
   );
   const [skipForm, setSkipForm] = useState(leadFormData.allowSkip);
-  const [showAt, setShowAt] = useState<number>(0);
+  const [showAt, setShowAt] = useState<number>(leadFormData.showAt ?? 0);
   
   const handleupsertForm = async () => {
     const formattedFields = fields.map((field) => ({
