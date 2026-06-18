@@ -1,0 +1,414 @@
+Date : 2026-06-18 22:25:20
+Directory : /Users/ajaysingh/Desktop/secure_video_provider
+Total : 233 files,  20739 codes, 1674 comments, 4834 blanks, all 27247 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| TypeScript JSX     |        116 |     10,957 |      1,131 |      1,452 |     13,540 |
+| Go                 |         61 |      5,256 |        396 |      1,734 |      7,386 |
+| TypeScript         |         24 |      2,285 |         95 |        516 |      2,896 |
+| JSON with Comments |          2 |      1,023 |          0 |        922 |      1,945 |
+| PostCSS            |          1 |        367 |         36 |         60 |        463 |
+| Go Checksum File   |          1 |        202 |          0 |          1 |        203 |
+| Python             |          5 |        180 |         10 |         66 |        256 |
+| XML                |          8 |        108 |          0 |          1 |        109 |
+| JSON               |          2 |         97 |          0 |          2 |         99 |
+| Go Module File     |          1 |         80 |          0 |          4 |         84 |
+| YAML               |          1 |         79 |          2 |         12 |         93 |
+| Docker             |          5 |         54 |          2 |         42 |         98 |
+| Markdown           |          1 |         23 |          0 |         14 |         37 |
+| JavaScript         |          2 |         20 |          2 |          5 |         27 |
+| Dotenv             |          1 |          4 |          0 |          0 |          4 |
+| pip requirements   |          1 |          3 |          0 |          3 |          6 |
+| Log                |          1 |          1 |          0 |          0 |          1 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++-----------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                  | files      | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                     |        233 |     20,739 |      1,674 |      4,834 |     27,247 |
+| fronted                                                                                                               |        156 |     14,880 |      1,264 |      2,972 |     19,116 |
+| fronted (Files)                                                                                                       |          8 |      1,168 |          3 |        946 |      2,117 |
+| fronted/public                                                                                                        |          8 |        108 |          0 |          1 |        109 |
+| fronted/public (Files)                                                                                                |          6 |         93 |          0 |          1 |         94 |
+| fronted/public/intigration                                                                                            |          2 |         15 |          0 |          0 |         15 |
+| fronted/src                                                                                                           |        140 |     13,604 |      1,261 |      2,025 |     16,890 |
+| fronted/src/app                                                                                                       |         16 |        705 |         48 |        139 |        892 |
+| fronted/src/app (Files)                                                                                               |          2 |        422 |         37 |         66 |        525 |
+| fronted/src/app/(auth)                                                                                                |          4 |         48 |          0 |         13 |         61 |
+| fronted/src/app/(auth) (Files)                                                                                        |          1 |         14 |          0 |          3 |         17 |
+| fronted/src/app/(auth)/login                                                                                          |          1 |          9 |          0 |          2 |         11 |
+| fronted/src/app/(auth)/register                                                                                       |          1 |          9 |          0 |          2 |         11 |
+| fronted/src/app/(auth)/verify-otp                                                                                     |          1 |         16 |          0 |          6 |         22 |
+| fronted/src/app/api                                                                                                   |          1 |         11 |          0 |          0 |         11 |
+| fronted/src/app/api/trpc                                                                                              |          1 |         11 |          0 |          0 |         11 |
+| fronted/src/app/api/trpc/[trpc]                                                                                       |          1 |         11 |          0 |          0 |         11 |
+| fronted/src/app/console                                                                                               |          7 |        203 |         11 |         52 |        266 |
+| fronted/src/app/console (Files)                                                                                       |          2 |         44 |          2 |          8 |         54 |
+| fronted/src/app/console/content-library                                                                               |          4 |        151 |          9 |         42 |        202 |
+| fronted/src/app/console/content-library (Files)                                                                       |          1 |         40 |          0 |         13 |         53 |
+| fronted/src/app/console/content-library/folder                                                                        |          1 |         45 |          1 |         12 |         58 |
+| fronted/src/app/console/content-library/folder/[id]                                                                   |          1 |         45 |          1 |         12 |         58 |
+| fronted/src/app/console/content-library/video                                                                         |          2 |         66 |          8 |         17 |         91 |
+| fronted/src/app/console/content-library/video/[id]                                                                    |          2 |         66 |          8 |         17 |         91 |
+| fronted/src/app/console/player                                                                                        |          1 |          8 |          0 |          2 |         10 |
+| fronted/src/app/console/player/settings                                                                               |          1 |          8 |          0 |          2 |         10 |
+| fronted/src/app/embed                                                                                                 |          1 |         13 |          0 |          3 |         16 |
+| fronted/src/app/embed/[videoId]                                                                                       |          1 |         13 |          0 |          3 |         16 |
+| fronted/src/app/logins                                                                                                |          1 |          8 |          0 |          5 |         13 |
+| fronted/src/components                                                                                                |         26 |      3,001 |         25 |        302 |      3,328 |
+| fronted/src/components/static                                                                                         |          3 |        169 |         11 |         14 |        194 |
+| fronted/src/components/ui                                                                                             |         23 |      2,832 |         14 |        288 |      3,134 |
+| fronted/src/hooks                                                                                                     |          3 |        243 |          2 |         46 |        291 |
+| fronted/src/lib                                                                                                       |          3 |         41 |          2 |         19 |         62 |
+| fronted/src/modules                                                                                                   |         84 |      9,426 |      1,161 |      1,490 |     12,077 |
+| fronted/src/modules (Files)                                                                                           |          3 |        254 |         27 |         66 |        347 |
+| fronted/src/modules/auth                                                                                              |          6 |        597 |          1 |         88 |        686 |
+| fronted/src/modules/auth/component                                                                                    |          3 |        478 |          1 |         68 |        547 |
+| fronted/src/modules/auth/view                                                                                         |          3 |        119 |          0 |         20 |        139 |
+| fronted/src/modules/billing                                                                                           |          1 |         83 |          2 |         21 |        106 |
+| fronted/src/modules/billing/server                                                                                    |          1 |         83 |          2 |         21 |        106 |
+| fronted/src/modules/console                                                                                           |         24 |      2,724 |        827 |        426 |      3,977 |
+| fronted/src/modules/console (Files)                                                                                   |          1 |         20 |          0 |          5 |         25 |
+| fronted/src/modules/console/component                                                                                 |         19 |      2,373 |        817 |        365 |      3,555 |
+| fronted/src/modules/console/context                                                                                   |          1 |         23 |          0 |          9 |         32 |
+| fronted/src/modules/console/view                                                                                      |          3 |        308 |         10 |         47 |        365 |
+| fronted/src/modules/embed                                                                                             |         11 |      1,287 |         21 |        167 |      1,475 |
+| fronted/src/modules/embed/component                                                                                   |          9 |      1,119 |         17 |        129 |      1,265 |
+| fronted/src/modules/embed/server                                                                                      |          1 |        155 |          4 |         33 |        192 |
+| fronted/src/modules/embed/view                                                                                        |          1 |         13 |          0 |          5 |         18 |
+| fronted/src/modules/folder                                                                                            |          1 |        411 |         10 |        107 |        528 |
+| fronted/src/modules/folder/server                                                                                     |          1 |        411 |         10 |        107 |        528 |
+| fronted/src/modules/micro-interactions                                                                                |          3 |        256 |          9 |         31 |        296 |
+| fronted/src/modules/player                                                                                            |          1 |          0 |         26 |          7 |         33 |
+| fronted/src/modules/player/context                                                                                    |          1 |          0 |         26 |          7 |         33 |
+| fronted/src/modules/playerSettings                                                                                    |         11 |        966 |        120 |         83 |      1,169 |
+| fronted/src/modules/playerSettings/component                                                                          |         10 |        840 |        116 |         73 |      1,029 |
+| fronted/src/modules/playerSettings/view                                                                               |          1 |        126 |          4 |         10 |        140 |
+| fronted/src/modules/upload                                                                                            |         12 |      1,251 |         61 |        256 |      1,568 |
+| fronted/src/modules/upload/component                                                                                  |         10 |        917 |         41 |        188 |      1,146 |
+| fronted/src/modules/upload/funcions                                                                                   |          1 |        144 |          5 |         34 |        183 |
+| fronted/src/modules/upload/server                                                                                     |          1 |        190 |         15 |         34 |        239 |
+| fronted/src/modules/user                                                                                              |          1 |        303 |          6 |         53 |        362 |
+| fronted/src/modules/user/server                                                                                       |          1 |        303 |          6 |         53 |        362 |
+| fronted/src/modules/video                                                                                             |         10 |      1,294 |         51 |        185 |      1,530 |
+| fronted/src/modules/video/component                                                                                   |          8 |      1,000 |         40 |        121 |      1,161 |
+| fronted/src/modules/video/server                                                                                      |          1 |        288 |         11 |         61 |        360 |
+| fronted/src/modules/video/view                                                                                        |          1 |          6 |          0 |          3 |          9 |
+| fronted/src/trpc                                                                                                      |          6 |        149 |         18 |         17 |        184 |
+| fronted/src/trpc (Files)                                                                                              |          5 |        133 |         17 |         14 |        164 |
+| fronted/src/trpc/routers                                                                                              |          1 |         16 |          1 |          3 |         20 |
+| fronted/src/utils                                                                                                     |          2 |         39 |          5 |         12 |         56 |
+| server                                                                                                                |         69 |      5,665 |        398 |      1,788 |      7,851 |
+| server (Files)                                                                                                        |          2 |        282 |          0 |          5 |        287 |
+| server/cmd                                                                                                            |          2 |        126 |          4 |         34 |        164 |
+| server/cmd/server                                                                                                     |          1 |        119 |          4 |         29 |        152 |
+| server/cmd/worker                                                                                                     |          1 |          7 |          0 |          5 |         12 |
+| server/infra                                                                                                          |          5 |        126 |          2 |         49 |        177 |
+| server/internal                                                                                                       |         58 |      5,109 |        392 |      1,694 |      7,195 |
+| server/internal/api                                                                                                   |          2 |        220 |         13 |         71 |        304 |
+| server/internal/api/domain                                                                                            |          1 |        187 |         12 |         64 |        263 |
+| server/internal/api/middleware                                                                                        |          1 |         33 |          1 |          7 |         41 |
+| server/internal/modules                                                                                               |         42 |      4,424 |        351 |      1,490 |      6,265 |
+| server/internal/modules/billing                                                                                       |          6 |        649 |         37 |        153 |        839 |
+| server/internal/modules/billing/config                                                                                |          1 |        145 |          2 |         11 |        158 |
+| server/internal/modules/billing/handler                                                                               |          1 |        112 |         12 |         28 |        152 |
+| server/internal/modules/billing/repository                                                                            |          2 |        158 |          0 |         58 |        216 |
+| server/internal/modules/billing/routes                                                                                |          1 |         28 |          3 |         10 |         41 |
+| server/internal/modules/billing/services                                                                              |          1 |        206 |         20 |         46 |        272 |
+| server/internal/modules/folders                                                                                       |          6 |      1,141 |        147 |        431 |      1,719 |
+| server/internal/modules/folders/dto                                                                                   |          1 |         33 |          0 |          9 |         42 |
+| server/internal/modules/folders/handler                                                                               |          1 |        395 |         15 |        159 |        569 |
+| server/internal/modules/folders/repository                                                                            |          1 |        223 |          8 |         69 |        300 |
+| server/internal/modules/folders/routes                                                                                |          1 |         24 |          1 |         17 |         42 |
+| server/internal/modules/folders/services                                                                              |          1 |        440 |        119 |        163 |        722 |
+| server/internal/modules/folders/utils                                                                                 |          1 |         26 |          4 |         14 |         44 |
+| server/internal/modules/form                                                                                          |          7 |        551 |         38 |        185 |        774 |
+| server/internal/modules/form/dto                                                                                      |          1 |         86 |          8 |         16 |        110 |
+| server/internal/modules/form/handler                                                                                  |          1 |        114 |          7 |         40 |        161 |
+| server/internal/modules/form/repository                                                                               |          3 |        236 |         15 |         81 |        332 |
+| server/internal/modules/form/routes                                                                                   |          1 |         16 |          1 |          8 |         25 |
+| server/internal/modules/form/service                                                                                  |          1 |         99 |          7 |         40 |        146 |
+| server/internal/modules/player                                                                                        |          5 |        300 |          2 |        102 |        404 |
+| server/internal/modules/player/dto                                                                                    |          1 |         42 |          0 |          7 |         49 |
+| server/internal/modules/player/handler                                                                                |          1 |        107 |          0 |         41 |        148 |
+| server/internal/modules/player/repository                                                                             |          1 |         63 |          1 |         22 |         86 |
+| server/internal/modules/player/routes                                                                                 |          1 |         16 |          1 |          8 |         25 |
+| server/internal/modules/player/services                                                                               |          1 |         72 |          0 |         24 |         96 |
+| server/internal/modules/uploader                                                                                      |          5 |        160 |         10 |         54 |        224 |
+| server/internal/modules/uploader/dto                                                                                  |          1 |          6 |          0 |          1 |          7 |
+| server/internal/modules/uploader/handler                                                                              |          1 |         55 |          3 |         21 |         79 |
+| server/internal/modules/uploader/routes                                                                               |          1 |         26 |          2 |          8 |         36 |
+| server/internal/modules/uploader/services                                                                             |          1 |         39 |          4 |         16 |         59 |
+| server/internal/modules/uploader/worker                                                                               |          1 |         34 |          1 |          8 |         43 |
+| server/internal/modules/users                                                                                         |          9 |        986 |         61 |        343 |      1,390 |
+| server/internal/modules/users/dto                                                                                     |          1 |         10 |          0 |          2 |         12 |
+| server/internal/modules/users/handler                                                                                 |          2 |        358 |         49 |        114 |        521 |
+| server/internal/modules/users/repository                                                                              |          3 |        234 |          1 |         86 |        321 |
+| server/internal/modules/users/routes                                                                                  |          1 |         26 |          3 |          7 |         36 |
+| server/internal/modules/users/services                                                                                |          2 |        358 |          8 |        134 |        500 |
+| server/internal/modules/videos                                                                                        |          4 |        637 |         56 |        222 |        915 |
+| server/internal/modules/videos/handler                                                                                |          1 |        282 |         12 |         87 |        381 |
+| server/internal/modules/videos/repository                                                                             |          1 |        143 |         37 |         60 |        240 |
+| server/internal/modules/videos/routes                                                                                 |          1 |         31 |          3 |          9 |         43 |
+| server/internal/modules/videos/services                                                                               |          1 |        181 |          4 |         66 |        251 |
+| server/internal/shared                                                                                                |         14 |        465 |         28 |        133 |        626 |
+| server/internal/shared/async                                                                                          |          1 |         34 |          1 |          8 |         43 |
+| server/internal/shared/async/worker                                                                                   |          1 |         34 |          1 |          8 |         43 |
+| server/internal/shared/config                                                                                         |          5 |        165 |         13 |         47 |        225 |
+| server/internal/shared/config/auth                                                                                    |          1 |         15 |          0 |          6 |         21 |
+| server/internal/shared/config/aws                                                                                     |          1 |         27 |          2 |          5 |         34 |
+| server/internal/shared/config/db                                                                                      |          1 |         59 |          9 |         17 |         85 |
+| server/internal/shared/config/r2                                                                                      |          1 |         42 |          0 |          8 |         50 |
+| server/internal/shared/config/redis                                                                                   |          1 |         22 |          2 |         11 |         35 |
+| server/internal/shared/utils                                                                                          |          8 |        266 |         14 |         78 |        358 |
+| server/pkg                                                                                                            |          1 |         21 |          0 |          6 |         27 |
+| server/tmp                                                                                                            |          1 |          1 |          0 |          0 |          1 |
+| transcoding                                                                                                           |          8 |        194 |         12 |         74 |        280 |
+| transcoding (Files)                                                                                                   |          4 |         28 |          4 |         21 |         53 |
+| transcoding/config                                                                                                    |          1 |         13 |          0 |          2 |         15 |
+| transcoding/feature                                                                                                   |          3 |        153 |          8 |         51 |        212 |
++-----------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-----------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                                                              | language           | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/README.md                                                      | Markdown           |         23 |          0 |         14 |         37 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/bun.lock                                                       | JSON with Comments |        989 |          0 |        921 |      1,910 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/components.json                                                | JSON               |         25 |          0 |          1 |         26 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/eslint.config.mjs                                              | JavaScript         |         14 |          2 |          3 |         19 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/next.config.ts                                                 | TypeScript         |          5 |          1 |          3 |          9 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/package.json                                                   | JSON               |         72 |          0 |          1 |         73 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/postcss.config.mjs                                             | JavaScript         |          6 |          0 |          2 |          8 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/public/empty.svg                                               | XML                |         88 |          0 |          1 |         89 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/public/file.svg                                                | XML                |          1 |          0 |          0 |          1 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/public/globe.svg                                               | XML                |          1 |          0 |          0 |          1 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/public/intigration/oneDrive.svg                                | XML                |          1 |          0 |          0 |          1 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/public/intigration/wistia.svg                                  | XML                |         14 |          0 |          0 |         14 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/public/next.svg                                                | XML                |          1 |          0 |          0 |          1 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/public/vercel.svg                                              | XML                |          1 |          0 |          0 |          1 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/public/window.svg                                              | XML                |          1 |          0 |          0 |          1 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/(auth)/layout.tsx                                      | TypeScript JSX     |         14 |          0 |          3 |         17 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/(auth)/login/page.tsx                                  | TypeScript JSX     |          9 |          0 |          2 |         11 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/(auth)/register/page.tsx                               | TypeScript JSX     |          9 |          0 |          2 |         11 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/(auth)/verify-otp/page.tsx                             | TypeScript JSX     |         16 |          0 |          6 |         22 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/api/trpc/[trpc]/route.ts                               | TypeScript         |         11 |          0 |          0 |         11 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/content-library/folder/[id]/page.tsx           | TypeScript JSX     |         45 |          1 |         12 |         58 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/content-library/page.tsx                       | TypeScript JSX     |         40 |          0 |         13 |         53 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/content-library/video/[id]/layout.tsx          | TypeScript JSX     |         25 |          3 |          5 |         33 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/content-library/video/[id]/page.tsx            | TypeScript JSX     |         41 |          5 |         12 |         58 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/layout.tsx                                     | TypeScript JSX     |         33 |          1 |          4 |         38 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/page.tsx                                       | TypeScript JSX     |         11 |          1 |          4 |         16 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/player/settings/page.tsx                       | TypeScript JSX     |          8 |          0 |          2 |         10 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/embed/[videoId]/page.tsx                               | TypeScript JSX     |         13 |          0 |          3 |         16 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/globals.css                                            | PostCSS            |        367 |         36 |         60 |        463 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/layout.tsx                                             | TypeScript JSX     |         55 |          1 |          6 |         62 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/logins/page.tsx                                        | TypeScript JSX     |          8 |          0 |          5 |         13 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/static/DataTable.tsx                            | TypeScript JSX     |        122 |         11 |         10 |        143 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/static/DeleteBox.tsx                            | TypeScript JSX     |         40 |          0 |          2 |         42 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/static/Loader.tsx                               | TypeScript JSX     |          7 |          0 |          2 |          9 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/SignInComp.tsx                               | TypeScript JSX     |        112 |          4 |         17 |        133 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/alert-dialog.tsx                             | TypeScript JSX     |        184 |          0 |         16 |        200 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/avatar.tsx                                   | TypeScript JSX     |        103 |          0 |         10 |        113 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/breadcrumb.tsx                               | TypeScript JSX     |        112 |          0 |         11 |        123 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/button.tsx                                   | TypeScript JSX     |         60 |          0 |          6 |         66 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/card.tsx                                     | TypeScript JSX     |         91 |          0 |         10 |        101 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/dialog.tsx                                   | TypeScript JSX     |        155 |          0 |         14 |        169 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/dropdown-menu.tsx                            | TypeScript JSX     |        250 |          0 |         19 |        269 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/empty.tsx                                    | TypeScript JSX     |         95 |          0 |         10 |        105 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/field.tsx                                    | TypeScript JSX     |        218 |          0 |         21 |        239 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/input-otp.tsx                                | TypeScript JSX     |         79 |          0 |          9 |         88 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/input.tsx                                    | TypeScript JSX     |         16 |          0 |          4 |         20 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/label.tsx                                    | TypeScript JSX     |         20 |          0 |          5 |         25 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/popover.tsx                                  | TypeScript JSX     |         79 |          0 |         11 |         90 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/select.tsx                                   | TypeScript JSX     |        181 |          0 |         14 |        195 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/separator.tsx                                | TypeScript JSX     |         24 |          0 |          5 |         29 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/sheet.tsx                                    | TypeScript JSX     |        134 |          0 |         14 |        148 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/sidebar.tsx                                  | TypeScript JSX     |        642 |         10 |         55 |        707 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/skeleton.tsx                                 | TypeScript JSX     |         11 |          0 |          3 |         14 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/switch.tsx                                   | TypeScript JSX     |         29 |          0 |          5 |         34 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/table.tsx                                    | TypeScript JSX     |        105 |          0 |         12 |        117 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/tabs.tsx                                     | TypeScript JSX     |         82 |          0 |          9 |         91 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/tooltip.tsx                                  | TypeScript JSX     |         50 |          0 |          8 |         58 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/hooks/use-mobile.ts                                        | TypeScript         |         15 |          0 |          5 |         20 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/hooks/useGooglePicker.ts                                   | TypeScript         |         93 |          0 |         11 |        104 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/hooks/useVideoThumbnail.ts                                 | TypeScript         |        135 |          2 |         30 |        167 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/lib/searchParams.ts                                        | TypeScript         |          8 |          0 |          4 |         12 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/lib/useLibraryFilters.ts                                   | TypeScript         |         13 |          0 |          3 |         16 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/lib/utils.ts                                               | TypeScript         |         20 |          2 |         12 |         34 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/SidebarProvider.tsx                                | TypeScript JSX     |         23 |          2 |          8 |         33 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/component/LoginForm.tsx                       | TypeScript JSX     |        152 |          0 |         27 |        179 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/component/RegisterForm.tsx                    | TypeScript JSX     |        217 |          1 |         24 |        242 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/component/VerifyOTPForm.tsx                   | TypeScript JSX     |        109 |          0 |         17 |        126 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/view/LoginView.tsx                            | TypeScript JSX     |         47 |          0 |          7 |         54 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/view/RegisterView.tsx                         | TypeScript JSX     |         47 |          0 |          9 |         56 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/view/VerifyOTPView.tsx                        | TypeScript JSX     |         25 |          0 |          4 |         29 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/billing/server/procedures.ts                       | TypeScript         |         83 |          2 |         21 |        106 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/HomeView.tsx                               | TypeScript JSX     |         20 |          0 |          5 |         25 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/AppSidebar.tsx                   | TypeScript JSX     |        224 |          7 |         21 |        252 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/BreadCumbConsole.tsx             | TypeScript JSX     |         80 |          3 |         14 |         97 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/ColumnLibrary.tsx                | TypeScript JSX     |        485 |         13 |         39 |        537 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/DropdownFilters.tsx              | TypeScript JSX     |         55 |          0 |          7 |         62 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/Filters.tsx                      | TypeScript JSX     |         68 |          0 |         11 |         79 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/PlanCard.tsx                     | TypeScript JSX     |        182 |          1 |          6 |        189 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/PricingCardSection.tsx           | TypeScript JSX     |        151 |          0 |          6 |        157 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/PricingPlan.tsx                  | TypeScript JSX     |         45 |          0 |          5 |         50 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/PricingSection.tsx               | TypeScript JSX     |         22 |          0 |          4 |         26 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/ProfileMenu.tsx                  | TypeScript JSX     |        305 |          4 |         31 |        340 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/ProgressBar.tsx                  | TypeScript JSX     |         26 |          0 |          3 |         29 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/SidebarStorage.tsx               | TypeScript JSX     |         52 |          0 |          2 |         54 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/StorageProgressBar.tsx           | TypeScript JSX     |         25 |          0 |          4 |         29 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/ThumbnailUploadWorker.ts         | TypeScript         |         54 |          2 |         19 |         75 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/ToolTipBar.tsx                   | TypeScript JSX     |         27 |          0 |          2 |         29 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/TopHeader.tsx                    | TypeScript JSX     |         18 |          0 |          4 |         22 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/UploadCard.tsx                   | TypeScript JSX     |        217 |         48 |         35 |        300 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/UploadFile.tsx                   | TypeScript JSX     |        304 |        739 |        148 |      1,191 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/generateAvatar.tsx               | TypeScript JSX     |         33 |          0 |          4 |         37 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/context/ConsoleContext.tsx                 | TypeScript JSX     |         23 |          0 |          9 |         32 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/view/FolderContentView.tsx                 | TypeScript JSX     |        151 |          0 |         23 |        174 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/view/LibraryView.tsx                       | TypeScript JSX     |        135 |         10 |         22 |        167 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/view/VideoPlayerView.tsx                   | TypeScript JSX     |         22 |          0 |          2 |         24 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/constant.ts                                        | TypeScript         |          1 |          1 |          1 |          3 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/BrandLogo.tsx                      | TypeScript JSX     |         62 |          1 |         10 |         73 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/CustomQuality.tsx                  | TypeScript JSX     |         50 |          1 |          6 |         57 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/CustomSpeed.tsx                    | TypeScript JSX     |         44 |          0 |          4 |         48 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/ShareFeature.tsx                   | TypeScript JSX     |          7 |          0 |          2 |          9 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/VideoCustomization.tsx             | TypeScript JSX     |        432 |          0 |         55 |        487 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/VideoPlayer.tsx                    | TypeScript JSX     |         28 |          0 |          7 |         35 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/VideoSettings.tsx                  | TypeScript JSX     |        115 |          0 |          5 |        120 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/VolumeControls.tsx                 | TypeScript JSX     |        159 |          5 |          9 |        173 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/temp.tsx                           | TypeScript JSX     |        222 |         10 |         31 |        263 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/server/procedures.ts                         | TypeScript         |        155 |          4 |         33 |        192 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/view/EmbedView.tsx                           | TypeScript JSX     |         13 |          0 |          5 |         18 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/folder/server/procedures.ts                        | TypeScript         |        411 |         10 |        107 |        528 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/micro-interactions/Authanimation.tsx               | TypeScript JSX     |         16 |          0 |          2 |         18 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/micro-interactions/UploadUI.tsx                    | TypeScript JSX     |        159 |          4 |         18 |        181 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/micro-interactions/VideoUploadCard.tsx             | TypeScript JSX     |         81 |          5 |         11 |         97 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/player/context/playerContext.tsx                   | TypeScript JSX     |          0 |         26 |          7 |         33 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Advance.tsx               | TypeScript JSX     |          7 |          0 |          2 |          9 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Branding.tsx              | TypeScript JSX     |        324 |          8 |         15 |        347 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/ControlsSettings.tsx      | TypeScript JSX     |        112 |          0 |          7 |        119 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Cta.tsx                   | TypeScript JSX     |          0 |         95 |          6 |        101 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/GeneralSetting.tsx        | TypeScript JSX     |         81 |          7 |          8 |         96 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/ItemRow.tsx               | TypeScript JSX     |         39 |          0 |          4 |         43 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Preview.tsx               | TypeScript JSX     |          7 |          0 |          2 |          9 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Security.tsx              | TypeScript JSX     |        150 |          1 |          7 |        158 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Settings.tsx              | TypeScript JSX     |        101 |          1 |         16 |        118 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/SettingsContent.tsx       | TypeScript JSX     |         19 |          4 |          6 |         29 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/view/PlayerSettingsView.tsx         | TypeScript JSX     |        126 |          4 |         10 |        140 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/types.ts                                           | TypeScript         |        230 |         24 |         57 |        311 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/BlankFolder.tsx                   | TypeScript JSX     |         36 |          2 |          8 |         46 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/ConnectGoogleDrive.tsx            | TypeScript JSX     |        163 |          5 |         36 |        204 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/CreateFolder.tsx                  | TypeScript JSX     |         93 |          3 |          8 |        104 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/Folder.tsx                        | TypeScript JSX     |        110 |          4 |         28 |        142 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/FolderList.tsx                    | TypeScript JSX     |        142 |         18 |         30 |        190 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/FolderTable.tsx                   | TypeScript JSX     |         99 |          3 |         17 |        119 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/ImportVideos.tsx                  | TypeScript JSX     |         81 |          3 |         19 |        103 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/SaveVideos.tsx                    | TypeScript JSX     |         12 |          1 |          5 |         18 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/SelectProvider.tsx                | TypeScript JSX     |         77 |          0 |         20 |         97 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/UploadManager.tsx                 | TypeScript JSX     |        104 |          2 |         17 |        123 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/funcions/upload.ts                          | TypeScript         |        144 |          5 |         34 |        183 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/server/procedures.ts                        | TypeScript         |        190 |         15 |         34 |        239 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/user/server/procedures.ts                          | TypeScript         |        303 |          6 |         53 |        362 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/CaptureLeads.tsx                   | TypeScript JSX     |        199 |         13 |         18 |        230 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/Form.tsx                           | TypeScript JSX     |         21 |          1 |          4 |         26 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/FormFields.tsx                     | TypeScript JSX     |        459 |         13 |         45 |        517 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/ThumbnailUpdate.tsx                | TypeScript JSX     |        186 |          6 |         29 |        221 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/UpdatePlan.tsx                     | TypeScript JSX     |         34 |          2 |          6 |         42 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/VideoControls.tsx                  | TypeScript JSX     |          7 |          0 |          2 |          9 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/VideoDurationInput.tsx             | TypeScript JSX     |         63 |          5 |         11 |         79 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/VideoSettingType.tsx               | TypeScript JSX     |         31 |          0 |          6 |         37 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/server/procedures.ts                         | TypeScript         |        288 |         11 |         61 |        360 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/view/VideoDetailsView.tsx                    | TypeScript JSX     |          6 |          0 |          3 |          9 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/client.tsx                                            | TypeScript JSX     |         49 |         10 |          1 |         60 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/init.ts                                               | TypeScript         |         48 |          4 |         10 |         62 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/query-client.ts                                       | TypeScript         |         23 |          0 |          2 |         25 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/routers/_app.ts                                       | TypeScript         |         16 |          1 |          3 |         20 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/server.tsx                                            | TypeScript JSX     |         13 |          3 |          0 |         16 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/type.ts                                               | TypeScript         |          0 |          0 |          1 |          1 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/utils/upload.ts                                            | TypeScript         |          0 |          0 |          1 |          1 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/src/utils/utils.ts                                             | TypeScript         |         39 |          5 |         11 |         55 |
+| /Users/ajaysingh/Desktop/secure_video_provider/fronted/tsconfig.json                                                  | JSON with Comments |         34 |          0 |          1 |         35 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/cmd/server/main.go                                              | Go                 |        119 |          4 |         29 |        152 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/cmd/worker/worker.go                                            | Go                 |          7 |          0 |          5 |         12 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/go.mod                                                          | Go Module File     |         80 |          0 |          4 |         84 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/go.sum                                                          | Go Checksum File   |        202 |          0 |          1 |        203 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/infra/.dev.api.dockerfile                                       | Docker             |          8 |          0 |          7 |         15 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/infra/.dev.worker.dockerfile                                    | Docker             |          8 |          0 |          8 |         16 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/infra/api.dockerfile                                            | Docker             |         15 |          0 |         10 |         25 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/infra/docker-compose.yml                                        | YAML               |         79 |          2 |         12 |         93 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/infra/worker.dockerfile                                         | Docker             |         16 |          0 |         12 |         28 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/api/domain/entity.go                                   | Go                 |        187 |         12 |         64 |        263 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/api/middleware/middleware.go                           | Go                 |         33 |          1 |          7 |         41 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/config/constant.go                     | Go                 |        145 |          2 |         11 |        158 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/handler/handler.go                     | Go                 |        112 |         12 |         28 |        152 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/repository/subscription_repo.go        | Go                 |         90 |          0 |         33 |        123 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/repository/userUsageRepo.go            | Go                 |         68 |          0 |         25 |         93 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/routes/routes.go                       | Go                 |         28 |          3 |         10 |         41 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/services/service.go                    | Go                 |        206 |         20 |         46 |        272 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/dto/dto.go                             | Go                 |         33 |          0 |          9 |         42 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/handler/folderHandler.go               | Go                 |        395 |         15 |        159 |        569 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/repository/folder_repo.go              | Go                 |        223 |          8 |         69 |        300 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/routes/folder_routes.go                | Go                 |         24 |          1 |         17 |         42 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/services/folder_service.go             | Go                 |        440 |        119 |        163 |        722 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/utils/hierarchy.go                     | Go                 |         26 |          4 |         14 |         44 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/dto/dto.go                                | Go                 |         86 |          8 |         16 |        110 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/handler/formHandler.go                    | Go                 |        114 |          7 |         40 |        161 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/repository/lead_form_field.go             | Go                 |         77 |          1 |         22 |        100 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/repository/lead_form_option_repository.go | Go                 |         65 |          0 |         22 |         87 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/repository/lead_form_repository.go        | Go                 |         94 |         14 |         37 |        145 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/routes/routes.go                          | Go                 |         16 |          1 |          8 |         25 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/service/form_service.go                   | Go                 |         99 |          7 |         40 |        146 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/player/dto/dto.go                              | Go                 |         42 |          0 |          7 |         49 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/player/handler/playerHandler.go                | Go                 |        107 |          0 |         41 |        148 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/player/repository/player_repo.go               | Go                 |         63 |          1 |         22 |         86 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/player/routes/player_routes.go                 | Go                 |         16 |          1 |          8 |         25 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/player/services/player_setting.go              | Go                 |         72 |          0 |         24 |         96 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/uploader/dto/dto.go                            | Go                 |          6 |          0 |          1 |          7 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/uploader/handler/uploaderHandler.go            | Go                 |         55 |          3 |         21 |         79 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/uploader/routes/Routes.go                      | Go                 |         26 |          2 |          8 |         36 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/uploader/services/services.go                  | Go                 |         39 |          4 |         16 |         59 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/uploader/worker/sqs.go                         | Go                 |         34 |          1 |          8 |         43 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/dto/dto.go                               | Go                 |         10 |          0 |          2 |         12 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/handler/o_auth.go                        | Go                 |        102 |         22 |         29 |        153 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/handler/userHandler.go                   | Go                 |        256 |         27 |         85 |        368 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/repository/account_repo.go               | Go                 |         77 |          0 |         24 |        101 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/repository/repositroy.go                 | Go                 |         75 |          1 |         24 |        100 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/repository/workspace_repo.go             | Go                 |         82 |          0 |         38 |        120 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/routes/userRoutes.go                     | Go                 |         26 |          3 |          7 |         36 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/services/services.go                     | Go                 |        296 |          6 |        105 |        407 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/services/workspacesService.go            | Go                 |         62 |          2 |         29 |         93 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/videos/handler/videoHandler.go                 | Go                 |        282 |         12 |         87 |        381 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/videos/repository/repositroy.go                | Go                 |        143 |         37 |         60 |        240 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/videos/routes/routes.go                        | Go                 |         31 |          3 |          9 |         43 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/videos/services/service.go                     | Go                 |        181 |          4 |         66 |        251 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/async/worker/sqs.go                             | Go                 |         34 |          1 |          8 |         43 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/config/auth/auth.go                             | Go                 |         15 |          0 |          6 |         21 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/config/aws/sqs.go                               | Go                 |         27 |          2 |          5 |         34 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/config/db/db.go                                 | Go                 |         59 |          9 |         17 |         85 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/config/r2/r2.go                                 | Go                 |         42 |          0 |          8 |         50 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/config/redis/redis.go                           | Go                 |         22 |          2 |         11 |         35 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/MakeSignedurl.go                          | Go                 |         21 |          1 |          6 |         28 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/apiError.go                               | Go                 |         33 |          0 |         13 |         46 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/decodeCursor.go                           | Go                 |         27 |          0 |         17 |         44 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/errMess.go                                | Go                 |          8 |          0 |          4 |         12 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/generateOTP.go                            | Go                 |         17 |          3 |          4 |         24 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/jwtMaker.go                               | Go                 |         69 |          8 |         19 |         96 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/sendEmail.go                              | Go                 |         78 |          1 |         12 |         91 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/state.go                                  | Go                 |         13 |          1 |          3 |         17 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/pkg/resetDb.go                                                  | Go                 |         21 |          0 |          6 |         27 |
+| /Users/ajaysingh/Desktop/secure_video_provider/server/tmp/build-errors.log                                            | Log                |          1 |          0 |          0 |          1 |
+| /Users/ajaysingh/Desktop/secure_video_provider/transcoding/.env                                                       | Dotenv             |          4 |          0 |          0 |          4 |
+| /Users/ajaysingh/Desktop/secure_video_provider/transcoding/config/aws.py                                              | Python             |         13 |          0 |          2 |         15 |
+| /Users/ajaysingh/Desktop/secure_video_provider/transcoding/dockerfile                                                 | Docker             |          7 |          2 |          5 |         14 |
+| /Users/ajaysingh/Desktop/secure_video_provider/transcoding/feature/download.py                                        | Python             |         51 |          1 |         10 |         62 |
+| /Users/ajaysingh/Desktop/secure_video_provider/transcoding/feature/transcode.py                                       | Python             |         80 |          3 |         34 |        117 |
+| /Users/ajaysingh/Desktop/secure_video_provider/transcoding/feature/upload.py                                          | Python             |         22 |          4 |          7 |         33 |
+| /Users/ajaysingh/Desktop/secure_video_provider/transcoding/main.py                                                    | Python             |         14 |          2 |         13 |         29 |
+| /Users/ajaysingh/Desktop/secure_video_provider/transcoding/requirements.txt                                           | pip requirements   |          3 |          0 |          3 |          6 |
+| Total                                                                                                                 |                    |     20,739 |      1,674 |      4,834 |     27,247 |
++-----------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+

@@ -305,4 +305,55 @@ export const videoRouter = createTRPCRouter({
       }
 
     }),
+  getLeadForm: baseProcedure
+    .input(
+      z.object({
+        videoId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+
+      try {
+        console.log(input, "458458");
+        // const cookieStore = await cookies();
+
+        // const access_token = cookieStore.get("access_token")?.value;
+
+        const res = await axios.get(
+          `${process.env.BASE_API}/v1/video/${input.videoId}/form`,
+
+          {
+            // headers: {
+            //   Authorization: `Bearer ${access_token}`,
+            // },
+          },
+        );
+
+        return res.data.data;
+      } catch (error: any) {
+
+        console.log(error,"lollol")
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+          if (status === 403) code = "FORBIDDEN";
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+
+    }),
+
+
 });
