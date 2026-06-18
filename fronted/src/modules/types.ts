@@ -308,3 +308,35 @@ export interface formFieldType{
 }
 
 
+
+
+export type FormPlacement = "before_video" | "during_video" | "after_video";
+
+export type FieldType = "text" | "dropdown" | "checkbox";
+
+export interface LeadFormOption {
+  id: string;
+  fieldId: string;
+  label: string;
+}
+
+export interface LeadFormField {
+  id: string;
+  formId: string;
+  label: string;
+  type: FieldType;
+  position: number;
+  options?: LeadFormOption[];
+}
+
+export interface LeadForm {
+  id: string;
+  videoId: string;
+  workspaceId: string;
+  placement: FormPlacement;
+  showAt: number | null;
+  allowSkip: boolean;
+  createdAt: string; // ISO DateTime string
+  updatedAt: string; // ISO DateTime string
+  fields: LeadFormField[];
+}
