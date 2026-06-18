@@ -32,10 +32,9 @@ func (r *postgresLeadFormOptionRepository) UpsertTx(ctx context.Context, tx *gor
 		return options, nil
 	}
 
-	// Performs batch insert or updates labels, scopes, and positions if the Option ID already exists.
 	err := tx.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"label", "position"}),
+		DoUpdates: clause.AssignmentColumns([]string{"label"}),
 	}).Create(&options).Error
 
 	if err != nil {
