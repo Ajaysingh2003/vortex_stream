@@ -1,0 +1,235 @@
+"filename", "language", "Go Checksum File", "Go", "Go Module File", "Docker", "Log", "YAML", "TypeScript JSX", "TypeScript", "JSON", "XML", "JavaScript", "JSON with Comments", "PostCSS", "Markdown", "Python", "pip requirements", "Dotenv", "comment", "blank", "total"
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/README.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 14, 37
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/bun.lock", "JSON with Comments", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 989, 0, 0, 0, 0, 0, 0, 921, 1910
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/components.json", "JSON", 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 26
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/eslint.config.mjs", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 2, 3, 19
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/next.config.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 9
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/package.json", "JSON", 0, 0, 0, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 73
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/postcss.config.mjs", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 2, 8
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/public/empty.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 88, 0, 0, 0, 0, 0, 0, 0, 0, 1, 89
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/public/file.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/public/globe.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/public/intigration/oneDrive.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/public/intigration/wistia.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/public/next.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/public/vercel.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/public/window.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/(auth)/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 17
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/(auth)/login/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/(auth)/register/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/(auth)/verify-otp/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 22
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/api/trpc/[trpc]/route.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/content-library/folder/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12, 58
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/content-library/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 53
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/content-library/video/[id]/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5, 33
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/content-library/video/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 12, 58
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 38
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 16
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/console/player/settings/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/embed/[videoId]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 16
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/globals.css", "PostCSS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 367, 0, 0, 0, 0, 36, 60, 463
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 62
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/app/logins/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/static/DataTable.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 122, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 10, 143
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/static/DeleteBox.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 42
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/static/Loader.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/SignInComp.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 17, 133
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/alert-dialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 184, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 200
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/avatar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 103, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 113
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/breadcrumb.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 123
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/button.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 66
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/card.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 91, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 101
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/dialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 155, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 169
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/dropdown-menu.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 250, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 269
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/empty.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 105
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/field.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 218, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 239
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/input-otp.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 79, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 88
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/input.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 20
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/label.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 25
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/popover.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 79, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 90
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/select.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 181, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 195
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/separator.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 29
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/sheet.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 134, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 148
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/sidebar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 642, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 55, 707
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/skeleton.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 14
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/switch.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 34
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 117
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/tabs.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 91
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/components/ui/tooltip.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 58
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/hooks/use-mobile.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 20
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/hooks/useGooglePicker.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 104
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/hooks/useVideoThumbnail.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 135, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 30, 167
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/lib/searchParams.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/lib/useLibraryFilters.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 16
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/lib/utils.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12, 34
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/SidebarProvider.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8, 33
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/component/LoginForm.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 152, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 179
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/component/RegisterForm.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 217, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 24, 242
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/component/VerifyOTPForm.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 109, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 126
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/view/LoginView.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 54
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/view/RegisterView.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 56
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/auth/view/VerifyOTPView.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 29
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/billing/server/procedures.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 21, 106
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/HomeView.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 25
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/AppSidebar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 21, 252
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/BreadCumbConsole.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 14, 97
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/ColumnLibrary.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 485, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 39, 537
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/DropdownFilters.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 62
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/Filters.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 79
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/PlanCard.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 182, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 189
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/PricingCardSection.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 151, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 157
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/PricingPlan.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 50
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/PricingSection.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 26
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/ProfileMenu.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 305, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 31, 340
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/ProgressBar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 29
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/SidebarStorage.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 54
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/StorageProgressBar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 29
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/ThumbnailUploadWorker.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 19, 75
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/ToolTipBar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 29
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/TopHeader.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 22
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/UploadCard.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 217, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 48, 35, 300
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/UploadFile.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 304, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 739, 148, 1191
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/component/generateAvatar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 37
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/context/ConsoleContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 32
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/view/FolderContentView.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 151, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 174
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/view/LibraryView.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 135, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 22, 167
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/console/view/VideoPlayerView.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 24
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/constant.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/BrandLogo.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10, 73
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/CustomQuality.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 57
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/CustomSpeed.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 48
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/ShareFeature.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/VideoCustomization.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 432, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55, 487
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/VideoPlayer.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 35
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/VideoSettings.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 115, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 120
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/VolumeControls.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 159, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 9, 173
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/component/temp.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 222, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 31, 263
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/server/procedures.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 155, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 33, 192
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/embed/view/EmbedView.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 18
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/folder/server/procedures.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 411, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 107, 528
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/micro-interactions/Authanimation.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 18
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/micro-interactions/UploadUI.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 159, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 18, 181
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/micro-interactions/VideoUploadCard.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 11, 97
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/player/context/playerContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 7, 33
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Advance.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Branding.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 324, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 15, 347
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/ControlsSettings.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 119
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Cta.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 95, 6, 101
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/GeneralSetting.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 8, 96
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/ItemRow.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 43
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Preview.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Security.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 158
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/Settings.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 16, 118
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/component/SettingsContent.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 29
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/playerSettings/view/PlayerSettingsView.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 126, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10, 140
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/types.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 230, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 57, 311
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/BlankFolder.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8, 46
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/ConnectGoogleDrive.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 163, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 36, 204
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/CreateFolder.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8, 104
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/Folder.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 28, 142
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/FolderList.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 142, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 30, 190
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/FolderTable.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 17, 119
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/ImportVideos.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 19, 103
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/SaveVideos.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 18
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/SelectProvider.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 97
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/component/UploadManager.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 17, 123
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/funcions/upload.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 144, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 34, 183
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/upload/server/procedures.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 190, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 34, 239
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/user/server/procedures.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 303, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 53, 362
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/CaptureLeads.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 199, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 18, 230
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/Form.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 26
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/FormFields.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 459, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 45, 517
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/ThumbnailUpdate.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 186, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 29, 221
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/UpdatePlan.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 42
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/VideoControls.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/VideoDurationInput.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 11, 79
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/component/VideoSettingType.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 37
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/server/procedures.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 288, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 61, 360
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/modules/video/view/VideoDetailsView.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 9
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/client.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1, 60
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/init.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10, 62
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/query-client.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 25
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/routers/_app.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 20
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/server.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 16
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/trpc/type.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/utils/upload.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/src/utils/utils.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 11, 55
+"/Users/ajaysingh/Desktop/secure_video_provider/fronted/tsconfig.json", "JSON with Comments", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 1, 35
+"/Users/ajaysingh/Desktop/secure_video_provider/server/cmd/server/main.go", "Go", 0, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 29, 152
+"/Users/ajaysingh/Desktop/secure_video_provider/server/cmd/worker/worker.go", "Go", 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 12
+"/Users/ajaysingh/Desktop/secure_video_provider/server/go.mod", "Go Module File", 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 84
+"/Users/ajaysingh/Desktop/secure_video_provider/server/go.sum", "Go Checksum File", 202, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 203
+"/Users/ajaysingh/Desktop/secure_video_provider/server/infra/.dev.api.dockerfile", "Docker", 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 15
+"/Users/ajaysingh/Desktop/secure_video_provider/server/infra/.dev.worker.dockerfile", "Docker", 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 16
+"/Users/ajaysingh/Desktop/secure_video_provider/server/infra/api.dockerfile", "Docker", 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 25
+"/Users/ajaysingh/Desktop/secure_video_provider/server/infra/docker-compose.yml", "YAML", 0, 0, 0, 0, 0, 79, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12, 93
+"/Users/ajaysingh/Desktop/secure_video_provider/server/infra/worker.dockerfile", "Docker", 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 28
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/api/domain/entity.go", "Go", 0, 187, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 64, 263
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/api/middleware/middleware.go", "Go", 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 41
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/config/constant.go", "Go", 0, 145, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11, 158
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/handler/handler.go", "Go", 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 28, 152
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/repository/subscription_repo.go", "Go", 0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 123
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/repository/userUsageRepo.go", "Go", 0, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 93
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/routes/routes.go", "Go", 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 10, 41
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/billing/services/service.go", "Go", 0, 206, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 46, 272
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/dto/dto.go", "Go", 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 42
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/handler/folderHandler.go", "Go", 0, 395, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 159, 569
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/repository/folder_repo.go", "Go", 0, 223, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 69, 300
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/routes/folder_routes.go", "Go", 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 17, 42
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/services/folder_service.go", "Go", 0, 440, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 119, 163, 722
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/folders/utils/hierarchy.go", "Go", 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 14, 44
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/dto/dto.go", "Go", 0, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 16, 110
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/handler/formHandler.go", "Go", 0, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 40, 161
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/repository/lead_form_field.go", "Go", 0, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 22, 100
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/repository/lead_form_option_repository.go", "Go", 0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 87
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/repository/lead_form_repository.go", "Go", 0, 94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 37, 145
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/routes/routes.go", "Go", 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8, 25
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/form/service/form_service.go", "Go", 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 40, 146
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/player/dto/dto.go", "Go", 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 49
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/player/handler/playerHandler.go", "Go", 0, 107, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41, 148
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/player/repository/player_repo.go", "Go", 0, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 22, 86
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/player/routes/player_routes.go", "Go", 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8, 25
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/player/services/player_setting.go", "Go", 0, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 96
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/uploader/dto/dto.go", "Go", 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/uploader/handler/uploaderHandler.go", "Go", 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 21, 79
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/uploader/routes/Routes.go", "Go", 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8, 36
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/uploader/services/services.go", "Go", 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 16, 59
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/uploader/worker/sqs.go", "Go", 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8, 43
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/dto/dto.go", "Go", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/handler/o_auth.go", "Go", 0, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 29, 153
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/handler/userHandler.go", "Go", 0, 256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 85, 368
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/repository/account_repo.go", "Go", 0, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 101
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/repository/repositroy.go", "Go", 0, 75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 24, 100
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/repository/workspace_repo.go", "Go", 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 38, 120
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/routes/userRoutes.go", "Go", 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 7, 36
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/services/services.go", "Go", 0, 296, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 105, 407
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/users/services/workspacesService.go", "Go", 0, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 29, 93
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/videos/handler/videoHandler.go", "Go", 0, 282, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 87, 381
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/videos/repository/repositroy.go", "Go", 0, 143, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37, 60, 240
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/videos/routes/routes.go", "Go", 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 9, 43
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/modules/videos/services/service.go", "Go", 0, 181, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 66, 251
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/async/worker/sqs.go", "Go", 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8, 43
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/config/auth/auth.go", "Go", 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 21
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/config/aws/sqs.go", "Go", 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 34
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/config/db/db.go", "Go", 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 17, 85
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/config/r2/r2.go", "Go", 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 50
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/config/redis/redis.go", "Go", 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11, 35
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/MakeSignedurl.go", "Go", 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 28
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/apiError.go", "Go", 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 46
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/decodeCursor.go", "Go", 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 44
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/errMess.go", "Go", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/generateOTP.go", "Go", 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 24
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/jwtMaker.go", "Go", 0, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 19, 96
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/sendEmail.go", "Go", 0, 78, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12, 91
+"/Users/ajaysingh/Desktop/secure_video_provider/server/internal/shared/utils/state.go", "Go", 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 17
+"/Users/ajaysingh/Desktop/secure_video_provider/server/pkg/resetDb.go", "Go", 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 27
+"/Users/ajaysingh/Desktop/secure_video_provider/server/tmp/build-errors.log", "Log", 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/ajaysingh/Desktop/secure_video_provider/transcoding/.env", "Dotenv", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 4
+"/Users/ajaysingh/Desktop/secure_video_provider/transcoding/config/aws.py", "Python", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 2, 15
+"/Users/ajaysingh/Desktop/secure_video_provider/transcoding/dockerfile", "Docker", 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 14
+"/Users/ajaysingh/Desktop/secure_video_provider/transcoding/feature/download.py", "Python", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 51, 0, 0, 1, 10, 62
+"/Users/ajaysingh/Desktop/secure_video_provider/transcoding/feature/transcode.py", "Python", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 0, 0, 3, 34, 117
+"/Users/ajaysingh/Desktop/secure_video_provider/transcoding/feature/upload.py", "Python", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 0, 0, 4, 7, 33
+"/Users/ajaysingh/Desktop/secure_video_provider/transcoding/main.py", "Python", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 2, 13, 29
+"/Users/ajaysingh/Desktop/secure_video_provider/transcoding/requirements.txt", "pip requirements", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 3, 6
+"Total", "-", 202, 5256, 80, 54, 1, 79, 10957, 2285, 97, 108, 20, 1023, 367, 23, 180, 3, 4, 1674, 4834, 27247

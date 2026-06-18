@@ -61,6 +61,7 @@ func (r *postgresLeadFormRepository) GetByID(ctx context.Context, id uuid.UUID) 
 	}
 	return &Leadform, nil
 }
+
 // func (r *postgresLeadFormRepository) GetByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.LeadForm, error) {
 // 	var Leadform domain.LeadForm
 	
@@ -75,28 +76,25 @@ func (r *postgresLeadFormRepository) GetByID(ctx context.Context, id uuid.UUID) 
 // }
 
 func (r *postgresLeadFormRepository) GetByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.LeadForm, error) {
-    var leadForm domain.LeadForm
+	var leadForm domain.LeadForm
+	
+	err := r.db.WithContext(ctx).
+		Preload("Fields", func(db *gorm.DB) *gorm.DB {
+			return db.Order("position ASC")
+		}).
+		Preload("Fields.Options").
+		First(&leadForm, "video_id = ?", videoID).
+		Error
 
-    err := r.db.
-        WithContext(ctx).
-        Preload("Fields", func(db *gorm.DB) *gorm.DB {
-            return db.Order("position ASC")
-        }).
-        // Preload("Fields.Options", func(db *gorm.DB) *gorm.DB {
-        //     return db.Order("position ASC")
-        // }).
-        First(&leadForm, "video_id = ?", videoID).
-        Error
-
-    if err != nil {
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            return nil, nil
-        }
-        return nil, err
-    }
-
-    return &leadForm, nil
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &leadForm, nil
 }
+
 
 
 
