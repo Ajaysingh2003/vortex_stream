@@ -79,6 +79,7 @@ type User struct {
 	// Videos []Video `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
 	Workspaces []Workspaces `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"workspaces,omitempty"`
 	Accounts   []Account    `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"accounts,omitempty"`
+
 	Subscriptions *Subscription `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"subscriptions,omitempty"`
 	UsageCounters UserUsageCounters `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"usageCounters,omitempty"`
 }
@@ -153,6 +154,7 @@ type Video struct {
 	Title       string      `gorm:"type:varchar(255);not null" json:"title"`
 	FolderID    *uuid.UUID  `gorm:"type:uuid;index" json:"folderId"`
 	WorkspaceID uuid.UUID   `gorm:"type:uuid;index" json:"WorkspaceId"`
+	
 	Workspace   *Workspaces `gorm:"foreignKey:WorkspaceID;references:ID" json:"workspace.omitempty"`
 	// Paths in S3/MinIO
 	VideoKey  string `gorm:"not null" json:"videoKey"`
@@ -164,8 +166,13 @@ type Video struct {
 	IsPrivate bool   `gorm:"default:true" json:"isPrivate"`
 
 	Status         VideoStatus       `gorm:"type:varchar(20);default:'PENDING'" json:"status"`
+
 	Resolutions    []VideoResolution `gorm:"foreignKey:VideoID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"resolutions"`
+
+	Form           *LeadForm         `gorm:"foreignKey:VideoID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"form"`
+	
 	AllowedDomains []VideoDomain     `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE" json:"allowedDomains,omitempty"`
+
 	CreatedAt      time.Time         `json:"createdAt"`
 	UpdatedAt      time.Time         `json:"updatedAt"`
 	DeletedAt      gorm.DeletedAt    `gorm:"index" json:"-"`

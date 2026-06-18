@@ -80,7 +80,7 @@ function CaptureLeads() {
       position: field.position,
       // Fix: Force a fallback to an empty array if options is undefined
       options:
-        field.options?.map((opt) => ({ id: opt.id, label: opt.label })) || [],
+        field.options?.map((opt) => ({ id: opt.id, label: opt.label })) || null,
     }));
 
     // Now pass 'formattedFields' instead of your raw 'fields' array!

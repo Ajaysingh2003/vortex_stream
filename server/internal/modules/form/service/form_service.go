@@ -21,6 +21,7 @@ import (
 
 	type FormServiceInterface interface {
 	Create(ctx context.Context, data *formdto.CreateFormReq,userID uuid.UUID) error
+	GetByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.LeadForm,error)
 }
 
 type formServiceRepo struct {
@@ -41,7 +42,7 @@ func (r *formServiceRepo) Create(ctx context.Context, data *formdto.CreateFormRe
 
 	// guard 
 
-	fmt.Print(data.WorkspaceID,data.VideoID,"kira queen")
+	fmt.Print(data.WorkspaceID,data.VideoID,"votehot")
 	workspaceData, err := r.workspaceRepo.GetByID(ctx, data.WorkspaceID)
 
 	if err != nil {
@@ -72,6 +73,7 @@ func (r *formServiceRepo) Create(ctx context.Context, data *formdto.CreateFormRe
 		leadFormpayload := &domain.LeadForm{
 			ID:        data.ToEntity().ID,
 			VideoID:   videoData.ID,
+			WorkspaceID: data.WorkspaceID,
 			Placement: data.Placement,
 			ShowAt:    data.ShowAt,
 			AllowSkip: data.AllowSkip,
@@ -116,4 +118,29 @@ func (r *formServiceRepo) Create(ctx context.Context, data *formdto.CreateFormRe
 		return err
 	}
 	return  nil
+}
+
+
+func (r * formServiceRepo) GetByVideoID (ctx context.Context,videoID uuid.UUID) (*domain.LeadForm,error) {
+
+	videoData,err:=r.videoRepo.GetByID(ctx , videoID)
+
+	if err != nil {
+		return nil,err
+	}
+
+	if videoData ==nil{
+		return  nil,&utils.ApiError{
+			Code: 404,
+			Message: "Video does not exist.",
+		}
+	}
+
+	formdata,err:=r.leadformRepo.GetByVideoID(ctx , videoID )
+
+	if err != nil {
+		return nil, err
+	}
+
+	return formdata,nil
 }
