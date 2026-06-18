@@ -16,18 +16,27 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Delete, GripVertical, PlusCircle, RemoveFormattingIcon, X } from "lucide-react";
+
+import {
+  Delete,
+  GripVertical,
+  PlusCircle,
+  RemoveFormattingIcon,
+  X,
+} from "lucide-react";
+
 import { Input } from "@/components/ui/input";
 
 type fieldType = "dropdown" | "checkbox" | "text";
 
-type optionType = { id: string; label: string; scope: string };
+type optionType = { id: string; label: string };
+
 export interface formFieldType {
   id: string;
   label: string;
-  scope: string;
+  // scope: string;
   type: fieldType;
-  position: string;
+  position: number;
   options?: optionType[];
 }
 
@@ -41,41 +50,46 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function FormFields({fields,setFields}:{fields:formFieldType[],setFields:React.Dispatch<React.SetStateAction<formFieldType[]>>}) {
-
+export default function FormFields({
+  fields,
+  setFields,
+}: {
+  fields: formFieldType[];
+  setFields: React.Dispatch<React.SetStateAction<formFieldType[]>>;
+}) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
-  const { active, over } = event;
+    const { active, over } = event;
 
-  if (over && active.id !== over.id) {
-    setFields((items) => {
-      const oldIndex = items.findIndex((item) => item.id === active.id);
-      const newIndex = items.findIndex((item) => item.id === over.id);
-      
-      // 1. Move the items in the array structure first
-      const rearrangedItems = arrayMove(items, oldIndex, newIndex);
-      
-      // 2. Re-map the position property to match its new sorted index position
-      return rearrangedItems.map((item, index) => ({
-        ...item,
-        position: `${index + 1}` // Keeps positions sequentially locked (1, 2, 3...)
-      }));
-    });
-  }
-};
+    if (over && active.id !== over.id) {
+      setFields((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+
+        // 1. Move the items in the array structure first
+        const rearrangedItems = arrayMove(items, oldIndex, newIndex);
+
+        // 2. Re-map the position property to match its new sorted index position
+        return rearrangedItems.map((item, index) => ({
+          ...item,
+          position:index + 1, // Keeps positions sequentially locked (1, 2, 3...)
+        }));
+      });
+    }
+  };
 
   const newFields = (labels: string, type: fieldType) => {
     const newPayload: formFieldType = {
       id: uuidv4(),
       label: labels,
       type: type,
-      position: `${fields.length + 1}`,
-      get scope() {
-        return this.label.trim().toLowerCase().replace(/\s+/g, "_");
-      },
+      position:fields.length + 1,
+      // get scope() {
+      //   return this.label.trim().toLowerCase().replace(/\s+/g, "_");
+      // },
     };
 
     if (type !== "text") {
@@ -83,16 +97,13 @@ export default function FormFields({fields,setFields}:{fields:formFieldType[],se
         {
           id: uuidv4(),
           label: `option 1`,
-          get scope() {
-            return this.label.trim().toLowerCase().replace(/\s+/g, "_");
-          },
+          // get scope() {
+          //   return this.label.trim().toLowerCase().replace(/\s+/g, "_");
+          // },
         },
         {
           id: uuidv4(),
           label: `option 2`,
-          get scope() {
-            return this.label.trim().toLowerCase().replace(/\s+/g, "_");
-          },
         },
       ];
       newPayload.options = optionPayload;
@@ -160,16 +171,24 @@ function SortableFieldRow({
     zIndex: isDragging ? 50 : "auto",
   };
 
-
-  
   const isFieldDuplicate = (currentLabel: string): boolean => {
     if (!currentLabel.trim()) return false;
-    return fieldData.filter((f) => f.label.trim().toLowerCase() === currentLabel.trim().toLowerCase()).length > 1;
+    return (
+      fieldData.filter(
+        (f) =>
+          f.label.trim().toLowerCase() === currentLabel.trim().toLowerCase(),
+      ).length > 1
+    );
   };
 
   const isOptionDuplicate = (optionLabel: string): boolean => {
     if (!optionLabel.trim() || !field.options) return false;
-    return field.options.filter((o) => o.label.trim().toLowerCase() === optionLabel.trim().toLowerCase()).length > 1;
+    return (
+      field.options.filter(
+        (o) =>
+          o.label.trim().toLowerCase() === optionLabel.trim().toLowerCase(),
+      ).length > 1
+    );
   };
 
   const handleInputChange = (id: string, newValue: string) => {
@@ -185,7 +204,7 @@ function SortableFieldRow({
       prevItems.map((item) => {
         const hasOption = item.options?.some((e) => e.id === id);
         if (!hasOption) return item;
-        
+
         return {
           ...item,
           options: item.options?.map((opt) =>
@@ -204,9 +223,6 @@ function SortableFieldRow({
     const newOptPayload: optionType = {
       id: uuidv4(),
       label: labels,
-      get scope() {
-        return this.label.trim().toLowerCase().replace(/\s+/g, "_");
-      },
     };
 
     setField((prevFields) =>
@@ -225,32 +241,30 @@ function SortableFieldRow({
   // Pre-calculate boundary checks for conditional styles
   const fieldHasError = isFieldDuplicate(field.label);
 
-
   const handleFieldRemove = (fieldId: string) => {
-  setField((prevItems) =>
-    prevItems
-      .filter((item) => item.id !== fieldId) // 1. Remove the clicked field
-      .map((item, index) => ({
-        ...item,
-        position: `${index + 1}`, // 2. Reset positions sequentially (1, 2, 3...)
-      }))
-  );
-};
+    setField((prevItems) =>
+      prevItems
+        .filter((item) => item.id !== fieldId) // 1. Remove the clicked field
+        .map((item, index) => ({
+          ...item,
+          position: index + 1, // 2. Reset positions sequentially (1, 2, 3...)
+        })),
+    );
+  };
 
-
-const handleOptionRemove = (fieldId: string, optionId: string) => {
-  setField((prevFields) =>
-    prevFields.map((field) => {
-      if (field.id === fieldId && field.options) {
-        return {
-          ...field,
-          options: field.options.filter((opt) => opt.id !== optionId),
-        };
-      }
-      return field; 
-    })
-  );
-};
+  const handleOptionRemove = (fieldId: string, optionId: string) => {
+    setField((prevFields) =>
+      prevFields.map((field) => {
+        if (field.id === fieldId && field.options) {
+          return {
+            ...field,
+            options: field.options.filter((opt) => opt.id !== optionId),
+          };
+        }
+        return field;
+      }),
+    );
+  };
   return (
     <div ref={setNodeRef} style={style}>
       {/* 1. TEXT FIELD TYPE */}
@@ -271,15 +285,18 @@ const handleOptionRemove = (fieldId: string, optionId: string) => {
                 value={field.label}
                 onChange={(e) => handleInputChange(field.id, e.target.value)}
                 className={`bg-transparent text-accent text-sm md:text-md border outline-none shadow-none focus-visible:ring-0 rounded-sm h-7 transition-colors ${
-                  fieldHasError 
-                    ? "border-red-500 focus-visible:border-red-500" 
+                  fieldHasError
+                    ? "border-red-500 focus-visible:border-red-500"
                     : "border-transparent focus-visible:border-none"
                 }`}
               />
             </div>
             <div className="text-neutral-400 cursor-pointer p-1">
-              <button className="cursor-pointer" onClick={(()=>handleFieldRemove(field.id))}>
-                <X className="size-4"/>
+              <button
+                className="cursor-pointer"
+                onClick={() => handleFieldRemove(field.id)}
+              >
+                <X className="size-4" />
               </button>
             </div>
           </div>
@@ -298,21 +315,24 @@ const handleOptionRemove = (fieldId: string, optionId: string) => {
             >
               <GripVertical size={16} />
             </button>
-            
+
             <div className="flex-1">
               <Input
                 value={field.label}
                 onChange={(e) => handleInputChange(field.id, e.target.value)}
                 className={`bg-transparent text-accent text-sm md:text-md border outline-none shadow-none focus-visible:ring-0 rounded-sm h-7 transition-colors ${
-                  fieldHasError 
-                    ? "border-red-500 focus-visible:border-red-500" 
+                  fieldHasError
+                    ? "border-red-500 focus-visible:border-red-500"
                     : "border-transparent focus-visible:border-none"
                 }`}
               />
             </div>
             <div className="text-neutral-400 cursor-pointer p-1">
-               <button className="cursor-pointer" onClick={(()=>handleFieldRemove(field.id))}>
-                <X className="size-4"/>
+              <button
+                className="cursor-pointer"
+                onClick={() => handleFieldRemove(field.id)}
+              >
+                <X className="size-4" />
               </button>
             </div>
           </div>
@@ -326,24 +346,26 @@ const handleOptionRemove = (fieldId: string, optionId: string) => {
                 const optionHasError = isOptionDuplicate(opt.label);
                 return (
                   <div className="w-full flex items-center gap-4  ">
-                  
-                   <div className="w-full flex-1">
-                    <Input
-                    key={opt.id}
-                    value={opt.label}
-                    onChange={(e) => handleChange(opt.id, e.target.value)}
-                    className={`bg-transparent flex-1 w-full border text-accent text-sm md:text-md focus-visible:ring-0 focus-within:outline:none py-0 max-h-8 rounded-lg transition-colors ${
-                      optionHasError 
-                        ? "border-red-500 focus-visible:border-red-500" 
-                        : "border-neutral-500"
-                    }`}
-                  />
-                   </div>
+                    <div className="w-full flex-1">
+                      <Input
+                        key={opt.id}
+                        value={opt.label}
+                        onChange={(e) => handleChange(opt.id, e.target.value)}
+                        className={`bg-transparent flex-1 w-full border text-accent text-sm md:text-md focus-visible:ring-0 focus-within:outline:none py-0 max-h-8 rounded-lg transition-colors ${
+                          optionHasError
+                            ? "border-red-500 focus-visible:border-red-500"
+                            : "border-neutral-500"
+                        }`}
+                      />
+                    </div>
 
-                  <button className="cursor-pointer text-neutral-400 pr-1" onClick={(()=>handleOptionRemove(field.id,opt.id))}>
-                <X className="size-4"/>
-              </button>
-                 </div>
+                    <button
+                      className="cursor-pointer text-neutral-400 pr-1"
+                      onClick={() => handleOptionRemove(field.id, opt.id)}
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -381,16 +403,18 @@ const handleOptionRemove = (fieldId: string, optionId: string) => {
                 onChange={(e) => handleInputChange(field.id, e.target.value)}
                 className={`bg-transparent text-accent text-sm md:text-md border outline-none shadow-none focus-visible:ring-0 rounded-sm h-7 transition-colors 
                   ${
-                  fieldHasError 
-                    ? "border-red-500 focus-visible:border-red-500" 
-                    : "border-transparent focus-visible:border-none"
-                }`}
-
+                    fieldHasError
+                      ? "border-red-500 focus-visible:border-red-500"
+                      : "border-transparent focus-visible:border-none"
+                  }`}
               />
             </div>
             <div className="text-neutral-400 cursor-pointer p-1">
-               <button className="cursor-pointer" onClick={(()=>handleFieldRemove(field.id))}>
-                <X className="size-4"/>
+              <button
+                className="cursor-pointer"
+                onClick={() => handleFieldRemove(field.id)}
+              >
+                <X className="size-4" />
               </button>
             </div>
           </div>
@@ -403,25 +427,27 @@ const handleOptionRemove = (fieldId: string, optionId: string) => {
               {field.options?.map((opt) => {
                 const optionHasError = isOptionDuplicate(opt.label);
                 return (
-                 <div className="w-full flex items-center gap-4  ">
-                  
-                   <div className="w-full flex-1">
-                    <Input
-                    key={opt.id}
-                    value={opt.label}
-                    onChange={(e) => handleChange(opt.id, e.target.value)}
-                    className={`bg-transparent flex-1 w-full border text-accent text-sm md:text-md focus-visible:ring-0 focus-within:outline:none py-0 max-h-8 rounded-lg transition-colors ${
-                      optionHasError 
-                        ? "border-red-500 focus-visible:border-red-500" 
-                        : "border-neutral-500"
-                    }`}
-                  />
-                   </div>
+                  <div className="w-full flex items-center gap-4  ">
+                    <div className="w-full flex-1">
+                      <Input
+                        key={opt.id}
+                        value={opt.label}
+                        onChange={(e) => handleChange(opt.id, e.target.value)}
+                        className={`bg-transparent flex-1 w-full border text-accent text-sm md:text-md focus-visible:ring-0 focus-within:outline:none py-0 max-h-8 rounded-lg transition-colors ${
+                          optionHasError
+                            ? "border-red-500 focus-visible:border-red-500"
+                            : "border-neutral-500"
+                        }`}
+                      />
+                    </div>
 
-                  <button className="cursor-pointer text-neutral-400 pr-1" onClick={(()=>handleOptionRemove(field.id,opt.id))}>
-                <X className="size-4"/>
-              </button>
-                 </div>
+                    <button
+                      className="cursor-pointer text-neutral-400 pr-1"
+                      onClick={() => handleOptionRemove(field.id, opt.id)}
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
                 );
               })}
             </div>

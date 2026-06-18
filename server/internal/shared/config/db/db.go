@@ -68,6 +68,9 @@ func InitDb() *gorm.DB {
 		&domain.VideoDomain{},
 		&domain.Subscription{},
 		&domain.UserUsageCounters{},	
+		&domain.LeadForm{},	
+		&domain.LeadFormField{},	
+		&domain.LeadFormFieldOption{},	
 	)
 		  
 	if err != nil {
