@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -66,7 +65,6 @@ func (r *postgresLeadFormFieldRepository) Delete(ctx context.Context, id uuid.UU
 	
 	return r.db.WithContext(ctx).Delete(&domain.LeadFormField{}, "id = ?", id).Error
 }
-
 
 func (r *postgresLeadFormFieldRepository) UpsertTx(ctx context.Context, tx *gorm.DB, fields []*domain.LeadFormField) ([]*domain.LeadFormField, error) {
 	if len(fields) == 0 {

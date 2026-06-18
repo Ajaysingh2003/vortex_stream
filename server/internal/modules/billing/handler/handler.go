@@ -41,7 +41,7 @@ func (*BillingHandler) BillingPlan(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": publicPlans})
 }
-
+     
 type CheckoutRequest struct {
 	PriceID string `json:"price_id" binding:"required"`
 }

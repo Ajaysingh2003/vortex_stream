@@ -8,18 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func SetupRouter(r *gin.Engine, formHandler *handler.FormHandler, jwtMaker *utils.JwtMaker) *gin.Engine {
 
-
-func SetupRouter(r *gin.Engine,formHandler *handler.FormHandler,jwtMaker *utils.JwtMaker)*gin.Engine{
-	
-	
 	// user api
 	api := r.Group("/api/v1")
-	workspace:=api.Group("/workspace")
+	workspace := api.Group("/workspace")
 
-	 {
-		workspace.POST("/:workspaceID/video/:videoID/form",middleware.AuthMiddleware(jwtMaker),formHandler.UpsertForm)
-		// workspace.GET("/:workspaceId/player/settings",Playerhandler.GetPlayer)
-	 }
+	{
+		workspace.POST("/:workspaceID/video/:videoID/form", middleware.AuthMiddleware(jwtMaker), formHandler.UpsertForm)
+		
+		api.GET("/video/:videoId/form", formHandler.GetByVideoID)
+		
+	}
 	return r
 }
