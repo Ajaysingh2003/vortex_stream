@@ -16,6 +16,7 @@ type LeadFormRepository interface {
 	CreateTx(ctx context.Context,tx *gorm.DB,form *domain.LeadForm) (*domain.LeadForm, error)
 	Create(ctx context.Context, form *domain.LeadForm) (*domain.LeadForm,error) 
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.LeadForm, error)
+	GetByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.LeadForm, error)
 	Update(ctx context.Context, lead *domain.LeadForm) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	UpsertTx(ctx context.Context,tx *gorm.DB ,form *domain.LeadForm) (*domain.LeadForm,error)
@@ -60,6 +61,44 @@ func (r *postgresLeadFormRepository) GetByID(ctx context.Context, id uuid.UUID) 
 	}
 	return &Leadform, nil
 }
+// func (r *postgresLeadFormRepository) GetByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.LeadForm, error) {
+// 	var Leadform domain.LeadForm
+	
+// 	if err := r.db.Preload("Fields.Options").WithContext(ctx).First(&Leadform, "video_id = ?", videoID).Error; err != nil {
+
+// 		if (errors.Is(err,gorm.ErrRecordNotFound)) {
+// 			return nil ,nil
+// 		}
+// 		return nil, err
+// 	}
+// 	return &Leadform, nil
+// }
+
+func (r *postgresLeadFormRepository) GetByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.LeadForm, error) {
+    var leadForm domain.LeadForm
+
+    err := r.db.
+        WithContext(ctx).
+        Preload("Fields", func(db *gorm.DB) *gorm.DB {
+            return db.Order("position ASC")
+        }).
+        // Preload("Fields.Options", func(db *gorm.DB) *gorm.DB {
+        //     return db.Order("position ASC")
+        // }).
+        First(&leadForm, "video_id = ?", videoID).
+        Error
+
+    if err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, nil
+        }
+        return nil, err
+    }
+
+    return &leadForm, nil
+}
+
+
 
 func (r *postgresLeadFormRepository) Update(ctx context.Context, form *domain.LeadForm) error {
 	return r.db.WithContext(ctx).Save(form).Error

@@ -252,7 +252,7 @@ export const videoRouter = createTRPCRouter({
                 id: z.string(),
                 label: z.string(),
               }),
-            ).optional(),
+            ).optional().nullable(),
           }),
         ),
       }),

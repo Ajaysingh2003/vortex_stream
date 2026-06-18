@@ -122,3 +122,39 @@ func (f *FormHandler) UpsertForm(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": "form Updated successfully"})
 }
+
+
+
+
+
+
+
+func (h *FormHandler) GetByVideoID(c *gin.Context) {
+	videoIDRaw := c.Param("videoId")
+
+	videoID, err := uuid.Parse(videoIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid uuid format",
+			"success": false,
+		})
+		return
+
+	}
+
+	formData, err := h.FormService.GetByVideoID(c.Request.Context(), videoID)
+
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+
+			fmt.Print(appErr.Code, "jerry")
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": formData})
+}
+
