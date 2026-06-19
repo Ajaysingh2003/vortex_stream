@@ -29,7 +29,6 @@ import { Input } from "@/components/ui/input";
 
 type fieldType = "dropdown" | "checkbox" | "text";
 
-type optionType = { id: string; label: string };
 
 export interface formFieldType {
   id: string;
@@ -49,6 +48,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { optionType } from "@/modules/types";
 
 export default function FormFields({
   fields,

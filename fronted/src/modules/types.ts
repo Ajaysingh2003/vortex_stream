@@ -297,6 +297,7 @@ export type ProductionVideoPlayerProps = {
 
 
 
+export type selectType = "before_video" | "during_video" | "after_video";
 
 
 
@@ -340,3 +341,16 @@ export interface LeadForm {
   updatedAt: string; // ISO DateTime string
   fields: LeadFormField[];
 }
+
+
+export type optionType = { id: string; label: string };
+
+
+
+export type endScreenType =
+  | "more_video"
+  | "call_to_action"
+  | "custom_image"
+  | "share_button"
+  | "custom_message"
+  | "empty";

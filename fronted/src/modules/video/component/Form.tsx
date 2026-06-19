@@ -5,7 +5,7 @@ import CaptureLeads from "./CaptureLeads";
 
 function Form() {
   // Try changing this to true to see the height expand seamlessly!
-  const isPremium = true;
+  const isPremium = false;
 
   return (
     <div className="w-full h-full overflow-scroll min-h-[112px]z relative">
