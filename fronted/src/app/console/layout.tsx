@@ -18,7 +18,7 @@ function layout({ children }: { children: React.ReactNode }) {
           }
 
           <div className="w-full relative ">
-            <div className="w-full bg-white py-1 px-1 md:px-2 md:py-2.5 border-stone-200 border-b flex gap-2 items-center fixed">
+            <div className="w-full bg-white py-1 px-1 md:px-2 md:py-2.5 border-stone-200 border-b flex gap-2 items-center fixed z-40">
               <SidebarTrigger />
               <div
                 className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-700"
