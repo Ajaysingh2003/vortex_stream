@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -12,58 +12,50 @@ import VideoDurationInput from "./VideoDurationInput";
 import { useTRPC } from "@/trpc/client";
 import { useParams } from "next/navigation";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { LeadForm, VideoAsset, WorkspaceType } from "@/modules/types";
+import {
+  LeadForm,
+  selectType,
+  VideoAsset,
+  WorkspaceType,
+} from "@/modules/types";
 import FormFields, { formFieldType } from "./FormFields";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
 import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
-type selectType = "before_video" | "during_video" | "after_video";
+import FormStyle from "./FormStyle";
+import { useVideoContext } from "../context/VideoContext";
 
-interface LeadFormType {
-  id:string
-
-}
 function CaptureLeads() {
-
-  const params = useParams();
-  const videoId = params.id;
   const trpc = useTRPC();
-
-  const {data:leadForm}=useSuspenseQuery(trpc.video.getLeadForm.queryOptions({videoId:videoId as string}))
-
-
-  const leadFormData=leadForm as LeadForm
-
-  const [select, setSelect] = useState<selectType>(leadFormData.placement);
-  const [fields, setFields] = useState<formFieldType[]>(leadFormData.fields);
-
-  const workspace = useSuspenseQuery(trpc.user.getWorkspace.queryOptions());
-  const workspacedata = workspace.data as WorkspaceType;
-
-  const { data: videoData } = useSuspenseQuery(
-    trpc.video.getVideoFromWorkspace.queryOptions({
-      videoId: videoId as string,
-      workspaceID: workspacedata.id,
-    }),
-  );
-
-  const videoAssets = videoData as VideoAsset;
-
+  const {
+    select,
+    setSelect,
+    fields,
+    setFields,
+    skipForm,
+    setSkipForm,
+    showAt,
+    setShowAt,
+    videoAssets,
+    workspaceData,
+  } = useVideoContext()!;
+ 
   const videoUpsertMutate = useMutation(
     trpc.video.createLeadForm.mutationOptions({
-      onSuccess:()=>{
-        toast.success("form updated Successfully")
+      onSuccess: () => {
+        toast.success("form updated Successfully");
       },
-      onError:(err)=>{
-        toast.error(err.message || "Something went wrong")
-      }
+      onError: (err) => {
+        toast.error(err.message || "Something went wrong");
+      },
     }),
   );
-  const [skipForm, setSkipForm] = useState(leadFormData.allowSkip);
-  const [showAt, setShowAt] = useState<number>(leadFormData.showAt ?? 0);
-  
+  useEffect(() => {
+    console.log("showAt", showAt);
+  }, [showAt]);
+
   const handleupsertForm = async () => {
     const formattedFields = fields.map((field) => ({
       id: field.id,
@@ -76,7 +68,7 @@ function CaptureLeads() {
 
     await videoUpsertMutate.mutateAsync({
       videoId: videoAssets.id,
-      workspaceId: workspacedata.id,
+      workspaceId: workspaceData.id,
       show_at: showAt,
       allow_skip: skipForm,
       placement: select,
@@ -86,7 +78,6 @@ function CaptureLeads() {
   return (
     <div className="w-full h-full">
       <div className="flex flex-col gap-4 pt-3 px-2">
-
         <div className="space-y-1 pb-3">
           <h4 className=" text-[13px] md:text-[16px] font-semibold text-neutral-800 tracking-wide capitalize">
             Capture Leads
@@ -131,9 +122,10 @@ function CaptureLeads() {
 
       {/* Duration input — only when during_video */}
       {select === "during_video" && (
-        <div className="rounded-lg border border-black/6 bg-neutral-50 p-3">
+        <div className="rounded-lg border mt-3 border-black/6 bg-neutral-50 p-3">
           <VideoDurationInput
             videoDurationInSeconds={videoAssets.duration}
+            value={showAt}
             onChange={setShowAt}
           />
         </div>
@@ -176,11 +168,13 @@ function CaptureLeads() {
           </TabsContent>
 
           <TabsContent value="style" className="mt-3">
-            <div className="flex flex-col items-center justify-center gap-2 py-8 rounded-lg border border-dashed border-black/10">
+            {/* <div className="flex flex-col items-center justify-center gap-2 py-8 rounded-lg border border-dashed border-black/10">
               <span className="text-[11.5px] text-neutral-300 font-medium">
                 Style options coming soon
               </span>
-            </div>
+            </div> */}
+
+            <FormStyle />
           </TabsContent>
         </Tabs>
         <div className="gap-4 px-3 justify-end grida w-full grid-cols-2 border-t-[0.5px] border-[#86868661]  py-2">
@@ -194,7 +188,7 @@ function CaptureLeads() {
             </Button>
             <Button
               onClick={handleupsertForm}
-               disabled={videoUpsertMutate.isPending}
+              disabled={videoUpsertMutate.isPending}
               className="tracking-wider h-8  bg-main-btn  capitalize px-4  font-semibold cursor-pointer border rounded-full text-xs md:text-sm transition-all duration-200"
             >
               save
