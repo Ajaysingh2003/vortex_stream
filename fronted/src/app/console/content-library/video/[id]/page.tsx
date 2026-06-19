@@ -19,12 +19,6 @@ type PageProps = {
 
 async function page({ params }: PageProps) {
   const { id } = await params;
-  // const filters = await loaderLibraryFilter.parse(searchParams);
-
-  // const currentCursor = filters.cursor || "";
-
-  //   console.log(currentCursor, "cursor for page library");
-  // const currentLimit = filters.limit ? Number(filters.limit) : 10;
 
   const queryClient = getQueryClient();
 
@@ -47,7 +41,7 @@ async function page({ params }: PageProps) {
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="w-full h-full">
         <Suspense fallback={<Loader />}>
-          <VideoDetailsView />
+          <VideoDetailsView  />
         </Suspense>
       </div>
     </HydrationBoundary>

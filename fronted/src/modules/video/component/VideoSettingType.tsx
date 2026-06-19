@@ -1,6 +1,7 @@
 import React from 'react'
 import ThumbnailUpdate from './ThumbnailUpdate';
 import Form from './Form';
+import EndScrennControl from './EndScrennControl';
 
 interface VideoSettingTypeProps {
   type: "general" | "thumbnail" | "controls" | "analytics" | string; // Type-safety strings
@@ -17,8 +18,8 @@ function VideoSettingType({ type }: VideoSettingTypeProps) {
     case 'thumbnail':
       settingContent = <ThumbnailUpdate/>
       break;
-    case 'controls':
-      settingContent = <div>Manage Player Controls and UI Overlays</div>;
+    case 'end_screen':
+      settingContent =  <EndScrennControl/>
       break;
     case 'analytics':
       settingContent = <div>Video Performance Metrics and Data Charts</div>;
