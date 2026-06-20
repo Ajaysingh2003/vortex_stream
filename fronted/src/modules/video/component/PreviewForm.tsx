@@ -26,21 +26,21 @@ function PreviewForm() {
   const [start, setStart] = useState(0);
   const [end, setEnd] = useState(MAX_SHOW);
 
-  const showContinue = end < fields.length;
-  const totalPages = Math.max(1, Math.ceil(fields.length / MAX_SHOW));
+  const showContinue = end < fields?.length;
+  const totalPages = Math.max(1, Math.ceil(fields?.length / MAX_SHOW));
   const currentPage = Math.floor(start / MAX_SHOW);
 
   // re-clamp if fields list changes (added/removed) while mid-pagination
   useEffect(() => {
-    if (end > fields.length) {
-      setEnd(Math.min(start + MAX_SHOW, fields.length));
+    if (end > fields?.length) {
+      setEnd(Math.min(start + MAX_SHOW, fields?.length));
     }
-  }, [fields.length]);
+  }, [fields?.length]);
 
   const handleContinue = () => {
-    if (end >= fields.length) return;
+    if (end >= fields?.length) return;
     const newStart = end;
-    const newEnd = Math.min(end + MAX_SHOW, fields.length);
+    const newEnd = Math.min(end + MAX_SHOW, fields?.length);
     setStart(newStart);
     setEnd(newEnd);
   };
@@ -51,6 +51,8 @@ function PreviewForm() {
     setStart(newStart);
     setEnd(newStart + MAX_SHOW);
   };
+
+  if (fields?.length == 0 || !fields) return
 
   return (
     <div
@@ -87,7 +89,7 @@ function PreviewForm() {
 
           {/* ── fields ── */}
           <div className="flex flex-col gap-3.5 items-center w-full px-3 md:px-4">
-            {[...fields].slice(start, end).map((field) =>
+            { fields?.length >0 && [...fields].slice(start, end).map((field) =>
               field.type == "text" ? (
                 <TextInput key={field.id ?? field.label} label={field.label} />
               ) : field.type == "dropdown" ? (

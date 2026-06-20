@@ -254,8 +254,8 @@ body{
   outline: none;
   color: white;
   overflow: hidden; 
-
 }
+
 
 .bg-main-btn::after {
   position: absolute;
@@ -459,4 +459,42 @@ media-controller {
   background: var(--track-fill, skyblue);
   border-radius: 999px;
   width: 100%;
+}
+
+
+
+
+/* Target your custom class name */
+.scroll-bar {
+  /* For Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d8 transparent;
+}
+
+/* Chrome, Safari, and Edge */
+.scroll-bar::-webkit-scrollbar {
+  width: 4px;  /* Micro width for vertical bars */
+  height: 4px; /* Micro height for horizontal bars */
+}
+
+.scroll-bar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-bar::-webkit-scrollbar-thumb {
+  background-color: #d4d4d8; 
+  border-radius: 20px;
+  
+  /* The Secret Sauce: Adds an invisible border to shrink the visible bar thickness */
+  border: 1px solid transparent;
+  background-clip: padding-box; 
+  
+  transition: background-color 150ms ease;
+}
+
+/* Hover state */
+.scroll-bar::-webkit-scrollbar-thumb:hover {
+  background-color: #a1a1aa;
+  border: 1px solid transparent;
+  background-clip: padding-box;
 }

@@ -86,10 +86,7 @@ export default function FormFields({
       id: uuidv4(),
       label: labels,
       type: type,
-      position:fields.length + 1,
-      // get scope() {
-      //   return this.label.trim().toLowerCase().replace(/\s+/g, "_");
-      // },
+      position:fields?.length + 1,
     };
 
     if (type !== "text") {
@@ -112,6 +109,7 @@ export default function FormFields({
     setFields((item) => [...item, newPayload]);
   };
 
+
   return (
     <DndContext
       sensors={sensors}
@@ -127,7 +125,7 @@ export default function FormFields({
         strategy={verticalListSortingStrategy}
       >
         <div className="space-y-2 mb-4">
-          {fields.map((field) => (
+          {fields?.map((field) => (
             <SortableFieldRow
               key={field.id}
               field={field}
@@ -345,7 +343,7 @@ function SortableFieldRow({
               {field.options?.map((opt) => {
                 const optionHasError = isOptionDuplicate(opt.label);
                 return (
-                  <div className="w-full flex items-center gap-4  ">
+                  <div key={opt.id} className="w-full flex items-center gap-4  ">
                     <div className="w-full flex-1">
                       <Input
                         key={opt.id}
@@ -427,7 +425,7 @@ function SortableFieldRow({
               {field.options?.map((opt) => {
                 const optionHasError = isOptionDuplicate(opt.label);
                 return (
-                  <div className="w-full flex items-center gap-4  ">
+                  <div key={opt.id} className="w-full flex items-center gap-4  ">
                     <div className="w-full flex-1">
                       <Input
                         key={opt.id}

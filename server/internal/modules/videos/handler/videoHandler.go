@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
@@ -96,6 +97,52 @@ func (h *VideoHandler) ListVideo(c *gin.Context) {
 
 	data, err := h.VideoService.ListVideo(c.Request.Context(), id)
 
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
+}
+func (h *VideoHandler) ListVideoByWorkspace(c *gin.Context) {
+
+	userId, exists := c.Get("user_id")
+
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": true})
+		return
+	}
+	fmt.Print(userId, "lollol")
+
+	userID, ok := userId.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration", "success": false})
+	}
+
+	workspaceID, err := uuid.Parse(c.Param("workspaceId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid Workspace ID"})
+		return
+	}
+
+	cursor := c.Query("cursor")
+
+	limit:=10
+	if l := c.Query("limit"); l != "" {
+    parsed, err := strconv.Atoi(l)
+    if err == nil && parsed > 0 && parsed <= 100 {
+        limit = parsed
+    }
+	}
+
+	data, err := h.VideoService.ListVideoByWorkspaceID(c.Request.Context(), workspaceID, userID,cursor,limit)
+
+	fmt.Print(data,"data-v3")
+	
 	if err != nil {
 		if appErr, ok := err.(*utils.ApiError); ok {
 			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
@@ -264,7 +311,7 @@ func (h *VideoHandler) UpdateVideoMetaData(c *gin.Context) {
 	if req.Title != nil {
 		videoPayload.Title = *req.Title
 	}
-	
+
 	if req.Thumbnail != nil {
 		videoPayload.Thumbnail = *req.Thumbnail
 	}
@@ -315,8 +362,6 @@ func (h *VideoHandler) GetByVideoID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": videoData})
 }
 
-
-
 func (h *VideoHandler) GetVideoMetaData(c *gin.Context) {
 	videoIDRaw := c.Param("id")
 
@@ -330,11 +375,8 @@ func (h *VideoHandler) GetVideoMetaData(c *gin.Context) {
 
 	}
 
-
 	workspaceIDRaw := c.Param("workspaceId")
 
-
-	
 	workspaceID, workspaceErr := uuid.Parse(workspaceIDRaw)
 
 	if workspaceErr != nil {
@@ -345,8 +387,6 @@ func (h *VideoHandler) GetVideoMetaData(c *gin.Context) {
 		return
 
 	}
-	
-	
 
 	userId, exists := c.Get("user_id")
 
@@ -362,7 +402,7 @@ func (h *VideoHandler) GetVideoMetaData(c *gin.Context) {
 
 	}
 
-	videoData, err := h.VideoService.GetVideoMetaData(c.Request.Context(), userID ,workspaceID ,videoID)
+	videoData, err := h.VideoService.GetVideoMetaData(c.Request.Context(), userID, workspaceID, videoID)
 
 	if err != nil {
 		if appErr, ok := err.(*utils.ApiError); ok {
@@ -377,4 +417,3 @@ func (h *VideoHandler) GetVideoMetaData(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": videoData})
 }
-

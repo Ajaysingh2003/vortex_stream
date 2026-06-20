@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/folders/dto"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/folders/repository"
@@ -386,7 +385,7 @@ func (s *FolderServiceRepository) GetContent (ctx context.Context, folderID uuid
 		remaining := fetchLimit - len(items)
 
 		// 💡 FIX 3: Pass your dynamically extracted afterIDStr variable down instead of hardcoding ""
-		videos, err := s.videoRepo.GetByFolderIdPaginated(ctx, &folderID, afterIDStr, remaining)
+		videos, err := s.videoRepo.GetByFolderIdPaginated(ctx, &folderID, workspaceID ,afterIDStr, remaining)
 		if err != nil {
 			fmt.Printf("Error querying nested folder video payloads: %v\n", err)
 			return nil, &utils.ApiError{Code: 500, Message: "Failed to fetch videos"}
@@ -668,7 +667,7 @@ func (s *FolderServiceRepository) GetRootData(ctx context.Context, workspaceID u
 
 		remaining := fetchLimit - len(items)
 
-		videos, err := s.videoRepo.GetByFolderIdPaginated(ctx, nil, afterIDStr, remaining)
+		videos, err := s.videoRepo.GetByFolderIdPaginated(ctx, nil,  workspaceID ,afterIDStr ,remaining)
 		if err != nil {
 			fmt.Printf("Error fetching root videos: %v\n", err)
 			return nil, &utils.ApiError{Code: http.StatusInternalServerError, Message: "Failed to fetch videos"}
