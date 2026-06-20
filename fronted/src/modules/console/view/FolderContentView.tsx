@@ -16,7 +16,7 @@ import {
 } from "@/modules/types";
 import { useLibraryFilters } from "@/lib/useLibraryFilters";
 import {
-    useQueryClient,
+  useQueryClient,
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
@@ -58,6 +58,24 @@ function FolderContentView({
         },
       ),
     );
+  useSuspenseInfiniteQuery(
+    trpc.folder.getFolderContent.infiniteQueryOptions(
+      {
+        limit,
+        folderID: folderID,
+        cursor: filters.cursor,
+        workspaceID: workspacesData.id,
+      },
+      {
+        getNextPageParam: (lastPage: LibraryContentType) =>
+          lastPage.metadata.hasNextPage
+            ? lastPage.metadata.nextCursor
+            : undefined,
+
+        initialCursor: "",
+      },
+    ),
+  );
 
   const getFolderInfo = useSuspenseQuery(
     trpc.folder.getfolderInfo.queryOptions({
@@ -86,39 +104,40 @@ function FolderContentView({
     observer.observe(el);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-  
-  const queryClient=useQueryClient()
+
+  const queryClient = useQueryClient();
 
   const handleSuccess = useCallback(async () => {
     await queryClient.invalidateQueries(
-        trpc.folder.getFolderContent.infiniteQueryOptions(
-            {
-                limit,
-                workspaceID: workspacesData.id,
-                cursor: "",
-                folderID:folderID
-            },
-            {
-                getNextPageParam: (lastPage: LibraryContentType) =>
-                    lastPage.metadata.hasNextPage
-                        ? lastPage.metadata.nextCursor
-                        : undefined,
-                initialCursor: "",
-            }
-        )
-    )
-}, [queryClient, limit, workspacesData?.id])
+      trpc.folder.getFolderContent.infiniteQueryOptions(
+        {
+          limit,
+          workspaceID: workspacesData.id,
+          cursor: "",
+          folderID: folderID,
+        },
+        {
+          getNextPageParam: (lastPage: LibraryContentType) =>
+            lastPage.metadata.hasNextPage
+              ? lastPage.metadata.nextCursor
+              : undefined,
+          initialCursor: "",
+        },
+      ),
+    );
+  }, [queryClient, limit, workspacesData?.id]);
 
+  const router = useRouter();
+  const handleRowClick = (row: { id: string; type: "video" | "folder" }) => {
+    console.log("row.id", row.id);
+    let url = `/`;
 
-const router=useRouter()
-const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{
-  console.log("row.id",row.id)
-  let url=`/`
+    row.type == "video"
+      ? (url = `/console-library/video/${row.id}`)
+      : (url = `/console/content-library/folder/${row.id}`);
 
-  row.type == "video" ? url=`/console-library/video/${row.id}` : url = `/console/content-library/folder/${row.id}`
-
-  router.push(url)
-}
+    router.push(url);
+  };
 
   return (
     <div className="w-full h-full min-h-screen relative bg-transparent">
@@ -135,12 +154,21 @@ const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{
           />
 
           <div className="flex justify-end">
-            <Filters parentId={folderID} workspaceID={workspacesData.id} onSucess={handleSuccess}  />
+            <Filters
+              parentId={folderID}
+              workspaceID={workspacesData.id}
+              onSucess={handleSuccess}
+            />
           </div>
 
           <div className="max-w-7xl">
             {items.length > 0 ? (
-              <DataTable name="folder" onRowClick={handleRowClick} columns={libraryColumn} data={items} />
+              <DataTable
+                name="folder"
+                onRowClick={handleRowClick}
+                columns={libraryColumn}
+                data={items}
+              />
             ) : (
               <div className="w-full py-12 flex flex-col items-center justify-center border border-dashed rounded-xl bg-muted/20 text-muted-foreground gap-2">
                 <Inbox className="size-8 opacity-40" />

@@ -7,7 +7,7 @@ function VideoDetailsView() {
   
   const params= useSearchParams()
   const scope=params.get("setting_scope")
-  // console.log(,"89")
+  console.log(scope,"89-leah")
       switch (scope){
     case 'form':
         return <FormVideoSection/>

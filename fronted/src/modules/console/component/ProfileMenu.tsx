@@ -69,10 +69,11 @@ function ProfileMenu() {
   const workspacesData = workspaces as workspacesType[];
   console.log(workspaces, "leah jaye");
   const [workspaceName, setWorkspaceName] = useState<string>("");
-  // const router=useRouter()
+  const router=useRouter()
   const switchWorkspace = useMutation(
     trpc.user.switchWorkspace.mutationOptions({
       onSuccess: async () => {
+        router.push(`/console/content-library`)
         await queryClient.invalidateQueries(
           trpc.user.getWorkspace.queryOptions(),
         );
@@ -210,7 +211,7 @@ function ProfileMenu() {
                 <Settings className="size-4" />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-black/70 bg-black/5 text-[11px] menu-btn">
+              <DropdownMenuItem className="text-black/70 bg-black/5  text-[11px] menu-btn">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -241,7 +242,7 @@ function ProfileMenu() {
                   onPointerLeave={() => setHoverWorkspace("")}
                   key={e.id}
                   onClick={() => addSearchParams(e.id)}
-                  className="text-[12px] cursor-pointer py-1.5 grid grid-cols-[30px_1fr_20px]"
+                  className="text-[12px] hover:bg-black/3 rounded-lg cursor-pointer py-1.5 grid grid-cols-[30px_1fr_20px]"
                 >
                   <GenerateAvartar
                     isCircle={true}
