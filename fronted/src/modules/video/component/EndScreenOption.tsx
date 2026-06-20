@@ -1,6 +1,12 @@
 import React from 'react'
 import { useVideoContext } from '../context/VideoContext';
 import CallToAction from './CallToAction';
+import ShareButton from './ShareButton';
+import CustomImage from './CustomImage';
+import CustomMessage from './CustomMessage';
+import { EmptyContent } from '@/components/ui/empty';
+import EmptyState from './Empty';
+import MoreVideo from './MoreVideo';
 
 function EndScreenOption() {
   const { endScreen } = useVideoContext()!;
@@ -10,20 +16,21 @@ function EndScreenOption() {
       return (
         <CallToAction/>
       );
-    
+     
     case "more_video":
-      return <div>More Videos Component</div>;
+      return <MoreVideo/>
 
     case "custom_image":
-      return <div>Custom Image Component</div>;
+      return <CustomImage/>
 
     case "share_button":
-      return <div>Share Button Component</div>;
+      return <ShareButton/>
 
     case "custom_message":
-      return <div>Custom Message Component</div>;
+      return <CustomMessage/>
 
     case "empty":
+      return <EmptyState/>
     default:
       return null; // React expects null or an element if you want to render nothing
   }

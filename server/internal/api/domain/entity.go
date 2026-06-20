@@ -155,7 +155,7 @@ type Video struct {
 	FolderID    *uuid.UUID  `gorm:"type:uuid;index" json:"folderId"`
 	WorkspaceID uuid.UUID   `gorm:"type:uuid;index" json:"WorkspaceId"`
 	
-	Workspace   *Workspaces `gorm:"foreignKey:WorkspaceID;references:ID" json:"workspace.omitempty"`
+	Workspace   *Workspaces `gorm:"foreignKey:WorkspaceID;references:ID" json:"workspace,omitempty"`
 	// Paths in S3/MinIO
 	VideoKey  string `gorm:"not null" json:"videoKey"`
 	MasterKey string `gorm:"not null" json:"masterKey"`
@@ -194,14 +194,10 @@ type VideoResolution struct {
 type VideoDomain struct {
 	ID uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 
-	// The allowed domain (e.g., "mycourse-site.com" or "localhost:3000")
 	Domain string `gorm:"type:varchar(255);not null" json:"domain"`
 
-	// Relationship to Video
 	VideoID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_video_domain" json:"videoId"`
 
-	// Adding the uniqueIndex name to both fields creates the composite unique constraint
-	// This prevents the same domain from being added twice for the same video
 	Video *Video `gorm:"foreignKey:VideoID;references:ID" json:"-"`
  
 	CreatedAt time.Time `json:"createdAt"`
