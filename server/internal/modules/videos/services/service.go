@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
+	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/dto"
 	folderRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/repository"
 	userRpo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	workspaceRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
@@ -13,12 +14,15 @@ import (
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/async/worker"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/google/uuid"
+
+	// "golang.org/x/text/number"
 	"gorm.io/gorm"
 )
 
 type VideoInterface interface {
 	CreateVideo(ctx context.Context, video *domain.Video) (*domain.Video, error)
 	ListVideo(ctx context.Context, userID uuid.UUID) ([]domain.Video, error)
+	ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.VideoContentsDTO, error)
 	UpdateVideo(ctx context.Context, userID uuid.UUID, video domain.Video) error
 	ProcessVideo(ctx context.Context, videoID uuid.UUID, userID uuid.UUID) (*domain.Video, error)
 	StreamVideo(ctx context.Context, videoID uuid.UUID) (*domain.Video, error)
@@ -80,27 +84,23 @@ func (r *VideoServiceRepo) UpdateVideo(ctx context.Context, userID uuid.UUID, vi
 
 	fmt.Print("goint to update")
 
-	updatePayload:=&domain.Video{
+	updatePayload := &domain.Video{
 		WorkspaceID: workspace.ID,
 		ID:          video.ID,
 		// Title:       video.Title,
-		FolderID:    video.FolderID,
+		FolderID: video.FolderID,
 		// Thumbnail:   video.Thumbnail,
 	}
 
-	if video.Title !="" {
-		updatePayload.Title=video.Title
-	}
-	
-	if video.Thumbnail !="" {
-		updatePayload.Thumbnail=video.Thumbnail
+	if video.Title != "" {
+		updatePayload.Title = video.Title
 	}
 
-
+	if video.Thumbnail != "" {
+		updatePayload.Thumbnail = video.Thumbnail
+	}
 
 	err = r.videoRepo.Update(ctx, updatePayload)
-
-
 
 	if err != nil {
 		return err
@@ -144,6 +144,52 @@ func (r *VideoServiceRepo) ListVideo(ctx context.Context, userID uuid.UUID) ([]d
 	}
 
 	return data, nil
+}
+
+func (r *VideoServiceRepo) ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.VideoContentsDTO, error) {
+    var cursorID **uuid.UUID
+	
+    if cursor != "" {
+        _, decodedID, err := utils.DecodeCursor(cursor)
+        if err != nil {
+            fmt.Println("Cursor decoding error:", err)
+            return nil, &utils.ApiError{Code: 400, Message: "Invalid cursor format"}
+        }
+        cursorID = &decodedID
+    }
+
+    videos, err := r.videoRepo.GetVideosPaginated(ctx, workspaceID, userID, cursorID, limit+1)
+    if err != nil {
+        return nil, err
+    }
+
+    // 3. Evaluate pagination states
+    hasNextPage := len(videos) > limit
+    nextCursorStr := ""
+
+    // If there's an extra record, slice it out and build the next cursor from the last real item
+    if hasNextPage {
+        videos = videos[:limit] // Remove the extra record
+        lastVideo := videos[len(videos)-1]
+        
+        // Encode the next cursor using the last item's ID (adjust time parameters if your encoder expects them)
+        nextCursorStr = utils.EncodeCursor("video", lastVideo.ID)
+        // if err != nil {
+        //     return nil, fmt.Errorf("failed to encode next cursor: %w", err)
+        // }
+    }
+
+    // 4. Construct the DTO Payload
+    payload := &dto.VideoContentsDTO{
+        Items: videos, // Map this to your DTO structure if your array needs domain-to-dto mapping
+        Metadata: dto.Metadata{
+            HasNextPage: hasNextPage,
+            NextCursor:  nextCursorStr,
+            Total:       len(videos), 
+        },
+    }
+
+    return payload, nil
 }
 
 func (r *VideoServiceRepo) ProcessVideo(ctx context.Context, videoID uuid.UUID, userID uuid.UUID) (*domain.Video, error) {

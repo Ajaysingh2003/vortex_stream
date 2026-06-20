@@ -37,6 +37,7 @@ type FolderContentsDTO struct {
     Items       []ContentItemDTO `json:"items"`
 }
 
+
 type UpdateFolderRequest struct {
     Name string `json:"name" binding:"required"`
 }

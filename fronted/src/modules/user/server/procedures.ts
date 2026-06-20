@@ -1,12 +1,11 @@
 // import { loginSchema } from "@/schema/schema";
-import { baseProcedure, createTRPCRouter, getUserProcedure, protectedProcedure } from "@/trpc/init";
+import { baseProcedure, createTRPCRouter, getUserProcedure, protectedProcedure} from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 // import { z } from "zod";
 import axios from "axios";
 import { cookies } from "next/headers";
 
 import { z } from "zod";
-
 
 export const userRouter = createTRPCRouter({
   login: baseProcedure
@@ -316,12 +315,14 @@ export const userRouter = createTRPCRouter({
     
     try {
       const cookieStore = await cookies();
-      cookieStore.delete("workspace_id");
+      // cookieStore.delete("workspace_id");
+      cookieStore.set("workspace_id", "", { domain: ".localhost", maxAge: 0, path: "/" });
         cookieStore.set("workspace_id", input.workspaceId, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
+          domain: process.env.NODE_ENV === "production" ? ".yourdomain.com" : "localhost",
           maxAge: 60 * 90,
         });
 

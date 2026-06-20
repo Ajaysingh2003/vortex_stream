@@ -21,7 +21,8 @@ type VideoRepository interface {
 	AddResolution(ctx context.Context, res *domain.VideoResolution) error
 	AddAllowedDomain(ctx context.Context, dom *domain.VideoDomain) error
 	Delete(ctx context.Context, id uuid.UUID) error
-	GetByFolderIdPaginated(ctx context.Context,folderID *uuid.UUID , afterID string,remaining int) ([]domain.Video,error)
+	GetVideosPaginated(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursorID **uuid.UUID, limit int) ([]domain.Video, error)
+	GetByFolderIdPaginated(ctx context.Context,folderID *uuid.UUID , workspaceID uuid.UUID ,afterID string,remaining int) ([]domain.Video,error)
 
 	CountByFolderID(ctx context.Context,folderID *uuid.UUID) (int64 , error)
 
@@ -183,9 +184,9 @@ func (r *postgresVideoRepository) GetByIdAndUserId(ctx context.Context, id uuid.
 // 	return videos,nil
 // }
 
-func (r *postgresVideoRepository) GetByFolderIdPaginated(ctx context.Context, folderID *uuid.UUID, afterID string, remaining int) ([]domain.Video, error) {
+func (r *postgresVideoRepository) GetByFolderIdPaginated(ctx context.Context, folderID *uuid.UUID, workspaceID uuid.UUID, afterID string, remaining int) ([]domain.Video, error) {
    
-    query := r.db.WithContext(ctx).Model(&domain.Video{})
+    query := r.db.WithContext(ctx).Model(&domain.Video{}).Where("workspace_id",workspaceID)
 
     if folderID != nil {
         query = query.Where("folder_id = ?", folderID)
@@ -237,4 +238,34 @@ func (r *postgresVideoRepository) CountByFolderID(ctx context.Context, folderID 
     }
 
     return count, nil
+}
+
+
+
+
+
+func (r *postgresVideoRepository) GetVideosPaginated(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursorID **uuid.UUID, limit int) ([]domain.Video, error) {
+    var videos []domain.Video
+    
+    // Set a default safety limit if not provided
+    if limit <= 0 {
+        limit = 10 
+    }
+
+    query := r.db.WithContext(ctx).
+        Where("workspace_id = ?", workspaceID).
+        Order("created_at DESC, id DESC"). 
+        Limit(limit)
+
+    // Apply cursor condition if it exists
+    if cursorID != nil {
+        // Assuming descending order pagination (newest videos first)
+        query = query.Where("id < ?", cursorID) 
+    }
+
+    if err := query.Find(&videos).Error; err != nil {
+        return nil, err
+    }
+
+    return videos, nil
 }

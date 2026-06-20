@@ -354,3 +354,14 @@ export type endScreenType =
   | "share_button"
   | "custom_message"
   | "empty";
+
+
+
+export interface VideoListType{
+  metadata:{
+    hasNextPage:boolean,
+    total:boolean,
+    nextCursor:string
+  },
+  items:VideoAsset[]
+} 
