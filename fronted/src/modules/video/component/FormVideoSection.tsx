@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 function FormVideoSection() {
   const thumbnail =
     "https://pub-db02f4666efb4ae9b337950ff0610772.r2.dev/blogimages/madisonbeer%2BCHWB_w9lckT-1-1200x630.jpg";
-
+  
   const header = "Form header";
   const description = "form description";
   const { background, skipForm } = useVideoContext()!;
