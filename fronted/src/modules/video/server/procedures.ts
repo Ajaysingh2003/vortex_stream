@@ -394,4 +394,67 @@ export const videoRouter = createTRPCRouter({
         });
       }
     }),
+    end_screen: getUserProcedure
+    .input(
+      z.object({
+        workspaceId: z.string(),
+        videoId:z.string(),
+        more_videos: z.array(z.string()).nullable().optional(),
+        cta_action:z.object({
+          cta_title:z.string(),
+          cta_sub_title:z.string(),
+          cta_btn_title:z.string(),
+          cta_btn_url:z.string(),
+        }).nullable().optional(),
+        custom_image:z.string(),
+        share_button:z.object({
+          instagram_url:z.string(),
+          facebook_url:z.string(),
+          mail_url:z.string(),
+          x_url:z.string(),
+          Linkedin_url:z.string(),
+        }),
+        custom_message:z.object({
+          custom_title:z.string(),
+          custom_description:z.string(),
+        })
+
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const cookieStore = await cookies();
+        const access_token = cookieStore.get("access_token")?.value;
+        const res = await axios.post(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/${input.videoId}/end_screen`,
+          {...input},
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          },
+        );
+
+        return res.data.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+          if (status === 403) code = "FORBIDDEN";
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
 });

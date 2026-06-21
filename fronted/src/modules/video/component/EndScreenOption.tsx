@@ -32,7 +32,7 @@ function EndScreenOption() {
     case "empty":
       return <EmptyState/>
     default:
-      return null; // React expects null or an element if you want to render nothing
+      return null;
   }
 }
 
