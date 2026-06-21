@@ -15,7 +15,7 @@ function layout({ children }: { children: React.ReactNode }) {
           <div className="rounded-md w-full  relative   h-full">
             <div className="w-full  relative  gap-3 md:gap-6 grid grid-cols-1 h-full md:grid-cols-[300px_1fr] lg:grid-cols-[350px_1fr]">
               {/* Sidebar */}
-              <div className="flex items-center     justify-center lg:justify-center  h-full relative">
+              <div className="flex items-start lg:items-center     justify-start lg:justify-center  h-full relative">
 
                 <div className="bg-[#f9f9f9] rounded-lg lg:fixed overflow-y-scroll scroll-bar shadow-sm pxb-5 md:max-h-[calc(100vh-12rem)] w-full lg:w-[350px] ">
                   <VideoSettingType type={filters.setting_scope} />
