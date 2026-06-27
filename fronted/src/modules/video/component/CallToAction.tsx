@@ -2,6 +2,9 @@ import { Input } from "@/components/ui/input";
 import React from "react";
 import { useVideoContext } from "../context/VideoContext";
 import { Label } from "@/components/ui/label";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+import { VideoEndScreenType } from "@/modules/types";
 
 function CallToAction() {
   const {
@@ -14,17 +17,17 @@ function CallToAction() {
     ctaSubTitle,
     setSubCtaTitle,
   } = useVideoContext()!;
+    const trpc=useTRPC()
 
   return (
     <div className="text-[13px] space-y-4 w-full mt-3">
-      {/* Title Field */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="title" className="text-gray-600 text-sm font-medium">
           Title
         </Label>
         <Input
           id="title"
-          value={ctaTitle || ""}
+          value={ctaTitle}
           onChange={(e) => setCtaTitle(e.target.value)}
           placeholder="Enter title..."
           className="bg-white rounded-lg border-gray-300"

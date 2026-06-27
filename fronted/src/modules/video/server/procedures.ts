@@ -139,8 +139,9 @@ export const videoRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
+        console.log(input,"check data")
         const cookieStore = await cookies();
-
+        const id=input.videoId
         const access_token = cookieStore.get("access_token")?.value;
 
         const res = await axios.get(
@@ -262,14 +263,16 @@ export const videoRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        // console.log(input, "458458");
+        console.log(input, "458458");
         const cookieStore = await cookies();
 
         const access_token = cookieStore.get("access_token")?.value;
+        const id = input.videoId;
 
         const res = await axios.post(
-          `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/${input.videoId}/form`,
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/${id}/form`,
           {
+            // 🚀 FIXED: Cleaned up the formatting entirely
             placement: input.placement,
             show_at: input.show_at,
             allow_skip: input.allow_skip,
@@ -278,6 +281,7 @@ export const videoRouter = createTRPCRouter({
           {
             headers: {
               Authorization: `Bearer ${access_token}`,
+              "Content-Type": "application/json",
             },
           },
         );
@@ -394,55 +398,118 @@ export const videoRouter = createTRPCRouter({
         });
       }
     }),
-    end_screen: getUserProcedure
+  end_screen: getUserProcedure
     .input(
       z.object({
+        type: z.string(),
         workspaceId: z.string(),
-        videoId:z.string(),
+        videoId: z.string(),
         more_videos: z.array(z.string()).nullable().optional(),
-        cta_action:z.object({
-          cta_title:z.string(),
-          cta_sub_title:z.string(),
-          cta_btn_title:z.string(),
-          cta_btn_url:z.string(),
-        }).nullable().optional(),
-        custom_image:z.string(),
-        share_button:z.object({
-          instagram_url:z.string(),
-          facebook_url:z.string(),
-          mail_url:z.string(),
-          x_url:z.string(),
-          Linkedin_url:z.string(),
-        }),
-        custom_message:z.object({
-          custom_title:z.string(),
-          custom_description:z.string(),
-        })
-
+        cta_action: z
+          .object({
+            cta_title: z.string(),
+            cta_sub_title: z.string(),
+            cta_btn_title: z.string(),
+            cta_btn_url: z.string(),
+          })
+          .nullable()
+          .optional(),
+        custom_image: z.string().optional(),
+        share_button: z
+          .object({
+            instagram_url: z.string(),
+            facebook_url: z.string(),
+            mail_url: z.string(),
+            x_url: z.string(),
+            Linkedin_url: z.string(),
+          })
+          .optional(),
+        custom_message: z
+          .object({
+            custom_title: z.string(),
+            custom_description: z.string(),
+          })
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
+
+        console.log(input,"lololsdjflsjd")
         const cookieStore = await cookies();
         const access_token = cookieStore.get("access_token")?.value;
+
+        // 🚀 1. Update the mapping table to match what your frontend button is actually passing
+        const typeMapping: Record<string, string> = {
+          call_action: "cta_action",
+          cta_action: "cta_action",
+          ctaAction: "cta_action",
+          custom_image: "custom_image",
+          share_button: "share_button",
+          custom_message: "custom_message",
+          more_video: "more_video",
+        };
+
+        const backendType = typeMapping[input.type] || input.type;
+
+        // 2. Safely extract the data mapping block
+        let backendPayload: any = null;
+        switch (backendType) {
+          case "cta_action":
+            backendPayload = input.cta_action;
+            break;
+
+          case "custom_image":
+            backendPayload =
+              typeof input.custom_image === "string"
+                ? { url: input.custom_image }
+                : input.custom_image;
+            break;
+
+          case "share_button":
+            backendPayload = input.share_button;
+            break;
+
+          case "custom_message":
+            backendPayload = input.custom_message;
+            break;
+
+          case "more_video":
+            backendPayload = { video_ids: input.more_videos };
+            break;
+        }
+        const id = input.videoId;
+
+
+        console.log(backendPayload,"lollolqwe")
         const res = await axios.post(
-          `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/${input.videoId}/end_screen`,
-          {...input},
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/${id}/end-screen`,
+          {
+            type: backendType,
+            payload: backendPayload,
+          },
           {
             headers: {
               Authorization: `Bearer ${access_token}`,
+              "Content-Type": "application/json",
             },
           },
         );
 
+        // console.log(res.request,"iouo")
+
         return res.data.data;
       } catch (error) {
+        console.log(error, "a error occuried");
         if (axios.isAxiosError(error)) {
           const status = error.response?.status;
+
           let code: TRPCError["code"] = "BAD_REQUEST";
 
           if (status === 401) code = "UNAUTHORIZED";
+
           if (status === 403) code = "FORBIDDEN";
+
           if (status === 404) code = "NOT_FOUND";
 
           throw new TRPCError({
@@ -457,4 +524,112 @@ export const videoRouter = createTRPCRouter({
         });
       }
     }),
+
+  get_end_screen:baseProcedure.input(
+    z.object({
+      workspaceId:z.string(),
+      videoId:z.string()
+    })
+  ).query(async({ctx,input})=>{
+
+
+    try {
+        const cookieStore = await cookies();
+        // const access_token = cookieStore.get("access_token")?.value;
+
+        const id=input.videoId
+
+        const res = await axios.get(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/${id}/end-screen`,
+          {
+            // headers: {
+            //   Authorization: `Bearer ${access_token}`,
+            //   "Content-Type": "application/json",
+            // },
+          },
+        );
+
+        console.log(res.data.data,"iouo")
+
+        return res.data.data;
+      } catch (error) {
+        console.log(error, "a error occuried");
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+
+          if (status === 403) code = "FORBIDDEN";
+
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+
+  }),
+
+  delete_screen:baseProcedure.input(
+    z.object({
+      workspaceId:z.string(),
+      videoId:z.string()
+    })
+  ).mutation(async({ctx,input})=>{
+
+
+    try {
+        const cookieStore = await cookies();
+        const access_token = cookieStore.get("access_token")?.value;
+
+        const id=input.videoId
+
+        const res = await axios.delete(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/${id}/end-screen`,
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+              // "Content-Type": "application/json",
+            },
+          },
+        );
+
+        console.log(res.data.data,"iouo")
+
+        return res.data.data;
+      } catch (error) {
+        console.log(error, "a error occuried");
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+
+          if (status === 403) code = "FORBIDDEN";
+
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+
+  })
 });

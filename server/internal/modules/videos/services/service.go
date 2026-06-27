@@ -1,25 +1,472 @@
+// package services
+
+// import (
+// 	"context"
+// 	"errors"
+// 	"fmt"
+// 	"time"
+// 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
+// 	folderRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/repository"
+// 	userRpo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
+// 	workspaceRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
+// 	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/dto"
+// 	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/repository"
+// 	"github.com/ajaysingh2003/vortex-stream/internal/shared/async/worker"
+// 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
+// 	"github.com/google/uuid"
+
+// 	// "golang.org/x/text/number"
+// 	"gorm.io/datatypes"
+// 	"gorm.io/gorm"
+// )
+
+// type VideoInterface interface {
+
+// 	CreateVideo(ctx context.Context, video *domain.Video) (*domain.Video, error)
+// 	ListVideo(ctx context.Context, userID uuid.UUID) ([]domain.Video, error)
+// 	ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.VideoContentsDTO, error)
+// 	UpdateVideo(ctx context.Context, userID uuid.UUID, video domain.Video) error
+// 	ProcessVideo(ctx context.Context, videoID uuid.UUID, userID uuid.UUID) (*domain.Video, error)
+// 	StreamVideo(ctx context.Context, videoID uuid.UUID) (*domain.Video, error)
+// 	GetVideoMetaData(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, videoID uuid.UUID) (*domain.Video, error)
+// 	GetEndScreenByVideoid(ctx context.Context, workspaceId uuid.UUID, videoID uuid.UUID) (*domain.VideoEndScreen, error)
+// 	UpsertEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, dto dto.EndScreenUpsertDTO) error
+// 	DeleteEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, videoID uuid.UUID) error
+
+// }
+
+// type VideoServiceRepo struct {
+// 	userRepo      userRpo.UserRepository
+// 	videoRepo     repository.VideoRepository
+// 	workspaceRepo workspaceRepo.WorkshopRepository
+// 	folderRepo    folderRepo.FolderRepository
+// }
+
+// func NewVideoService(userRepo userRpo.UserRepository, videoRepo repository.VideoRepository, workspaceRepo workspaceRepo.WorkshopRepository, folderRepo folderRepo.FolderRepository) VideoInterface {
+// 	return &VideoServiceRepo{userRepo: userRepo, videoRepo: videoRepo, workspaceRepo: workspaceRepo, folderRepo: folderRepo}
+// }
+
+// func (r *VideoServiceRepo) UpdateVideo(ctx context.Context, userID uuid.UUID, video domain.Video) error {
+
+// 	videoData, err := r.videoRepo.GetByID(ctx, video.ID)
+
+// 	if err != nil || videoData == nil {
+// 		return &utils.ApiError{
+// 			Code:    404,
+// 			Message: "The video does not exist",
+// 		}
+// 	}
+
+// 	userData, err := r.userRepo.GetByID(ctx, userID)
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	workspace, err := r.workspaceRepo.GetByID(ctx, video.WorkspaceID)
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	if workspace.UserID != userData.ID {
+// 		return &utils.ApiError{
+// 			Code:    403,
+// 			Message: "You don't have permission for this action.",
+// 		}
+// 	}
+
+// 	if video.FolderID != nil {
+// 		// Pass *video.FolderID (single dereference) to read the underlying UUID value for the query
+// 		folderData, err := r.folderRepo.GetByID(ctx, *video.FolderID)
+// 		if err != nil {
+// 			return fmt.Errorf("failed to look up target folder: %w", err)
+// 		}
+
+// 		if folderData == nil {
+// 			return fmt.Errorf("specified folder does not exist")
+// 		}
+// 	}
+
+// 	fmt.Print("goint to update")
+
+// 	updatePayload := &domain.Video{
+// 		WorkspaceID: workspace.ID,
+// 		ID:          video.ID,
+// 		// Title:       video.Title,
+// 		FolderID: video.FolderID,
+// 		// Thumbnail:   video.Thumbnail,
+// 	}
+
+// 	if video.Title != "" {
+// 		updatePayload.Title = video.Title
+// 	}
+
+// 	if video.Thumbnail != "" {
+// 		updatePayload.Thumbnail = video.Thumbnail
+// 	}
+
+// 	err = r.videoRepo.Update(ctx, updatePayload)
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+
+// }
+
+// func (r *VideoServiceRepo) CreateVideo(ctx context.Context, video *domain.Video) (*domain.Video, error) {
+
+// 	fmt.Print("data from video", video.Duration)
+
+// 	workspace, err := r.workspaceRepo.GetByID(ctx, video.WorkspaceID)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	existingUser, err := r.userRepo.GetByID(ctx, workspace.UserID)
+
+// 	if err != nil || existingUser == nil {
+// 		return nil, err
+// 	}
+
+// 	vidData, err := r.videoRepo.Create(ctx, video)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return vidData, nil
+
+// }
+
+// func (r *VideoServiceRepo) ListVideo(ctx context.Context, userID uuid.UUID) ([]domain.Video, error) {
+
+// 	data, err := r.videoRepo.GetByUserID(ctx, userID)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return data, nil
+// }
+
+// func (r *VideoServiceRepo) ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.VideoContentsDTO, error) {
+// 	var cursorID **uuid.UUID
+
+// 	if cursor != "" {
+// 		_, decodedID, err := utils.DecodeCursor(cursor)
+// 		if err != nil {
+// 			fmt.Println("Cursor decoding error:", err)
+// 			return nil, &utils.ApiError{Code: 400, Message: "Invalid cursor format"}
+// 		}
+// 		cursorID = &decodedID
+// 	}
+
+// 	videos, err := r.videoRepo.GetVideosPaginated(ctx, workspaceID, userID, cursorID, limit+1)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	// 3. Evaluate pagination states
+// 	hasNextPage := len(videos) > limit
+// 	nextCursorStr := ""
+
+// 	// If there's an extra record, slice it out and build the next cursor from the last real item
+// 	if hasNextPage {
+// 		videos = videos[:limit] // Remove the extra record
+// 		lastVideo := videos[len(videos)-1]
+
+// 		// Encode the next cursor using the last item's ID (adjust time parameters if your encoder expects them)
+// 		nextCursorStr = utils.EncodeCursor("video", lastVideo.ID)
+// 		// if err != nil {
+// 		//     return nil, fmt.Errorf("failed to encode next cursor: %w", err)
+// 		// }
+// 	}
+
+// 	// 4. Construct the DTO Payload
+// 	payload := &dto.VideoContentsDTO{
+// 		Items: videos, // Map this to your DTO structure if your array needs domain-to-dto mapping
+// 		Metadata: dto.Metadata{
+// 			HasNextPage: hasNextPage,
+// 			NextCursor:  nextCursorStr,
+// 			Total:       len(videos),
+// 		},
+// 	}
+
+// 	return payload, nil
+// }
+
+// func (r *VideoServiceRepo) ProcessVideo(ctx context.Context, videoID uuid.UUID, userID uuid.UUID) (*domain.Video, error) {
+// 	data, err := r.videoRepo.GetByIdAndUserId(ctx, videoID, userID)
+
+// 	if err != nil || data == nil {
+// 		return nil, &utils.ApiError{
+// 			Code:    400,
+// 			Message: "Bad Request",
+// 		}
+// 	}
+
+// 	if data.Status != "PENDING" {
+// 		return nil, &utils.ApiError{
+// 			Code:    400,
+// 			Message: fmt.Sprintf("Video is already in %s", data.Status),
+// 		}
+// 	}
+
+// 	err = worker.PushVideoJob(data.VideoKey, data.ID.String())
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	payload := &domain.Video{
+// 		Workspace: &domain.Workspaces{
+// 			UserID: userID,
+// 		},
+// 		ID:     data.ID,
+// 		Status: domain.StatusQueue,
+// 	}
+
+// 	err = r.videoRepo.Update(ctx, payload)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	// fmt.Print(data,"leah jaye")
+
+// 	return data, nil
+// }
+
+// func (r *VideoServiceRepo) StreamVideo(ctx context.Context, videoID uuid.UUID) (*domain.Video, error) {
+
+// 	videoData, err := r.videoRepo.GetByID(ctx, videoID)
+
+// 	if err != nil {
+// 		if errors.Is(err, gorm.ErrRecordNotFound) {
+// 			return nil, &utils.ApiError{
+// 				Code:    404,
+// 				Message: "Video not found",
+// 			}
+// 		}
+// 		return nil, err
+// 	}
+
+// 	if videoData == nil {
+// 		return nil, &utils.ApiError{
+// 			Code:    404,
+// 			Message: "Video not found",
+// 		}
+// 	}
+
+// 	return videoData, nil
+// }
+
+// func (r *VideoServiceRepo) GetVideoMetaData(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, videoID uuid.UUID) (*domain.Video, error) {
+
+// 	userData, err := r.userRepo.GetByID(ctx, userID)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	workspaceData, err := r.workspaceRepo.GetByID(ctx, workspaceID)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	if workspaceData.UserID != userData.ID {
+// 		return nil, &utils.ApiError{
+// 			Code:    403,
+// 			Message: "You don't have permission for this action.",
+// 		}
+// 	}
+
+// 	videoData, err := r.videoRepo.GetByID(ctx, videoID)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	if videoData.WorkspaceID != workspaceData.ID {
+// 		return nil, &utils.ApiError{
+// 			Code:    403,
+// 			Message: "Unauthorised Access",
+// 		}
+// 	}
+
+// 	return videoData, nil
+
+// }
+
+// func (s *VideoServiceRepo) UpsertEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, dto dto.EndScreenUpsertDTO) error {
+
+// 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceId)
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	videoData, err := s.videoRepo.GetByID(ctx, dto.VideoID)
+
+// 	if videoData == nil {
+
+// 		return &utils.ApiError{
+// 			Code:    404,
+// 			Message: "Video not found.",
+// 		}
+
+// 	}
+
+// 	if workspaceData.ID != videoData.WorkspaceID {
+// 		return &utils.ApiError{
+// 			Code:    403,
+// 			Message: "You don't have access for this video",
+// 		}
+// 	}
+
+// 	endScreenPayload := &domain.VideoEndScreen{
+// 		VideoID:   dto.VideoID,
+// 		Payload:   datatypes.JSONMap(dto.Payload),
+// 		Type:      dto.Type,
+// 		UpdatedAt: time.Now(),
+// 	}
+
+// 	err = s.videoRepo.UpsertVideoEndScreen(ctx, endScreenPayload)
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+// func (s *VideoServiceRepo) DeleteEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, videoID uuid.UUID) error {
+
+// 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceId)
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	if workspaceData == nil {
+
+// 		return &utils.ApiError{
+// 			Code:    404,
+// 			Message: "Workspace is not found.",
+// 		}
+
+// 	}
+
+// 	userData, err := s.userRepo.GetByID(ctx, userID)
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	if workspaceData.UserID != userData.ID && !userData.IsActive {
+// 		return &utils.ApiError{
+// 			Code:    403,
+// 			Message: "You don't have permission.",
+// 		}
+// 	}
+
+// 	videoData, err := s.videoRepo.GetByID(ctx, videoID)
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	if videoData == nil {
+// 		return &utils.ApiError{
+// 			Code:    404,
+// 			Message: "Video not found.",
+// 		}
+// 	}
+
+// 	err = s.videoRepo.DeleteEndScreen(ctx, videoData.ID)
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+// func (s *VideoServiceRepo) GetEndScreenByVideoid(ctx context.Context, workspaceID uuid.UUID, videoID uuid.UUID, userID uuid.UUID) (*domain.VideoEndScreen, error) {
+
+// 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceID)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	if workspaceData == nil {
+// 		return nil, &utils.ApiError{
+// 			Code:    403,
+// 			Message: "Workspace not found",
+// 		}
+// 	}
+
+// 	endScreen, err := s.videoRepo.GetEndScreenByVideoID(ctx, videoID, workspaceID)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+	
+// 	return  endScreen,nil
+
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 package services
 
 import (
 	"context"
-	"errors"
+	// "errors"
 	"fmt"
-
+	"time"
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
-	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/dto"
 	folderRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/repository"
 	userRpo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	workspaceRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
+	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/dto"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/repository"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/async/worker"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/google/uuid"
-
-	// "golang.org/x/text/number"
-	"gorm.io/gorm"
+	"gorm.io/datatypes"
+	// "gorm.io/gorm"
 )
 
 type VideoInterface interface {
+
 	CreateVideo(ctx context.Context, video *domain.Video) (*domain.Video, error)
 	ListVideo(ctx context.Context, userID uuid.UUID) ([]domain.Video, error)
 	ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.VideoContentsDTO, error)
@@ -27,6 +474,10 @@ type VideoInterface interface {
 	ProcessVideo(ctx context.Context, videoID uuid.UUID, userID uuid.UUID) (*domain.Video, error)
 	StreamVideo(ctx context.Context, videoID uuid.UUID) (*domain.Video, error)
 	GetVideoMetaData(ctx context.Context, userID uuid.UUID, workspaceID uuid.UUID, videoID uuid.UUID) (*domain.Video, error)
+	GetEndScreenByVideoid(ctx context.Context, workspaceId uuid.UUID, videoID uuid.UUID) (*domain.VideoEndScreen, error)
+	UpsertEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, dto dto.EndScreenUpsertDTO) error
+	DeleteEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, videoID uuid.UUID) error
+
 }
 
 type VideoServiceRepo struct {
@@ -147,49 +598,49 @@ func (r *VideoServiceRepo) ListVideo(ctx context.Context, userID uuid.UUID) ([]d
 }
 
 func (r *VideoServiceRepo) ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.VideoContentsDTO, error) {
-    var cursorID **uuid.UUID
-	
-    if cursor != "" {
-        _, decodedID, err := utils.DecodeCursor(cursor)
-        if err != nil {
-            fmt.Println("Cursor decoding error:", err)
-            return nil, &utils.ApiError{Code: 400, Message: "Invalid cursor format"}
-        }
-        cursorID = &decodedID
-    }
+	var cursorID **uuid.UUID
 
-    videos, err := r.videoRepo.GetVideosPaginated(ctx, workspaceID, userID, cursorID, limit+1)
-    if err != nil {
-        return nil, err
-    }
+	if cursor != "" {
+		_, decodedID, err := utils.DecodeCursor(cursor)
+		if err != nil {
+			fmt.Println("Cursor decoding error:", err)
+			return nil, &utils.ApiError{Code: 400, Message: "Invalid cursor format"}
+		}
+		cursorID = &decodedID
+	}
 
-    // 3. Evaluate pagination states
-    hasNextPage := len(videos) > limit
-    nextCursorStr := ""
+	videos, err := r.videoRepo.GetVideosPaginated(ctx, workspaceID, userID, cursorID, limit+1)
+	if err != nil {
+		return nil, err
+	}
 
-    // If there's an extra record, slice it out and build the next cursor from the last real item
-    if hasNextPage {
-        videos = videos[:limit] // Remove the extra record
-        lastVideo := videos[len(videos)-1]
-        
-        // Encode the next cursor using the last item's ID (adjust time parameters if your encoder expects them)
-        nextCursorStr = utils.EncodeCursor("video", lastVideo.ID)
-        // if err != nil {
-        //     return nil, fmt.Errorf("failed to encode next cursor: %w", err)
-        // }
-    }
+	// 3. Evaluate pagination states
+	hasNextPage := len(videos) > limit
+	nextCursorStr := ""
 
-    // 4. Construct the DTO Payload
-    payload := &dto.VideoContentsDTO{
-        Items: videos, // Map this to your DTO structure if your array needs domain-to-dto mapping
-        Metadata: dto.Metadata{
-            HasNextPage: hasNextPage,
-            NextCursor:  nextCursorStr,
-            Total:       len(videos), 
-        },
-    }
+	// If there's an extra record, slice it out and build the next cursor from the last real item
+	if hasNextPage {
+		videos = videos[:limit] // Remove the extra record
+		lastVideo := videos[len(videos)-1]
 
-    return payload, nil
+		// Encode the next cursor using the last item's ID (adjust time parameters if your encoder expects them)
+		nextCursorStr = utils.EncodeCursor("video", lastVideo.ID)
+		// if err != nil {
+		//     return nil, fmt.Errorf("failed to encode next cursor: %w", err)
+		// }
+	}
+
+	// 4. Construct the DTO Payload
+	payload := &dto.VideoContentsDTO{
+		Items: videos, // Map this to your DTO structure if your array needs domain-to-dto mapping
+		Metadata: dto.Metadata{
+			HasNextPage: hasNextPage,
+			NextCursor:  nextCursorStr,
+			Total:       len(videos),
+		},
+	}
+
+	return payload, nil
 }
 
 func (r *VideoServiceRepo) ProcessVideo(ctx context.Context, videoID uuid.UUID, userID uuid.UUID) (*domain.Video, error) {
@@ -238,12 +689,7 @@ func (r *VideoServiceRepo) StreamVideo(ctx context.Context, videoID uuid.UUID) (
 	videoData, err := r.videoRepo.GetByID(ctx, videoID)
 
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, &utils.ApiError{
-				Code:    404,
-				Message: "Video not found",
-			}
-		}
+		
 		return nil, err
 	}
 
@@ -292,5 +738,145 @@ func (r *VideoServiceRepo) GetVideoMetaData(ctx context.Context, userID uuid.UUI
 	}
 
 	return videoData, nil
+
+}
+
+func (s *VideoServiceRepo) UpsertEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, dto dto.EndScreenUpsertDTO) error {
+
+	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceId)
+
+	if err != nil {
+		return err
+	}
+
+	videoData, err := s.videoRepo.GetByID(ctx, dto.VideoID)
+
+	if videoData == nil {
+
+		return &utils.ApiError{
+			Code:    404,
+			Message: "Video not found.",
+		}
+
+	}
+
+	if workspaceData.ID != videoData.WorkspaceID {
+		return &utils.ApiError{
+			Code:    403,
+			Message: "You don't have access for this video",
+		}
+	}
+
+	endScreenPayload := &domain.VideoEndScreen{
+		VideoID:   dto.VideoID,
+		Payload:   datatypes.JSONMap(dto.Payload),
+		Type:      dto.Type,
+		UpdatedAt: time.Now(),
+	}
+
+	err = s.videoRepo.UpsertVideoEndScreen(ctx, endScreenPayload)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *VideoServiceRepo) DeleteEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, videoID uuid.UUID) error {
+
+	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceId)
+
+	if err != nil {
+		return err
+	}
+
+	if workspaceData == nil {
+
+		return &utils.ApiError{
+			Code:    404,
+			Message: "Workspace is not found.",
+		}
+
+	}
+
+	userData, err := s.userRepo.GetByID(ctx, userID)
+
+	if err != nil {
+		return err
+	}
+
+	if workspaceData.UserID != userData.ID && !userData.IsActive {
+		return &utils.ApiError{
+			Code:    403,
+			Message: "You don't have permission.",
+		}
+	}
+
+	videoData, err := s.videoRepo.GetByID(ctx, videoID)
+
+	if err != nil {
+		return err
+	}
+
+	if videoData == nil {
+		return &utils.ApiError{
+			Code:    404,
+			Message: "Video not found.",
+		}
+	}
+
+	err = s.videoRepo.DeleteEndScreen(ctx, videoData.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *VideoServiceRepo) GetEndScreenByVideoid(ctx context.Context, workspaceID uuid.UUID, videoID uuid.UUID) (*domain.VideoEndScreen, error) {
+
+	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceID)
+	
+	if err != nil {
+		return nil, err
+	}
+
+	if workspaceData == nil {
+		return nil, &utils.ApiError{
+			Code:    404,
+			Message: "Workspace not found",
+		}
+	}
+
+
+	videoData, err := s.videoRepo.GetByID(ctx, videoID)
+	
+	if err != nil {
+		return nil, err
+	}
+
+	if videoData == nil {
+		return nil, &utils.ApiError{
+			Code:    404,
+			Message: "Video not found.....",
+		}
+	}
+
+
+	if videoData.WorkspaceID != workspaceData.ID {
+    return nil, &utils.ApiError{
+        Code:    403,
+        Message: "Unauthorized access: Video does not belong to this workspace.",
+    }
+}
+	endScreen, err := s.videoRepo.GetEndScreenByVideoID(ctx, videoData.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return  endScreen,nil
 
 }
