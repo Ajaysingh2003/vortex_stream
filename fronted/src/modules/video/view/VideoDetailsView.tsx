@@ -6,21 +6,22 @@ import EndScreenControl from "../component/EndScrennControl";
 import EndScreenPreview from "../component/EndScreenPreview";
 
 function VideoDetailsView() {
-  
-  const params= useSearchParams()
-  const scope=params.get("setting_scope")
-  console.log(scope,"89-leah")
+  const params = useSearchParams();
+  const scope = params.get("setting_scope");
+  console.log(scope, "89-leah");
 
-      switch (scope){
-    case 'form':
-        // return <div className="min-h-400">
-            <FormVideoSection/>
-        // </div> 
-    case 'end_screen' :
-      return   <EndScreenPreview />
-      // <div className="min-h-140">
-        
-      // </div>
+  switch (scope) {
+    case "form":
+      return (
+        <div className="">
+          <FormVideoSection />
+        </div>
+      );
+    case "end_screen":
+      return <EndScreenPreview />;
+    // <div className="min-h-140">
+
+    // </div>
   }
 }
 

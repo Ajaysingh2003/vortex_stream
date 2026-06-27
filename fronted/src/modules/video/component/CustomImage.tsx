@@ -2,6 +2,9 @@ import React, { useState, useRef } from "react";
 import { UploadCloud, X, ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useVideoContext } from "../context/VideoContext";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+import axios from "axios";
 
 interface CustomImageUploadProps {
   value?: string | File | null;
@@ -14,10 +17,33 @@ function CustomImage() {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (file: File | null) => {
+  const trpc=useTRPC()
+  const getSignedUrl=useMutation(trpc.upload.getSignedUrl.mutationOptions())
+  const handleFileChange = async(file: File | null) => {
+    
     if (file && file.type.startsWith("image/")) {
       const objectUrl = URL.createObjectURL(file);
-      setCustomImagePreview(objectUrl);
+      const signedUrl=await getSignedUrl.mutateAsync([{name:file.name,type:file.type,size:file.size}])
+
+      const urlObj=signedUrl.files[0]
+
+
+
+       const uploadRes = await axios.put(
+          urlObj.UploadUrl,
+          file,
+          {
+            headers: {
+              "Content-Type": file.type,
+            },
+          },
+        );
+
+        console.log(uploadRes, "filling in the image");
+        
+
+        
+        setCustomImagePreview(urlObj.Key);
     }
   };
 
@@ -85,7 +111,7 @@ function CustomImage() {
               height={100}
               width={100}
               unoptimized
-              src={customImagePreview}
+              src={ `${process.env.NEXT_PUBLIC_CDN_URL}`+customImagePreview}
               alt="Upload preview"
               className="w-full h-full object-cover"
             />

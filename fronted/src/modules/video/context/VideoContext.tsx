@@ -5,6 +5,8 @@ import {
   selectType,
   UploadItem,
   VideoAsset,
+  VideoEndScreenType,
+  // VideoEndScreenType,
   WorkspaceType,
 } from "@/modules/types";
 
@@ -59,11 +61,9 @@ interface VideoContextType {
   setFacebookUrl: React.Dispatch<React.SetStateAction<string>>;
   setMail: React.Dispatch<React.SetStateAction<string>>;
 
-  // custom image
-
   customImagePreview: string | null;
   setCustomImagePreview: React.Dispatch<React.SetStateAction<string | null>>;
-
+  
   // custom message
 
   customTitle: string;
@@ -81,11 +81,15 @@ const videoContext = createContext<VideoContextType | null>(null);
 export const VideoProvider = ({ children }: { children: React.ReactNode }) => {
   const params = useParams();
   const videoId = params.id;
+
+
   const trpc = useTRPC();
 
+  
   const { data: leadForm } = useSuspenseQuery(
     trpc.video.getLeadForm.queryOptions({ videoId: videoId as string }),
   );
+
 
   const defaultFormFields: formFieldType[] = [
     {
@@ -111,7 +115,6 @@ export const VideoProvider = ({ children }: { children: React.ReactNode }) => {
   );
   const [skipForm, setSkipForm] = useState(leadFormData?.allowSkip || false);
   const [showAt, setShowAt] = useState<number>(leadFormData?.showAt ?? 0);
-  const [endScreen, setEndScreen] = useState<endScreenType>("empty");
 
   const [layout, setLayout] = useState<LayoutType>("center");
 
@@ -120,6 +123,17 @@ export const VideoProvider = ({ children }: { children: React.ReactNode }) => {
   const workspace = useSuspenseQuery(trpc.user.getWorkspace.queryOptions());
   const workspacedata = workspace.data as WorkspaceType;
 
+
+
+  const { data: videoEnd } = useSuspenseQuery(
+    trpc.video.get_end_screen.queryOptions({ videoId: videoId as string,workspaceId: workspacedata.id }),
+  );
+
+
+  const videoEndScreen=videoEnd as VideoEndScreenType
+
+  
+
   const { data: videoData } = useSuspenseQuery(
     trpc.video.getVideoFromWorkspace.queryOptions({
       videoId: videoId as string,
@@ -127,27 +141,37 @@ export const VideoProvider = ({ children }: { children: React.ReactNode }) => {
     }),
   );
 
+
+
   const videoAssets = videoData as VideoAsset;
 
-  const [ctaTitle, setCtaTitle] = useState<string>("");
-  const [ctaSubTitle, setSubCtaTitle] = useState<string>("");
+  const [ctaTitle, setCtaTitle] = useState<string>(videoEndScreen?.payload?.cta_title ?? "");
 
-  const [ctaBtnText, setCtaBtnText] = useState<string>("");
-  const [ctaBtnUrl, setCtaBtnUrl] = useState<string>("");
+  const [ctaSubTitle, setSubCtaTitle] = useState<string>(videoEndScreen?.payload?.cta_sub_title ?? "");
 
-  const [xUrl, setXUrl] = useState<string>("");
-  const [instagramUrl, setInstagramUrl] = useState<string>("");
-  const [facebookUrl, setFacebookUrl] = useState<string>("");
-  const [mail, setMail] = useState<string>("");
-  const [linkedinUrl, setLinkedinUrl] = useState<string>("");
+  const [ctaBtnText, setCtaBtnText] = useState<string>(videoEndScreen?.payload?.cta_btn_title ?? "");
+
+  const [ctaBtnUrl, setCtaBtnUrl] = useState<string>( videoEndScreen?.payload?.cta_btn_url ?? "");
+
+
+
+
+  const [xUrl, setXUrl] = useState<string>(videoEndScreen?.payload?.x_url ?? "");
+  const [instagramUrl, setInstagramUrl] = useState<string>( videoEndScreen?.payload?.instagram_url ?? "");
+  const [facebookUrl, setFacebookUrl] = useState<string>(videoEndScreen?.payload?.facebook_url ?? "");
+  const [mail, setMail] = useState<string>(videoEndScreen?.payload?.x_url ?? "");
+  const [linkedinUrl, setLinkedinUrl] = useState<string>( videoEndScreen?.payload?.Linkedin_url ?? "");
 
   const [customImagePreview, setCustomImagePreview] = useState<string | null>(
+    videoEndScreen?.payload?.url ??
     null,
   );
 
-  const [customTitle, setCustomTitle] = useState<string>("");
-  const [customDescription, setCustomDescription] = useState<string>("");
+  const [customTitle, setCustomTitle] = useState<string>(videoEndScreen?.payload.custom_title ??"");
+  const [customDescription, setCustomDescription] = useState<string>(videoEndScreen?.payload?.custom_description ?? "");
   const [selectMoreVideo,setSelectMoreVideo]=useState<VideoAsset[]>([])
+  const [endScreen, setEndScreen] = useState<endScreenType>( videoEndScreen?.type ?? "empty");
+
   return (
     <videoContext.Provider
       value={{

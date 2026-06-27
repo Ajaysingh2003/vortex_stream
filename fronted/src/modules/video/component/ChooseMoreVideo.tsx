@@ -58,9 +58,10 @@ function ChooseMoreVideo({ items }: ChooseMoreVideoProps) {
               <div className="grid grid-cols-[60px_1fr_10px]  gap-3">
                 <div className="max-w-12 relative ">
                   <Image
+                  unoptimized
                     src={
                       (item.thumbnail &&
-                        `${process.env.NEXT_PUBLIC_CDN_URL}/${item.thumbnail}`) ||
+                        `${process.env.NEXT_PUBLIC_CDN_URL}${item.thumbnail}`) ||
                       "/video-player.png"
                     }
                     height={100}

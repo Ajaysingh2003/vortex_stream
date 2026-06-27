@@ -56,11 +56,11 @@ function PreviewForm() {
 
   return (
     <div
-      className={`h-full flex w-full items-center ${
+      className={`h-full flex w-full  items-center ${
         layout == "left" ? "justify-start" : layout == "center" ? "justify-center" : "justify-end"
       }`}
     >
-      <div className="max-w-84 w-full">
+      <div className="max-w-84  w-full">
         <div className="flex flex-col gap-3 md:gap-5 py-2">
 
           {/* ── header + description ── */}

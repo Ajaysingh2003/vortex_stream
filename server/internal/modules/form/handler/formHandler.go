@@ -38,8 +38,8 @@ type FormHandler struct {
 
 func (f *FormHandler) UpsertForm(c *gin.Context) {
 	fmt.Print("gotigoti")
-	workspaceIDRaw := c.Param("workspaceID")
-	videoIDRaw := c.Param("videoID")
+	workspaceIDRaw := c.Param("workspaceId")
+	videoIDRaw := c.Param("id")
 
 	workspaceID, err := uuid.Parse(workspaceIDRaw)
 	if err != nil {

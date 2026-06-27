@@ -18,7 +18,7 @@ function EndScreenShowOff() {
   return (
     <div className="w-full h-full relative">
       {selectMoreVideo.length > 0 && <MoreVideo items={selectMoreVideo} />}
-      {endScreen == "call_to_action" && <CtaSection />}
+      {endScreen == "cta_action" && <CtaSection />}
       {endScreen == "custom_image" && <CustomImage />}
       {endScreen == "share_button" && <ShareContent />}
       {endScreen == "custom_message" && <CustomMssagePreview />}
@@ -59,16 +59,15 @@ function MoreVideo({ items }: { items: VideoAsset[] }) {
                 </div>
               </div>
 
-              {/* <div className=" relative w-full h-full"> */}
               <Image
-                className="w-full  h-full object-cover"
+                className="w-full lg:max-h-38  h-full object-cover"
                 unoptimized
-                src={(item.thumbnail && "") || thumbnail}
+
+                src={ item.thumbnail && `${process.env.NEXT_PUBLIC_CDN_URL}` + item.thumbnail || "/video-player.png"}
                 height={100}
                 width={100}
-                alt=""
+                alt="image"
               />
-              {/* </div> */}
             </li>
           ))}
         </ul>
@@ -108,7 +107,7 @@ function CustomImage() {
       <div className="w-full h-full relative">
         {!customImagePreview ? <div className="w-full h-full flex items-center justify-center">
             <p className=" tracking-wider text-xs sm:text-sm text-white/70 capitalize    text-center">Add an image to see preview</p>
-        </div>:<Image src={customImagePreview} className="w-full h-full object-contain" height={100} width={100} alt="" />}
+        </div>:<Image src={`${process.env.NEXT_PUBLIC_CDN_URL}` + customImagePreview} className="w-full h-full object-contain" height={100} width={100} alt="" />}
     </div>
     </div>
   );

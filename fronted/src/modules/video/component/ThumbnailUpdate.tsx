@@ -144,7 +144,7 @@ function ThumbnailUpdate() {
             <Image
               // ref={previewUrl}
               unoptimized
-              src={previewUrl || thumbnail}
+              src={  previewUrl || thumbnail}
               className="w-full h-full rounded-lg object-contain object-center bg-white/90"
               height={100}
               width={100}
