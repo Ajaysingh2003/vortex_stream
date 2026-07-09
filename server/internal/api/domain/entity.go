@@ -257,3 +257,21 @@ type LeadFormAnswer struct {
     // Scope        string `gorm:"not null"` // denormalized for query convenience
     Value        string `gorm:"not null" json:"value" ` // always string, cast on read
 }
+
+
+
+
+
+type VideoEndScreen struct {
+	ID        uint              `gorm:"primaryKey" json:"id"`
+	VideoID   uuid.UUID            `gorm:"type:varchar(255);not null;uniqueIndex" json:"video_id"`
+	
+	Video     *Video            `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
+	
+	Type      string            `gorm:"type:varchar(50);not null" json:"type"`
+	
+	Payload   datatypes.JSONMap `gorm:"type:jsonb;not null" json:"payload"`
+	
+	CreatedAt time.Time         `json:"created_at"`
+	UpdatedAt time.Time         `json:"updated_at"`
+}

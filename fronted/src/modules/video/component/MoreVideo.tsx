@@ -1,25 +1,19 @@
 import { useTRPC } from "@/trpc/client";
 import React, { useCallback, useEffect, useRef } from "react";
 import { useVideoContext } from "../context/VideoContext";
-import { VideoAsset, VideoListType } from "@/modules/types";
+import { VideoAsset, VideoEndScreenType, VideoListType } from "@/modules/types";
 
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useLibraryFilters } from "@/lib/useLibraryFilters";
 import { Loader2, Film } from "lucide-react";
 import ChooseMoreVideo from "./ChooseMoreVideo";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { StarsIcon, Video01FreeIcons } from "@hugeicons/core-free-icons";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 function MoreVideo() {
   const { workspaceData } = useVideoContext()!;
@@ -50,8 +44,38 @@ function MoreVideo() {
     ).values(),
   );
 
-  // Always-fresh snapshot, read inside the observer callback instead of
-  // being captured in its closure.
+  const params = useParams();
+
+  const { setSelectMoreVideo } = useVideoContext()!;
+
+  const videoId = params.id as string;
+
+  const { data: videoEnd } = useSuspenseQuery(
+    trpc.video.get_end_screen.queryOptions({
+      workspaceId: workspaceData.id,
+      videoId: videoId,
+    }),
+  );
+
+  const videoEndScreen = videoEnd as VideoEndScreenType;
+
+  useEffect(() => {
+    const serverVideoIds = videoEndScreen?.payload?.video_ids;
+    if (
+      !serverVideoIds ||
+      !Array.isArray(serverVideoIds) ||
+      items.length === 0
+    ) {
+      return;
+    }
+
+    const matchedVideoAssets = items.filter((asset) =>
+      serverVideoIds.includes(asset.id),
+    );
+
+    setSelectMoreVideo(matchedVideoAssets);
+  }, [videoEnd, items]);
+
   const latestRef = useRef({ hasNextPage, isFetchingNextPage, fetchNextPage });
   useEffect(() => {
     latestRef.current = { hasNextPage, isFetchingNextPage, fetchNextPage };

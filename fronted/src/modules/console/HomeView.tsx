@@ -13,7 +13,7 @@ function HomeView() {
           title="Gumlet video player"
           src="http://localhost:4000/embed/61e7fb1b-1aeb-4863-b325-ff83d0b63e1d"
           allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;"
-        ></iframe>
+        >a</iframe>
       </div>
 
      

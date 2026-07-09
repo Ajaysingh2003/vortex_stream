@@ -1,44 +1,49 @@
-import { IconSvgElement } from "@hugeicons/react"
-import { UPLOADPROVIDER } from "./constant"
+import { IconSvgElement } from "@hugeicons/react";
+import { UPLOADPROVIDER } from "./constant";
 
 export interface WorkspaceType {
-    id : string
-    name:string
-    userId:string
-    isDefault:boolean
-    createdAt:string
-    updatedAt:string
+  id: string;
+  name: string;
+  userId: string;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface RootFolderDataType{
-  id:string
-  name:string
-  workspaceID:string
-  parentId:null
-  position:number
-  createdAt:string
-  updatedAt:string
+export interface RootFolderDataType {
+  id: string;
+  name: string;
+  workspaceID: string;
+  parentId: null;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface FolderDataType{
-  id:string
-  name:string
-  workspaceID:string
-  parentId:null | string
-  position:number
-  createdAt:string
-  updatedAt:string
+export interface FolderDataType {
+  id: string;
+  name: string;
+  workspaceID: string;
+  parentId: null | string;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export type ProviderType = "wistia" | "vimeo" | "dropbox" | "onedrive" | "google_drive";
+export type ProviderType =
+  | "wistia"
+  | "vimeo"
+  | "dropbox"
+  | "onedrive"
+  | "google_drive";
 
 export type GooglePickerFile = {
-    id: string
-    name: string
-    mimeType: string
-    url: string
-    sizeBytes: number
-}
+  id: string;
+  name: string;
+  mimeType: string;
+  url: string;
+  sizeBytes: number;
+};
 
 type UploadStatus =
   | "queued"
@@ -47,12 +52,11 @@ type UploadStatus =
   | "done"
   | "error"
   | "cancelled"
-  | "TRANSCODING"
-
+  | "TRANSCODING";
 
 export interface UploadItem {
   id: string;
-  file: File & {duration?:number};
+  file: File & { duration?: number };
   status: UploadStatus;
   progress: number;
   uploadedBytes: number;
@@ -63,72 +67,66 @@ export interface UploadItem {
   startedAt?: number;
   xhr?: XMLHttpRequest;
   chunkOffset: number;
-  uploadType: UPLOADPROVIDER,
-  googleToken?:string
+  uploadType: UPLOADPROVIDER;
+  googleToken?: string;
 }
 
-
-export interface UserType{
-  id : string
-  avatar:string
-  name:string
-  email:string
-  createdAt:string
-  updatedAt:string
-  role:string
-  isActive:boolean
+export interface UserType {
+  id: string;
+  avatar: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  updatedAt: string;
+  role: string;
+  isActive: boolean;
 }
 
-
-export interface LibraryType{
-  id:string
-  thumbnailUrl?:string
-  name:string
-  type:"video" | "folder"
-  duration?:number
-  childCount?:number
-  parentId?:string
-  createdAt:string
-  position?:number
+export interface LibraryType {
+  id: string;
+  thumbnailUrl?: string;
+  name: string;
+  type: "video" | "folder";
+  duration?: number;
+  childCount?: number;
+  parentId?: string;
+  createdAt: string;
+  position?: number;
 }
 
 export interface LibraryContentType {
-  items:LibraryType[]
-  metadata:{
-    hasNextPage:boolean
-    total:number
-    nextCursor:string
-  }
+  items: LibraryType[];
+  metadata: {
+    hasNextPage: boolean;
+    total: number;
+    nextCursor: string;
+  };
 }
 
-
-export interface FolderType{
-  id:string
-  name:string
-  workspaceId:string
-  parentId:string | null
-  position:number
-  createdAt:string
-  updatedAt:string
+export interface FolderType {
+  id: string;
+  name: string;
+  workspaceId: string;
+  parentId: string | null;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
+export type renameType = {
+  id: string;
+  assetType: "video" | "folder";
+  oldName: string;
+  newName: string | undefined;
+};
 
-export type renameType={
-    id:string
-    assetType:"video" | "folder"
-    oldName:string
-    newName:string | undefined
-}
-
-
-
-export type BillingCycleType = 'monthly' | 'quarterly' | 'annually';
-export type PlanTierType = 'free' | 'starter' | 'pro' | 'business';
+export type BillingCycleType = "monthly" | "quarterly" | "annually";
+export type PlanTierType = "free" | "starter" | "pro" | "business";
 // export type HLSQualityType = '360p' | '480p' | '720p' | '1080p';
 
 export interface PlanBillingDetails {
   price_id: string; // Will be an empty string for the free tier
-  amount: number;   // Base price unit (e.g., in dollars or local base denomination)
+  amount: number; // Base price unit (e.g., in dollars or local base denomination)
 }
 
 // export interface PlanLimits {
@@ -154,22 +152,17 @@ export interface PlanConfig {
 // This represents the entire structural map returned by your Go backend
 export type BillingConfigResponse = Record<PlanTierType, PlanConfig>;
 
-
-
 export interface FeatureItem {
-  label: string;       
-  icon: IconSvgElement;     
+  label: string;
+  icon: IconSvgElement;
   // unit?: 'workspace' | 'mb' | 'gb' | 'hours';
   // icon: 'WorkIcon' | 'DatabaseIcon' | 'PlayIcon' | 'TransferIcon';
 }
 
-
-export type VideoResolutionType={
-  index:number
-  resolution:string;
-
-}
-
+export type VideoResolutionType = {
+  index: number;
+  resolution: string;
+};
 
 export interface VideoAsset {
   id: string;
@@ -181,26 +174,22 @@ export interface VideoAsset {
   status: string;
   thumbnail: string;
   masterKey: string;
-  resolutions: VideoResolutionType[]; 
+  resolutions: VideoResolutionType[];
   folderId: string | null;
   WorkspaceId: string;
   createdAt: string;
-  updatedAt: string; 
-  
+  updatedAt: string;
 }
 
-
-
-export interface VideoPlayerMetaData{
-  id:string,
-  workspaceId:string,
-  general_settings:generalType,
-  control_settings:controlsType,
-  branding_settings:brandingType,
-  security_settings:securityType,
-  advanced_settings:any
+export interface VideoPlayerMetaData {
+  id: string;
+  workspaceId: string;
+  general_settings: generalType;
+  control_settings: controlsType;
+  branding_settings: brandingType;
+  security_settings: securityType;
+  advanced_settings: any;
 }
-
 
 export type generalType = {
   ctaEnabled: boolean;
@@ -270,7 +259,7 @@ export interface VideoPlayerMetaData {
   control_settings: controlsType;
   branding_settings: brandingType;
   security_settings: securityType;
-  advanced_settings: any
+  advanced_settings: any;
 }
 
 type CaptionTrack = {
@@ -295,21 +284,14 @@ export type ProductionVideoPlayerProps = {
   onEnded?: (payload: { videoId: string }) => void;
 };
 
-
-
 export type selectType = "before_video" | "during_video" | "after_video";
 
-
-
-export interface formFieldType{
-  label:string,
-  scope:string,
-  type: "dropdown" | "checkbox" | "text",
-  position:string
+export interface formFieldType {
+  label: string;
+  scope: string;
+  type: "dropdown" | "checkbox" | "text";
+  position: string;
 }
-
-
-
 
 export type FormPlacement = "before_video" | "during_video" | "after_video";
 
@@ -342,26 +324,56 @@ export interface LeadForm {
   fields: LeadFormField[];
 }
 
-
 export type optionType = { id: string; label: string };
-
-
 
 export type endScreenType =
   | "more_video"
-  | "call_to_action"
+  | "cta_action"
   | "custom_image"
   | "share_button"
   | "custom_message"
   | "empty";
 
+export interface VideoListType {
+  metadata: {
+    hasNextPage: boolean;
+    total: boolean;
+    nextCursor: string;
+  };
+  items: VideoAsset[];
+}
 
+type moreVideo = {
+  video_ids: string[];
+};
+type ctaForEndScreen = {
+  cta_btn_title: string;
+  cta_btn_url: string;
+  cta_sub_title: string;
+  cta_title: string;
+};
 
-export interface VideoListType{
-  metadata:{
-    hasNextPage:boolean,
-    total:boolean,
-    nextCursor:string
-  },
-  items:VideoAsset[]
-} 
+type imageEndScreenType = {
+  url: string;
+};
+
+type shareEndScreenType = {
+  Linkedin_url: string;
+  facebook_url: string;
+  instagram_url: string;
+  mail_url: string;
+  x_url: string;
+};
+
+type typeCustomTextType = {
+  custom_description: string,
+  custom_title: string
+};
+
+export interface VideoEndScreenType {
+  id: string;
+  video_id: string;
+  type: endScreenType;
+  payload:any 
+  // ctaForEndScreen | moreVideo  | typeCustomTextType | imageEndScreenType |shareEndScreenType;
+}
