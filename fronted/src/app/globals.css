@@ -247,13 +247,14 @@ body{
 
 .bg-main-btn{
   /* background: rgba(213, 74, 251, 0.828); */
-  background: rgba(242, 60, 175, 0.87);
+  background: #f23cafde;
   /* background: rgba(77, 117, 250, 0.828); */
   border: none;
   position: relative;
   outline: none;
   color: white;
   overflow: hidden; 
+  filter: brightness(1.10); 
 }
 
 
@@ -341,7 +342,7 @@ body{
 
 
 .text-gradient {
-  background-image: linear-gradient(110.48deg, rgba(115, 103, 240, 0.963) 0%, #e1caec 100%);
+  background-image: linear-gradient(110.48deg, #f23cafde 0%, #e1caec 100%);
   /* background-image: linear-gradient(110.48deg, rgba(154, 146, 245, 0.963) 0%, #350c5f 100%); */
   -webkit-background-clip: text;
   background-clip: text;
