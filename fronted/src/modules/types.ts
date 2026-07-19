@@ -377,3 +377,16 @@ export interface VideoEndScreenType {
   payload:any 
   // ctaForEndScreen | moreVideo  | typeCustomTextType | imageEndScreenType |shareEndScreenType;
 }
+
+
+
+
+
+
+export interface VideoSubtitle{
+  id:string;
+  video_id:string;
+  file_name:string;
+  code:string;
+  label:string
+}

@@ -499,3 +499,130 @@ media-controller {
   border: 1px solid transparent;
   background-clip: padding-box;
 }
+
+
+
+
+.grid-pattern {
+  background-image: 
+    /* Vertical line at 100px from the left */
+    linear-gradient(90deg, #8b8b8b12 1px, transparent 1px),
+    /* Vertical line at 100px from the right */
+    linear-gradient(90deg, #8b8b8b12 1px, transparent 1px),
+    /* Original grid lines */
+    linear-gradient(#8b8b8b12 1px, transparent 1px),
+    linear-gradient(90deg, #8b8b8b12 1px, transparent 1px);
+
+  background-position: 
+    100px 0,            /* Position for first line */
+    calc(100% - 100px) 0, /* Position for second line (from right) */
+    0 0, 0 0;           /* Position for original grid */
+
+  background-size: 
+    1px 100%,           /* Size for first line */
+    1px 100%,           /* Size for second line */
+    664px 964px, 664px 964px; /* Size for original grid */
+  
+  background-repeat: no-repeat, no-repeat, repeat, no-repeat;
+}
+
+
+@media (max-width: 640px) {
+  .grid-pattern {
+    /* Hide the 100px lines on mobile if they look crowded */
+    background-image: linear-gradient(#8b8b8b12 1px, transparent 1px), linear-gradient(90deg, #8b8b8b12 1px, transparent 1px);
+    background-position: 0 0;
+  }
+}
+
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+
+
+.fade-middle-window {
+  -webkit-mask-image: linear-gradient(
+    to right, 
+    transparent 0%, 
+    black 40%,    /* Fade in ends at 40% */
+    black 60%,    /* Fade out starts at 60% */
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right, 
+    transparent 0%, 
+    black 40%, 
+    black 60%, 
+    transparent 100%
+  );
+}
+
+.fade-navigation {
+  -webkit-mask-image: linear-gradient(
+    to right, 
+    transparent 0%,   /* Fully hidden at the very edge */
+    black 25%,        /* Starts fading into view at 25% */
+    black 75%,        /* Stays fully visible until 75% */
+    transparent 100%  /* Fades out to hidden at the right edge */
+  );
+  mask-image: linear-gradient(
+    to right, 
+    transparent 0%, 
+    black 25%, 
+    black 75%, 
+    transparent 100%
+  );
+}
+
+
+
+
+@media (max-width:400px) {
+  
+
+
+.fade-middle-window {
+  -webkit-mask-image: linear-gradient(
+    to right, 
+    transparent 0%, 
+    black 20%,    /* Fade in ends at 40% */
+    black 80%,    /* Fade out starts at 60% */
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right, 
+    transparent 0%, 
+    black 20%, 
+    black 80%, 
+    transparent 100%
+  );
+}
+
+.fade-navigation {
+  -webkit-mask-image: linear-gradient(
+    to right, 
+    transparent 0%,   /* Fully hidden at the very edge */
+    black 15%,        /* Starts fading into view at 25% */
+    black 85%,        /* Stays fully visible until 75% */
+    transparent 100%  /* Fades out to hidden at the right edge */
+  );
+  mask-image: linear-gradient(
+    to right, 
+    transparent 0%, 
+    black 25%, 
+    black 75%, 
+    transparent 100%
+  );
+}
+
+
+
+}
