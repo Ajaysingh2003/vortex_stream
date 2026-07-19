@@ -24,7 +24,7 @@ const fontContent = DM_Sans({
 const fontHeading = Syne({
   variable: "--font-heading",
   // weight:["400"],
-  weight: ["500", "700", "800"],
+  weight: ["500", "600", "700", "800"],
   subsets: ["latin"],
 });
 

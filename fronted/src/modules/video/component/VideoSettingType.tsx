@@ -2,6 +2,7 @@ import React from 'react'
 import ThumbnailUpdate from './ThumbnailUpdate';
 import Form from './Form';
 import EndScrennControl from './EndScrennControl';
+import SubtitleControl from './SubtitleControl';
 
 interface VideoSettingTypeProps {
   type: "general" | "thumbnail" | "controls" | "analytics" | string; // Type-safety strings
@@ -23,6 +24,9 @@ function VideoSettingType({ type }: VideoSettingTypeProps) {
       break;
     case 'analytics':
       settingContent = <div>Video Performance Metrics and Data Charts</div>;
+      break;
+    case 'subtitle':
+      settingContent = <SubtitleControl/>;
       break;
     default:
       settingContent = <div>Select a valid setting configuration panel</div>;

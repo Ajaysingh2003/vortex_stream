@@ -90,6 +90,9 @@ func SetupRouter(r *gin.Engine, videohandler *handler.VideoHandler, jwtMaker *ut
 		workspaceVideos.GET("/:id/end-screen", videohandler.GetEndScreenByVideoID)
 		workspaceVideos.DELETE("/:id/end-screen",middleware.AuthMiddleware(jwtMaker), videohandler.DeleteEndScreen)
 
+
+		workspaceVideos.POST("/:id/subtitle",middleware.AuthMiddleware(jwtMaker), videohandler.VideoSubtitle)
+		workspaceVideos.GET("/:id/subtitle",middleware.AuthMiddleware(jwtMaker), videohandler.GetSubtitleByVideoID)
 	}
 
 	return r

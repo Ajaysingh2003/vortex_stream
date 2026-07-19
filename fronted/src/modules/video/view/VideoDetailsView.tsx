@@ -19,6 +19,8 @@ function VideoDetailsView() {
       );
     case "end_screen":
       return <EndScreenPreview />;
+    case "subtitle":
+      return <EndScreenPreview />;
     // <div className="min-h-140">
 
     // </div>

@@ -139,9 +139,9 @@ export const videoRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
-        console.log(input,"check data")
+        console.log(input, "check data");
         const cookieStore = await cookies();
-        const id=input.videoId
+        const id = input.videoId;
         const access_token = cookieStore.get("access_token")?.value;
 
         const res = await axios.get(
@@ -434,8 +434,7 @@ export const videoRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-
-        console.log(input,"lololsdjflsjd")
+        console.log(input, "lololsdjflsjd");
         const cookieStore = await cookies();
         const access_token = cookieStore.get("access_token")?.value;
 
@@ -480,8 +479,7 @@ export const videoRouter = createTRPCRouter({
         }
         const id = input.videoId;
 
-
-        console.log(backendPayload,"lollolqwe")
+        console.log(backendPayload, "lollolqwe");
         const res = await axios.post(
           `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/${id}/end-screen`,
           {
@@ -525,19 +523,19 @@ export const videoRouter = createTRPCRouter({
       }
     }),
 
-  get_end_screen:baseProcedure.input(
-    z.object({
-      workspaceId:z.string(),
-      videoId:z.string()
-    })
-  ).query(async({ctx,input})=>{
-
-
-    try {
+  get_end_screen: baseProcedure
+    .input(
+      z.object({
+        workspaceId: z.string(),
+        videoId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
         const cookieStore = await cookies();
         // const access_token = cookieStore.get("access_token")?.value;
 
-        const id=input.videoId
+        const id = input.videoId;
 
         const res = await axios.get(
           `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/${id}/end-screen`,
@@ -549,7 +547,7 @@ export const videoRouter = createTRPCRouter({
           },
         );
 
-        console.log(res.data.data,"iouo")
+        console.log(res.data.data, "iouo");
 
         return res.data.data;
       } catch (error) {
@@ -576,22 +574,21 @@ export const videoRouter = createTRPCRouter({
           message: "Something went wrong",
         });
       }
+    }),
 
-  }),
-
-  delete_screen:baseProcedure.input(
-    z.object({
-      workspaceId:z.string(),
-      videoId:z.string()
-    })
-  ).mutation(async({ctx,input})=>{
-
-
-    try {
+  delete_screen: baseProcedure
+    .input(
+      z.object({
+        workspaceId: z.string(),
+        videoId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
         const cookieStore = await cookies();
         const access_token = cookieStore.get("access_token")?.value;
 
-        const id=input.videoId
+        const id = input.videoId;
 
         const res = await axios.delete(
           `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/${id}/end-screen`,
@@ -603,7 +600,7 @@ export const videoRouter = createTRPCRouter({
           },
         );
 
-        console.log(res.data.data,"iouo")
+        console.log(res.data.data, "iouo");
 
         return res.data.data;
       } catch (error) {
@@ -630,6 +627,159 @@ export const videoRouter = createTRPCRouter({
           message: "Something went wrong",
         });
       }
+    }),
 
-  })
+  VideoSubtitle: baseProcedure
+    .input(
+      z.object({
+        video_id: z
+          .string()
+          .uuid({ message: "Invalid video selection ID format" }),
+        workspaceID: z
+          .string()
+          .uuid({ message: "Invalid workspace context ID format" }),
+
+        items: z
+          .array(
+            z.object({
+              code: z
+                .string()
+                .min(2, {
+                  message: "Language code must be at least 2 characters",
+                })
+                .trim(),
+              label: z
+                .string()
+                .min(1, { message: "Language label is required" })
+                .trim(),
+
+              subtitle_url: z
+                .string(),
+
+              file_name: z
+                .string()
+                .min(1, { message: "File name identifier is required" })
+                .trim(),
+            }),
+          ).optional()
+      }),
+    )
+
+    .mutation(async ({ ctx, input }) => {
+      try {
+
+        const cookieStore = await cookies();
+        console.log(input,"singh is king")
+        const access_token = cookieStore.get("access_token")?.value;
+        const id = input.video_id;
+        const res = await axios.post(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceID}/video/${id}/subtitle`,
+          { ...input },
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          },
+        );
+
+        return res.data.data;
+      } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+          if (status === 403) code = "FORBIDDEN";
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
+  
+    
+  getSubtitle: baseProcedure
+    .input(
+      z.object({
+        video_id: z
+          .string()
+          .uuid({ message: "Invalid video selection ID format" }),
+        workspaceID: z
+          .string()
+          .uuid({ message: "Invalid workspace context ID format" }),
+
+        items: z
+          .array(
+            z.object({
+              code: z
+                .string()
+                .min(2, {
+                  message: "Language code must be at least 2 characters",
+                })
+                .trim(),
+              label: z
+                .string()
+                .min(1, { message: "Language label is required" })
+                .trim(),
+
+              subtitle_url: z
+                .string(),
+
+              file_name: z
+                .string()
+                .min(1, { message: "File name identifier is required" })
+                .trim(),
+            }),
+          ).optional()
+      }),
+    )
+
+    .query(async ({ ctx, input }) => {
+      try {
+
+        const cookieStore = await cookies();
+        console.log(input,"singh is king")
+        const access_token = cookieStore.get("access_token")?.value;
+        const id = input.video_id;
+        const res = await axios.get(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceID}/video/${id}/subtitle`,
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          },
+        );
+
+        return res.data.data;
+      } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+          if (status === 403) code = "FORBIDDEN";
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
+  
+    
 });

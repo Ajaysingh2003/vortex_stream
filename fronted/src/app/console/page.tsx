@@ -6,7 +6,6 @@ import HomeView from "@/modules/console/HomeView";
 function page() {
   return (
     <div className="w-full min-h-screen flex flex-col rounded-[12px] bg-[#ffff] h-full">
-     
       <HomeView />
     </div>
   );
