@@ -31,6 +31,10 @@ type VideoInterface interface {
 	GetEndScreenByVideoid(ctx context.Context, workspaceId uuid.UUID, videoID uuid.UUID) (*domain.VideoEndScreen, error)
 	UpsertEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, dto dto.EndScreenUpsertDTO) error
 	DeleteEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, videoID uuid.UUID) error
+	
+	DeleteSubtitle(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error
+
+	GetChaptersVideoid(ctx context.Context, videoID uuid.UUID) ([]domain.VideoChapters, error)
 
 	GetSubtitleByVideoID(ctx context.Context,videoId uuid.UUID) ([] domain.VideoSubtitle ,error)
 
@@ -38,6 +42,9 @@ type VideoInterface interface {
 
 
 	UpsertVideoSubtitles(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, subtitles [] dto.SubtitleItemInput) error
+
+
+	UpsertVideoChapters(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, chapters [] dto.VideoChapterInput) error
 
 }
 
@@ -161,6 +168,30 @@ func (r *VideoServiceRepo) ListVideo(ctx context.Context, userID uuid.UUID) ([]d
 func (r *VideoServiceRepo) GetSubtitleByVideoID(ctx context.Context, videoID uuid.UUID) ([]domain.VideoSubtitle, error) {
 
 	data, err := r.videoRepo.GetSubtitleByVideoID(ctx, videoID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+
+}
+func (r *VideoServiceRepo) GetChaptersVideoid(ctx context.Context,videoID uuid.UUID) ([]domain.VideoChapters, error) {
+
+	videoData,err:=r.videoRepo.GetByID(ctx , videoID)
+
+
+	if err != nil {
+		return nil, err
+	}
+
+	if videoData ==nil {
+		return  nil,&utils.ApiError{
+			Code: 404,
+			Message: "Video does not Exist.",
+		}
+	}
+	data, err := r.videoRepo.GetChaptersVideoID(ctx, videoID)
 
 	if err != nil {
 		return nil, err
@@ -409,6 +440,47 @@ func (s *VideoServiceRepo) DeleteEndScreen(ctx context.Context, workspaceId uuid
 	return nil
 }
 
+
+func (s *VideoServiceRepo) DeleteSubtitle(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error {
+
+	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceId)
+
+	if err != nil {
+		return err
+	}
+
+	if workspaceData == nil {
+
+		return &utils.ApiError{
+			Code:    404,
+			Message: "Workspace is not found.",
+		}
+
+	}
+
+	userData, err := s.userRepo.GetByID(ctx, userID)
+
+	if err != nil {
+		return err
+	}
+
+	if workspaceData.UserID != userData.ID && !userData.IsActive {
+		return &utils.ApiError{
+			Code:    403,
+			Message: "You don't have permission.",
+		}
+	}
+
+
+	err = s.videoRepo.DeleteSubtitle(ctx, ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *VideoServiceRepo) GetEndScreenByVideoid(ctx context.Context, workspaceID uuid.UUID, videoID uuid.UUID) (*domain.VideoEndScreen, error) {
 
 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceID)
@@ -455,13 +527,6 @@ func (s *VideoServiceRepo) GetEndScreenByVideoid(ctx context.Context, workspaceI
 
 }
 
-
-
-
-
-
-
-
 func (s *VideoServiceRepo) UpsertVideoSubtitles(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, subtitles [] dto.SubtitleItemInput) error {
 
 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceID)
@@ -495,6 +560,50 @@ func (s *VideoServiceRepo) UpsertVideoSubtitles(ctx context.Context, videoID uui
 	
 
 	err = s.videoRepo.UpsertSubtitles(ctx, videoID,subtitles)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
+
+
+func (s *VideoServiceRepo) UpsertVideoChapters(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, chapters [] dto.VideoChapterInput) error {
+
+	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceID)
+
+	if err != nil {
+		return err
+	}
+
+	videoData, err := s.videoRepo.GetByID(ctx, videoID)
+
+	if err != nil {
+		return err
+	}
+
+	if videoData == nil {
+
+		return &utils.ApiError{
+			Code:    404,
+			Message: "Video not found.",
+		}
+
+	}
+
+	if workspaceData.ID != videoData.WorkspaceID {
+		return &utils.ApiError{
+			Code:    403,
+			Message: "You don't have access for this video",
+		}
+	}
+
+	
+
+	err = s.videoRepo.UpsertVideosChapter(ctx, videoID,chapters)
 
 	if err != nil {
 		return err

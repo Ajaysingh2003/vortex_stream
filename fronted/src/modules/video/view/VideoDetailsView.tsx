@@ -8,7 +8,7 @@ import EndScreenPreview from "../component/EndScreenPreview";
 function VideoDetailsView() {
   const params = useSearchParams();
   const scope = params.get("setting_scope");
-  console.log(scope, "89-leah");
+
 
   switch (scope) {
     case "form":
@@ -21,6 +21,11 @@ function VideoDetailsView() {
       return <EndScreenPreview />;
     case "subtitle":
       return <EndScreenPreview />;
+    case "chapter":
+      return <EndScreenPreview />;
+
+
+
     // <div className="min-h-140">
 
     // </div>

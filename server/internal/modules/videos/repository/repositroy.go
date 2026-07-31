@@ -26,7 +26,8 @@ type VideoRepository interface {
 	GetByFolderIdPaginated(ctx context.Context, folderID *uuid.UUID, workspaceID uuid.UUID, afterID string, remaining int) ([]domain.Video, error)
 	
 	GetEndScreenByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.VideoEndScreen, error)
-
+	
+	DeleteSubtitle(ctx context.Context, id uuid.UUID) error
 	CountByFolderID(ctx context.Context, folderID *uuid.UUID) (int64, error)
 	DeleteEndScreen(ctx context.Context, videoId uuid.UUID) error
 	UpsertVideoEndScreen(ctx context.Context,endScreen *domain.VideoEndScreen) error
@@ -39,8 +40,10 @@ type VideoRepository interface {
 	// subtitle
 
 	GetSubtitleByVideoID(ctx context.Context,VideoID uuid.UUID) ([]domain.VideoSubtitle,error)
+	GetChaptersVideoID(ctx context.Context,VideoID uuid.UUID) ([]domain.VideoChapters,error)
 
 	UpsertSubtitles(ctx context.Context,videoID uuid.UUID , items [] dto.SubtitleItemInput) (error)
+	UpsertVideosChapter(ctx context.Context,videoID uuid.UUID , items [] dto.VideoChapterInput) (error)
 }
 
 type postgresVideoRepository struct {
@@ -150,6 +153,11 @@ func (r *postgresVideoRepository) AddAllowedDomain(ctx context.Context, dom *dom
 func (r *postgresVideoRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	// This will trigger the CASCADE delete in DB for Resolutions and Domains
 	return r.db.WithContext(ctx).Delete(&domain.Video{}, "id = ?", id).Error
+}
+
+func (r *postgresVideoRepository) DeleteSubtitle(ctx context.Context, id uuid.UUID) error {
+
+	return r.db.WithContext(ctx).Delete(&domain.VideoSubtitle{}, "id = ?", id).Error
 }
 
 
@@ -354,6 +362,36 @@ func (r *postgresVideoRepository) UpsertSubtitles(ctx context.Context, videoID u
 		}),
 	}).Create(&subtitlesToUpsert).Error
 }
+func (r *postgresVideoRepository) UpsertVideosChapter(ctx context.Context, videoID uuid.UUID, items []dto.VideoChapterInput) error {
+
+	chaptersToUpsert := make([]domain.VideoChapters, len(items))
+
+	if len(items) == 0 {
+		return nil
+	}
+
+
+	for i, item := range items{
+    chaptersToUpsert[i] = domain.VideoChapters{
+        VideoID:     videoID,
+        Time:    item.Time,
+
+        Label:       item.Label,
+
+    }
+}
+
+	return r.db.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns: []clause.Column{
+			{Name: "video_id"},
+			{Name: "time"},
+
+		},
+		DoUpdates: clause.AssignmentColumns([]string{
+			 "label", "updated_at",
+		}),
+	}).Create(&chaptersToUpsert).Error
+}
 
 
 
@@ -371,4 +409,18 @@ func (r *postgresVideoRepository) GetSubtitleByVideoID(ctx context.Context, vide
 	}
 
 	return subtitles, nil
+}
+func (r *postgresVideoRepository) GetChaptersVideoID(ctx context.Context, videoID uuid.UUID) ([]domain.VideoChapters, error) {
+	var chapters []domain.VideoChapters
+
+	err := r.db.WithContext(ctx).
+		Where("video_id = ?", videoID).
+		Order("created_at asc").
+		Find(&chapters).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return chapters, nil
 }

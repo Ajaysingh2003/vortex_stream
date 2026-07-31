@@ -3,6 +3,7 @@ import ThumbnailUpdate from './ThumbnailUpdate';
 import Form from './Form';
 import EndScrennControl from './EndScrennControl';
 import SubtitleControl from './SubtitleControl';
+import Chapters from './Chapters';
 
 interface VideoSettingTypeProps {
   type: "general" | "thumbnail" | "controls" | "analytics" | string; // Type-safety strings
@@ -28,6 +29,11 @@ function VideoSettingType({ type }: VideoSettingTypeProps) {
     case 'subtitle':
       settingContent = <SubtitleControl/>;
       break;
+      
+    case 'chapter':
+      settingContent = <Chapters/>;
+      break;
+
     default:
       settingContent = <div>Select a valid setting configuration panel</div>;
   }
