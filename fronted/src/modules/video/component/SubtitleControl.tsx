@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { VideoSubtitle, WorkspaceType } from "@/modules/types";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { AppWindow, Plus, X, Globe, Sparkles } from "lucide-react";
+import { AppWindow, Plus, X, Globe, Sparkles, DeleteIcon, Delete } from "lucide-react";
 import { useParams } from "next/navigation";
 import React, { ChangeEvent, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -374,10 +374,18 @@ function SubtitleInputField({
     return finding.label;
   };
 
+
+
+
+
+  const handleDelete=(id : string)=>{
+    // onRemove(id)
+  }
+
   return (
     <div className="flex flex-col gap-2 p-3 bg-white/40 rounded-xl border border-black/[0.04]">
       {/* Language Selector */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2">
         <Globe className="size-3.5 text-black/40 stroke-[2]" />
         <select
           value={language}
@@ -396,6 +404,13 @@ function SubtitleInputField({
             </option>
           ))}
         </select>
+         <button
+            // onClick={() => onRemove(id)}
+            className="p-2 transition-colors duration-200 hover:bg-red-50 active:scale-95 rounded-lg flex items-center justify-center text-black/40  shrink-0"
+            title="Remove subtitle field"
+          >
+            <Delete className="size-4 hover:stroke-red-500" />
+          </button>
       </div>
 
       {/* File Input Row */}

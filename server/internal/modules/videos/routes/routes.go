@@ -78,21 +78,30 @@ func SetupRouter(r *gin.Engine, videohandler *handler.VideoHandler, jwtMaker *ut
 		video.GET("/:videoId", videohandler.GetByVideoID)
 		video.POST("/process/:videoId", middleware.AuthMiddleware(jwtMaker), videohandler.Process)
 		video.PATCH("/:id/update/name", middleware.AuthMiddleware(jwtMaker), videohandler.UpdateVideo)
+		video.GET("/:videoId/chapters", videohandler.GetVideoChapterByVideoID)
 	}
 
 	workspaceVideos := api.Group("/workspace/:workspaceId/video")
 	{
 		
 		workspaceVideos.GET("/video-list/",middleware.AuthMiddleware(jwtMaker) ,videohandler.ListVideoByWorkspace)
+		
 		workspaceVideos.GET("/:id/",middleware.AuthMiddleware(jwtMaker) ,videohandler.GetVideoMetaData)
+
 		workspaceVideos.PATCH("/:id/update",middleware.AuthMiddleware(jwtMaker), videohandler.UpdateVideoMetaData)
+
 		workspaceVideos.POST("/:id/end-screen", middleware.AuthMiddleware(jwtMaker) ,videohandler.EndScreenSave)
+
 		workspaceVideos.GET("/:id/end-screen", videohandler.GetEndScreenByVideoID)
+
 		workspaceVideos.DELETE("/:id/end-screen",middleware.AuthMiddleware(jwtMaker), videohandler.DeleteEndScreen)
 
 
 		workspaceVideos.POST("/:id/subtitle",middleware.AuthMiddleware(jwtMaker), videohandler.VideoSubtitle)
 		workspaceVideos.GET("/:id/subtitle",middleware.AuthMiddleware(jwtMaker), videohandler.GetSubtitleByVideoID)
+		
+		workspaceVideos.DELETE("/:id/subtitle/:subtitleId",middleware.AuthMiddleware(jwtMaker), videohandler.DeleteSubtitle)
+		workspaceVideos.POST("/:id/chapters",middleware.AuthMiddleware(jwtMaker), videohandler.VideoChapters)
 	}
 
 	return r

@@ -6,6 +6,7 @@ import {
 } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import axios from "axios";
+import { time } from "console";
 import { cookies } from "next/headers";
 
 import { z } from "zod";
@@ -780,6 +781,164 @@ export const videoRouter = createTRPCRouter({
         });
       }
     }),
+  deleteSubtitle: baseProcedure
+    .input(
+      z.object({
+        video_id: z
+          .string()
+          .uuid({ message: "Invalid video selection ID format" }),
+        workspaceID: z
+          .string()
+          .uuid({ message: "Invalid workspace context ID format" }),
+         
+        subtitleId:z.string()
+      }),
+    )
+
+    .query(async ({ ctx, input }) => {
+      try {
+
+        const cookieStore = await cookies();
+        console.log(input,"singh is king")
+        const access_token = cookieStore.get("access_token")?.value;
+        const id = input.video_id;
+        const res = await axios.delete(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceID}/video/${id}/subtitle/${input.subtitleId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          },
+        );
+
+        return res.data.data;
+      } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+          if (status === 403) code = "FORBIDDEN";
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
   
-    
+    VideoChapter: baseProcedure
+    .input(
+      z.object({
+        video_id: z
+          .string()
+          .uuid({ message: "Invalid video selection ID format" }),
+        workspaceID: z
+          .string()
+          .uuid({ message: "Invalid workspace context ID format" }),
+
+        items: z
+          .array(
+            z.object({
+              label: z
+                .string()
+                .min(1, { message: "Language label is required" })
+                .trim(),
+
+              time: z
+                .string()
+                .min(1, { message: "File name identifier is required" })
+                .trim(),
+            }),
+          ).optional()
+      }),
+    )
+
+    .mutation(async ({ ctx, input }) => {
+      try {
+
+        const cookieStore = await cookies();
+        console.log(input,"singh is king")
+        const access_token = cookieStore.get("access_token")?.value;
+        const id = input.video_id;
+        const res = await axios.post(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceID}/video/${id}/chapters`,
+          { ...input },
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          },
+        );
+
+        return res.data.data;
+      } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+          if (status === 403) code = "FORBIDDEN";
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
+
+    getVideoChapters: baseProcedure
+    .input(
+      z.object({
+        videoId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const res = await axios.get(
+          `${process.env.BASE_API}/v1/video/${input.videoId}/chapters`,
+        );
+
+        console.log(res.data, "res");
+
+        return res.data.data;
+      } catch (error: any) {
+        // return error?.response?.data
+
+        // console.log(error?.response?.data, "error");
+
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+          if (status === 403) code = "FORBIDDEN";
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
 });

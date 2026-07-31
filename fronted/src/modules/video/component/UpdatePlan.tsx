@@ -3,7 +3,7 @@ import { StarsIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import React from "react";
 
-function UpdatePlan() {
+function UpdatePlan({title,description}:{title:string,description:string}) {
   return (
     <div className="h-full w-full">
       <div className=" w-full h-full flex items-center justify-center">
@@ -11,11 +11,11 @@ function UpdatePlan() {
           <div className="flex justify-end flex-col items-center justify-center gap-2 w-full max-w-sm">
 
             <h3 className="font-heading capitalize text-accent text-lg md:text-lg font-bold leading-snug tracking-tight ">
-                Turn Viewers into Leads
+                {title}
             </h3>
 
             <p className="text-xs md:text-sm text-neutral-500 text-center max-w-xs leading-relaxed mb-1">
-             Interactive mid-video forms, email gates, and automated CRM lead syncing are exclusive to our Premium Users infrastructure tier.
+             {description}
             </p>
 
             <Button
