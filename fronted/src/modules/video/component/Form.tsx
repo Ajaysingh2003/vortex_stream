@@ -5,7 +5,7 @@ import CaptureLeads from "./CaptureLeads";
 
 function Form() {
   // Try changing this to true to see the height expand seamlessly!
-  const isPremium = true;
+  const isPremium = false;
 
   return (
     <div className="w-full h-full overflow-scroll min-h-[112px]z relative">
@@ -15,7 +15,7 @@ function Form() {
         }`}
       >
         <div className="w-full h-full">
-          {isPremium ? <CaptureLeads /> : <UpdatePlan />}
+          {isPremium ? <CaptureLeads /> : <UpdatePlan title="Turn Viewers Into Leads" description="Interactive mid-video forms, email gates, and automated CRM lead syncing are exclusive to our Premium Users infrastructure tier." />}
         </div>
       </div>
     </div>

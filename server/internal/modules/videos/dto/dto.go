@@ -51,3 +51,40 @@ type EndScreenUpsertDTO struct {
 	Type    string                 `json:"type" binding:"required,oneof=more_videos cta_action custom_image share_button custom_message"`
 	Payload map[string]interface{} `json:"payload" binding:"required"`
 }
+
+
+
+
+
+
+
+
+
+
+type SubtitleItemInput struct {
+	FileName    string `json:"file_name" binding:"required"`
+	Code        string `json:"code" binding:"required"`
+	Label       string `json:"label" binding:"required"`
+	SubtitleUrl string `json:"subtitle_url" binding:"required"` 
+}
+
+type VideoChapterInput struct {
+	Time    string `json:"time" binding:"required"`
+	Label       string `json:"label" binding:"required"`
+}
+
+type VideoReq struct {
+
+	// Assumed mapping payload token from your layout configuration setup
+	VideoID string              `json:"video_id" binding:"required,uuid"` 
+	Items   []SubtitleItemInput `json:"items" binding:"required,dive"` 
+}
+
+
+
+type VideoChapterReq struct {
+
+	// Assumed mapping payload token from your layout configuration setup
+	VideoID string              `json:"video_id" binding:"required,uuid"` 
+	Items   []VideoChapterInput `json:"items" binding:"required,dive"` 
+}

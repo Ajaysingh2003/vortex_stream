@@ -275,3 +275,28 @@ type VideoEndScreen struct {
 	CreatedAt time.Time         `json:"created_at"`
 	UpdatedAt time.Time         `json:"updated_at"`
 }
+
+type VideoSubtitle struct {
+    ID          uint           `gorm:"primaryKey" json:"id"`
+    // Combined composite unique index named "idx_video_lang"
+    VideoID     uuid.UUID      `gorm:"type:uuid;not null;uniqueIndex:idx_video_lang" json:"video_id"`
+    Video       *Video         `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
+    FileName    string         `gorm:"type:varchar(255);not null" json:"file_name"` // Increased to 255 for long filenames
+    Code        string         `gorm:"type:varchar(50);not null;uniqueIndex:idx_video_lang" json:"code"`
+    Label       string         `gorm:"type:varchar(50);not null" json:"label"`
+    SubtitleUrl string         `gorm:"type:varchar(512);column:subtitle_url;not null" json:"subtitle_url"` 
+    CreatedAt   time.Time      `json:"created_at"`
+    UpdatedAt   time.Time      `json:"updated_at"`
+}
+
+type VideoChapters struct {
+    ID          uuid.UUID           `gorm:"primaryKey" json:"id"`
+
+    VideoID     uuid.UUID      `gorm:"type:uuid;not null;uniqueIndex:idx_video_chapter_time" json:"video_id"`
+    Video       *Video         `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
+    Time        string         `gorm:"type:varchar(255);not null;uniqueIndex:idx_video_chapter_time" json:"time"` 
+    Label       string         `gorm:"type:varchar(50);not null" json:"label"` 
+    CreatedAt   time.Time      `gorm:"autoCreateTime" json:"created_at"`
+    UpdatedAt   time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+}
+

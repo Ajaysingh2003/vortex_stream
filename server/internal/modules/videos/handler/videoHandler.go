@@ -86,7 +86,7 @@ func (h *VideoHandler) ListVideo(c *gin.Context) {
 	id, ok := userId.(uuid.UUID)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration", "success": false})
-return
+		return
 	}
 
 	user, err := h.UserRepo.GetByID(c.Request.Context(), id)
@@ -97,6 +97,28 @@ return
 	}
 
 	data, err := h.VideoService.ListVideo(c.Request.Context(), id)
+
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
+}
+func (h *VideoHandler) GetSubtitleByVideoID(c *gin.Context) {
+
+	videoIDRaw := c.Param("id")
+	videoID, err := uuid.Parse(videoIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})
+		return
+	}
+
+	data, err := h.VideoService.GetSubtitleByVideoID(c.Request.Context(), videoID)
 
 	if err != nil {
 		if appErr, ok := err.(*utils.ApiError); ok {
@@ -372,7 +394,7 @@ func (h *VideoHandler) GetVideoMetaData(c *gin.Context) {
 	userID, ok := userId.(uuid.UUID)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration", "success": false})
-return
+		return
 	}
 
 	videoData, err := h.VideoService.GetVideoMetaData(c.Request.Context(), userID, workspaceID, videoID)
@@ -421,128 +443,188 @@ func (h *VideoHandler) GetByVideoID(c *gin.Context) {
 }
 
 func (h *VideoHandler) EndScreenSave(c *gin.Context) {
-    var req struct {
-        Type    string                 `json:"type" binding:"required"`
-        Payload map[string]interface{} `json:"payload" binding:"required"`
-    }
-	fmt.Print(req.Type,"lollol")
-    // 1. Bind and validate the JSON payload stream first
-    if err := c.ShouldBindJSON(&req); err != nil {
-        // 🎯 This print statement will tell you EXACTLY what field failed validation
-        fmt.Printf("❌ Gin Validation Failed: %v\n", err)
-        c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false})
-        return
-    }
-
-
-    // 🚀 NOW IT IS SAFE TO PRINT: The struct is fully filled out by Gin!
-    fmt.Printf("✅ Incoming Request Body Data: %+v\n", req)
-
-    videoIDRaw := c.Param("id")
-    videoID, err := uuid.Parse(videoIDRaw)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})
-        return
-    }
-
-    workspaceIDRaw := c.Param("workspaceId")
-    workspaceID, workspaceErr := uuid.Parse(workspaceIDRaw)
-    if workspaceErr != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"message": "invalid workspace uuid format", "success": false})
-        return
-    }
-
-    userId, exists := c.Get("user_id")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
-        return
-    }
-
-    userID, ok := userId.(uuid.UUID)
-    if !ok {
-        c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type assertion", "success": false})
-        return // 🚀 FIXED: Added missing return statement to prevent execution panics
-    }
-
-    dtoEndScreenPayload := dto.EndScreenUpsertDTO{
-        VideoID: videoID,
-        Type:    req.Type,
-        Payload: req.Payload,
-    }
-
-	if len(req.Payload) ==0{
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Payload can't be empty"})
-            return
+	var req struct {
+		Type    string                 `json:"type" binding:"required"`
+		Payload map[string]interface{} `json:"payload" binding:"required"`
 	}
-    err = h.VideoService.UpsertEndScreen(c.Request.Context(), workspaceID, userID, dtoEndScreenPayload)
-    if err != nil {
-        if appErr, ok := err.(*utils.ApiError); ok {
-            fmt.Printf("⚠️ Business Logic Error [%d]: %s\n", appErr.Code, appErr.Message)
-            c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
-            return
-        }
-        c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
-        return
-    }
+	fmt.Print(req.Type, "lollol")
+	// 1. Bind and validate the JSON payload stream first
+	if err := c.ShouldBindJSON(&req); err != nil {
+		// 🎯 This print statement will tell you EXACTLY what field failed validation
+		fmt.Printf("❌ Gin Validation Failed: %v\n", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false})
+		return
+	}
 
-    c.JSON(http.StatusOK, gin.H{"success": true, "message": "End Screen saved Successfully"})
+	// 🚀 NOW IT IS SAFE TO PRINT: The struct is fully filled out by Gin!
+	fmt.Printf("✅ Incoming Request Body Data: %+v\n", req)
+
+	videoIDRaw := c.Param("id")
+	videoID, err := uuid.Parse(videoIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})
+		return
+	}
+
+	workspaceIDRaw := c.Param("workspaceId")
+	workspaceID, workspaceErr := uuid.Parse(workspaceIDRaw)
+	if workspaceErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid workspace uuid format", "success": false})
+		return
+	}
+
+	userId, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
+		return
+	}
+
+	userID, ok := userId.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type assertion", "success": false})
+		return // 🚀 FIXED: Added missing return statement to prevent execution panics
+	}
+
+	dtoEndScreenPayload := dto.EndScreenUpsertDTO{
+		VideoID: videoID,
+		Type:    req.Type,
+		Payload: req.Payload,
+	}
+
+	if len(req.Payload) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Payload can't be empty"})
+		return
+	}
+	err = h.VideoService.UpsertEndScreen(c.Request.Context(), workspaceID, userID, dtoEndScreenPayload)
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			fmt.Printf("⚠️ Business Logic Error [%d]: %s\n", appErr.Code, appErr.Message)
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "End Screen saved Successfully"})
 }
+
 func (h *VideoHandler) DeleteEndScreen(c *gin.Context) {
-    // var req struct {
-    //     Type    string                 `json:"type" binding:"required"`
-    //     Payload map[string]interface{} `json:"payload" binding:"required"`
-    // }
-	
-    // if err := c.ShouldBindJSON(&req); err != nil {
-    //     fmt.Printf("❌ Gin Validation Failed: %v\n", err)
-    //     c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false})
-    //     return
-    // }
+	// var req struct {
+	//     Type    string                 `json:"type" binding:"required"`
+	//     Payload map[string]interface{} `json:"payload" binding:"required"`
+	// }
 
+	// if err := c.ShouldBindJSON(&req); err != nil {
+	//     fmt.Printf("❌ Gin Validation Failed: %v\n", err)
+	//     c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false})
+	//     return
+	// }
 
-    // 🚀 NOW IT IS SAFE TO PRINT: The struct is fully filled out by Gin!
-    // fmt.Printf("✅ Incoming Request Body Data: %+v\n", req)
+	// 🚀 NOW IT IS SAFE TO PRINT: The struct is fully filled out by Gin!
+	// fmt.Printf("✅ Incoming Request Body Data: %+v\n", req)
 
-    videoIDRaw := c.Param("id")
-    videoID, err := uuid.Parse(videoIDRaw)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})
-        return
-    }
+	videoIDRaw := c.Param("id")
+	videoID, err := uuid.Parse(videoIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})
+		return
+	}
 
-    workspaceIDRaw := c.Param("workspaceId")
-    workspaceID, workspaceErr := uuid.Parse(workspaceIDRaw)
-    if workspaceErr != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"message": "invalid workspace uuid format", "success": false})
-        return
-    }
+	workspaceIDRaw := c.Param("workspaceId")
+	workspaceID, workspaceErr := uuid.Parse(workspaceIDRaw)
+	if workspaceErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid workspace uuid format", "success": false})
+		return
+	}
 
-    userId, exists := c.Get("user_id")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
-        return
-    }
+	userId, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
+		return
+	}
 
-    userID, ok := userId.(uuid.UUID)
-    if !ok {
-        c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type assertion", "success": false})
-        return // 🚀 FIXED: Added missing return statement to prevent execution panics
-    }
+	userID, ok := userId.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type assertion", "success": false})
+		return // 🚀 FIXED: Added missing return statement to prevent execution panics
+	}
 
+	err = h.VideoService.DeleteEndScreen(c.Request.Context(), workspaceID, userID, videoID)
 
-    err = h.VideoService.DeleteEndScreen(c.Request.Context(), workspaceID, userID, videoID)
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			fmt.Printf("⚠️ Business Logic Error [%d]: %s\n", appErr.Code, appErr.Message)
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
 
-    if err != nil {
-        if appErr, ok := err.(*utils.ApiError); ok {
-            fmt.Printf("⚠️ Business Logic Error [%d]: %s\n", appErr.Code, appErr.Message)
-            c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
-            return
-        }
-        c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
-        return
-    }
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "End Screen deleted Successfully"})
+}
+func (h *VideoHandler) DeleteSubtitle(c *gin.Context) {
+	// var req struct {
+	//     Type    string                 `json:"type" binding:"required"`
+	//     Payload map[string]interface{} `json:"payload" binding:"required"`
+	// }
 
-    c.JSON(http.StatusOK, gin.H{"success": true, "message": "End Screen deleted Successfully"})
+	// if err := c.ShouldBindJSON(&req); err != nil {
+	//     fmt.Printf("❌ Gin Validation Failed: %v\n", err)
+	//     c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false})
+	//     return
+	// }
+
+	// 🚀 NOW IT IS SAFE TO PRINT: The struct is fully filled out by Gin!
+	// fmt.Printf("✅ Incoming Request Body Data: %+v\n", req)
+
+	// videoIDRaw := c.Param("id")
+	// videoID, err := uuid.Parse(videoIDRaw)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})
+	// 	return
+	// }
+
+	subtitleIDRaw := c.Param("subtitleId")
+	subtitleID, err := uuid.Parse(subtitleIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})
+		return
+	}
+
+	workspaceIDRaw := c.Param("workspaceId")
+	workspaceID, workspaceErr := uuid.Parse(workspaceIDRaw)
+	if workspaceErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid workspace uuid format", "success": false})
+		return
+	}
+
+	userId, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
+		return
+	}
+
+	userID, ok := userId.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type assertion", "success": false})
+		return // 🚀 FIXED: Added missing return statement to prevent execution panics
+	}
+
+	err = h.VideoService.DeleteSubtitle(c.Request.Context(), workspaceID, userID, subtitleID)
+
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			fmt.Printf("⚠️ Business Logic Error [%d]: %s\n", appErr.Code, appErr.Message)
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "End Screen deleted Successfully"})
 }
 
 func (h *VideoHandler) GetEndScreenByVideoID(c *gin.Context) {
@@ -568,7 +650,7 @@ func (h *VideoHandler) GetEndScreenByVideoID(c *gin.Context) {
 
 	}
 
-	videoEndScreen, err := h.VideoService.GetEndScreenByVideoid(c.Request.Context(),workspaceID ,videoID)
+	videoEndScreen, err := h.VideoService.GetEndScreenByVideoid(c.Request.Context(), workspaceID, videoID)
 
 	if err != nil {
 		if appErr, ok := err.(*utils.ApiError); ok {
@@ -582,4 +664,179 @@ func (h *VideoHandler) GetEndScreenByVideoID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": videoEndScreen})
+}
+
+func (h *VideoHandler) VideoSubtitle(c *gin.Context) {
+
+	var req dto.VideoReq
+
+	// 1. Bind and validate the JSON payload stream first
+	if err := c.ShouldBindJSON(&req); err != nil {
+		// 🎯 This print statement will tell you EXACTLY what field failed validation
+		fmt.Printf("❌ Gin Validation Failed: %v\n", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false})
+		return
+	}
+
+	// 🚀 NOW IT IS SAFE TO PRINT: The struct is fully filled out by Gin!
+	fmt.Printf("✅ Incoming Request Body Data: %+v\n", req)
+
+	videoIDRaw := c.Param("id")
+	videoID, err := uuid.Parse(videoIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})
+		return
+	}
+
+	workspaceIDRaw := c.Param("workspaceId")
+	workspaceID, workspaceErr := uuid.Parse(workspaceIDRaw)
+	if workspaceErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid workspace uuid format", "success": false})
+		return
+	}
+
+	userId, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
+		return
+	}
+
+	userID, ok := userId.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type assertion", "success": false})
+		return // 🚀 FIXED: Added missing return statement to prevent execution panics
+	}
+
+	err = h.VideoService.UpsertVideoSubtitles(c.Request.Context(), videoID, workspaceID, userID, req.Items)
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			fmt.Printf("⚠️ Business Logic Error [%d]: %s\n", appErr.Code, appErr.Message)
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Subtitle saved Successfully"})
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func (h *VideoHandler) VideoChapters(c *gin.Context) {
+
+	var req dto.VideoChapterReq
+
+	// 1. Bind and validate the JSON payload stream first
+	if err := c.ShouldBindJSON(&req); err != nil {
+		// 🎯 This print statement will tell you EXACTLY what field failed validation
+		fmt.Printf("❌ Gin Validation Failed: %v\n", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false})
+		return
+	}
+
+	// 🚀 NOW IT IS SAFE TO PRINT: The struct is fully filled out by Gin!
+	fmt.Printf("✅ Incoming Request Body Data: %+v\n", req)
+
+	videoIDRaw := c.Param("id")
+	videoID, err := uuid.Parse(videoIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})
+		return
+	}
+
+	workspaceIDRaw := c.Param("workspaceId")
+	workspaceID, workspaceErr := uuid.Parse(workspaceIDRaw)
+	if workspaceErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid workspace uuid format", "success": false})
+		return
+	}
+
+	userId, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
+		return
+	}
+
+	userID, ok := userId.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type assertion", "success": false})
+		return // 🚀 FIXED: Added missing return statement to prevent execution panics
+	}
+
+	err = h.VideoService.UpsertVideoChapters(c.Request.Context(), videoID, workspaceID, userID, req.Items)
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			fmt.Printf("⚠️ Business Logic Error [%d]: %s\n", appErr.Code, appErr.Message)
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Subtitle saved Successfully"})
+}
+
+
+
+
+
+
+
+func (h *VideoHandler) GetVideoChapterByVideoID(c *gin.Context) {
+	videoIDRaw := c.Param("videoId")
+
+	videoID, err := uuid.Parse(videoIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid uuid format",
+			"success": false,
+		})
+		return
+	}
+	// workspaceIDRaw := c.Param("workspaceId")
+
+	// workspaceID, err := uuid.Parse(workspaceIDRaw)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{
+	// 		"message": "invalid uuid format",
+	// 		"success": false,
+	// 	})
+	// 	return
+
+	// }
+
+	videoChapters, err := h.VideoService.GetChaptersVideoid(c.Request.Context(), videoID)
+
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+
+			fmt.Print(appErr.Code, "jerry")
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": videoChapters})
 }
