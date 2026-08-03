@@ -4,6 +4,8 @@ import FormVideoSection from "../component/FormVideoSection";
 import { useSearchParams } from "next/navigation";
 import EndScreenControl from "../component/EndScrennControl";
 import EndScreenPreview from "../component/EndScreenPreview";
+import CtaSetting from "../component/CtaSetting";
+import CTAShow from "../component/CtaSetting";
 
 function VideoDetailsView() {
   const params = useSearchParams();
@@ -23,8 +25,10 @@ function VideoDetailsView() {
       return <EndScreenPreview />;
     case "chapter":
       return <EndScreenPreview />;
+    case "cta":
+      return <CTAShow isPremium={true} />;
 
-
+    
 
     // <div className="min-h-140">
 

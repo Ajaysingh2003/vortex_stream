@@ -11,8 +11,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { useLibraryFilters } from "@/lib/useLibraryFilters";
 
 interface TypeProps {
+  scope:string
   label: string;
   items: {
     label: string;
@@ -20,8 +22,18 @@ interface TypeProps {
   }[];
 }
 
-function DropdownFilters({ label, items }: TypeProps) {
+function DropdownFilters({ label, items ,scope }: TypeProps) {
+
+  const [filters,setFilters]=useLibraryFilters()
+
   const handleApply = (filter: string) => {
+
+    setFilters({
+      [scope]:filter
+    })
+    // setFilters({
+    //   type
+    // })
     console.log(filter, label);
   };
   return (

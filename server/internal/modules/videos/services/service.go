@@ -34,17 +34,27 @@ type VideoInterface interface {
 	
 	DeleteSubtitle(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error
 
+
+
+	DeleteChapter(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error
+
 	GetChaptersVideoid(ctx context.Context, videoID uuid.UUID) ([]domain.VideoChapters, error)
-
+	
 	GetSubtitleByVideoID(ctx context.Context,videoId uuid.UUID) ([] domain.VideoSubtitle ,error)
-
-
-
-
+	
+	
+	
+	
 	UpsertVideoSubtitles(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, subtitles [] dto.SubtitleItemInput) error
-
-
+	
+	
 	UpsertVideoChapters(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, chapters [] dto.VideoChapterInput) error
+	
+	UpsertVideoCta(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, cta [] dto.VideoCtaInput) error
+	DeleteCta(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error
+
+	GetCtaByVideoId(ctx context.Context, videoID uuid.UUID) ([]domain.VideoCtaSetting, error)
+
 
 }
 
@@ -192,6 +202,31 @@ func (r *VideoServiceRepo) GetChaptersVideoid(ctx context.Context,videoID uuid.U
 		}
 	}
 	data, err := r.videoRepo.GetChaptersVideoID(ctx, videoID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+
+}
+
+func (r *VideoServiceRepo) GetCtaByVideoId(ctx context.Context,videoID uuid.UUID) ([]domain.VideoCtaSetting, error) {
+
+	videoData,err:=r.videoRepo.GetByID(ctx , videoID)
+
+
+	if err != nil {
+		return nil, err
+	}
+
+	if videoData ==nil {
+		return  nil,&utils.ApiError{
+			Code: 404,
+			Message: "Video does not Exist.",
+		}
+	}
+	data, err := r.videoRepo.GetVideoCta(ctx, videoID)
 
 	if err != nil {
 		return nil, err
@@ -481,6 +516,86 @@ func (s *VideoServiceRepo) DeleteSubtitle(ctx context.Context, workspaceId uuid.
 	return nil
 }
 
+func (s *VideoServiceRepo) DeleteCta(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error {
+
+	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceId)
+
+	if err != nil {
+		return err
+	}
+
+	if workspaceData == nil {
+
+		return &utils.ApiError{
+			Code:    404,
+			Message: "Workspace is not found.",
+		}
+
+	}
+
+	userData, err := s.userRepo.GetByID(ctx, userID)
+
+	if err != nil {
+		return err
+	}
+
+	if workspaceData.UserID != userData.ID && !userData.IsActive {
+		return &utils.ApiError{
+			Code:    403,
+			Message: "You don't have permission.",
+		}
+	}
+
+
+	err = s.videoRepo.DeleteVideoCta(ctx, ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *VideoServiceRepo) DeleteChapter(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error {
+
+	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceId)
+
+	if err != nil {
+		return err
+	}
+
+	if workspaceData == nil {
+
+		return &utils.ApiError{
+			Code:    404,
+			Message: "Workspace is not found.",
+		}
+
+	}
+
+	userData, err := s.userRepo.GetByID(ctx, userID)
+
+	if err != nil {
+		return err
+	}
+
+	if workspaceData.UserID != userData.ID && !userData.IsActive {
+		return &utils.ApiError{
+			Code:    403,
+			Message: "You don't have permission.",
+		}
+	}
+
+
+	err = s.videoRepo.DeleteVideoChapter(ctx, ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *VideoServiceRepo) GetEndScreenByVideoid(ctx context.Context, workspaceID uuid.UUID, videoID uuid.UUID) (*domain.VideoEndScreen, error) {
 
 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceID)
@@ -604,6 +719,50 @@ func (s *VideoServiceRepo) UpsertVideoChapters(ctx context.Context, videoID uuid
 	
 
 	err = s.videoRepo.UpsertVideosChapter(ctx, videoID,chapters)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
+
+
+func (s *VideoServiceRepo) UpsertVideoCta(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, cta [] dto.VideoCtaInput) error {
+
+	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceID)
+
+	if err != nil {
+		return err
+	}
+
+	videoData, err := s.videoRepo.GetByID(ctx, videoID)
+
+	if err != nil {
+		return err
+	}
+
+	if videoData == nil {
+
+		return &utils.ApiError{
+			Code:    404,
+			Message: "Video not found.",
+		}
+
+	}
+
+	if workspaceData.ID != videoData.WorkspaceID {
+		return &utils.ApiError{
+			Code:    403,
+			Message: "You don't have access for this video",
+		}
+	}
+
+	
+
+	err = s.videoRepo.UpsertVideosCta(ctx, videoID,cta)
 
 	if err != nil {
 		return err

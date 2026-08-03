@@ -797,6 +797,62 @@ func (h *VideoHandler) VideoChapters(c *gin.Context) {
 }
 
 
+func (h *VideoHandler) VideoCtaUpsert(c *gin.Context) {
+
+	var req dto.VideoCtaReq
+
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		// 🎯 This print statement will tell you EXACTLY what field failed validation
+		fmt.Printf("❌ Gin Validation Failed: %v\n", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false})
+		return
+	}
+
+	// 🚀 NOW IT IS SAFE TO PRINT: The struct is fully filled out by Gin!
+	fmt.Printf("✅ Incoming Request Body Data: %+v\n", req)
+
+	videoIDRaw := c.Param("id")
+	videoID, err := uuid.Parse(videoIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})
+		return
+	}
+
+	workspaceIDRaw := c.Param("workspaceId")
+	workspaceID, workspaceErr := uuid.Parse(workspaceIDRaw)
+	if workspaceErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid workspace uuid format", "success": false})
+		return
+	}
+
+	userId, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
+		return
+	}
+
+	userID, ok := userId.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type assertion", "success": false})
+		return // 🚀 FIXED: Added missing return statement to prevent execution panics
+	}
+
+	err = h.VideoService.UpsertVideoCta(c.Request.Context(), videoID, workspaceID, userID, req.Items)
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			fmt.Printf("⚠️ Business Logic Error [%d]: %s\n", appErr.Code, appErr.Message)
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Subtitle saved Successfully"})
+}
+
+
 
 
 
@@ -839,4 +895,154 @@ func (h *VideoHandler) GetVideoChapterByVideoID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": videoChapters})
+}
+
+func (h *VideoHandler) GetVideoCtaByVideoID(c *gin.Context) {
+	videoIDRaw := c.Param("videoId")
+
+	videoID, err := uuid.Parse(videoIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid uuid format",
+			"success": false,
+		})
+		return
+	}
+	// workspaceIDRaw := c.Param("workspaceId")
+
+	// workspaceID, err := uuid.Parse(workspaceIDRaw)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{
+	// 		"message": "invalid uuid format",
+	// 		"success": false,
+	// 	})
+	// 	return
+
+	// }
+
+	videoChapters, err := h.VideoService.GetCtaByVideoId(c.Request.Context(), videoID)
+
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+
+			fmt.Print(appErr.Code, "jerry")
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": videoChapters})
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func (h *VideoHandler) DeleteChapter(c *gin.Context) {
+	
+
+	ChapterIDRaw := c.Param("id")
+	chapterID, err := uuid.Parse(ChapterIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})
+		return
+	}
+
+	workspaceIDRaw := c.Param("workspaceId")
+	workspaceID, workspaceErr := uuid.Parse(workspaceIDRaw)
+	if workspaceErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid workspace uuid format", "success": false})
+		return
+	}
+
+	userId, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
+		return
+	}
+
+	userID, ok := userId.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type assertion", "success": false})
+		return // 🚀 FIXED: Added missing return statement to prevent execution panics
+	}
+
+	err = h.VideoService.DeleteChapter(c.Request.Context(), workspaceID, userID, chapterID)
+
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			fmt.Printf("⚠️ Business Logic Error [%d]: %s\n", appErr.Code, appErr.Message)
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "End Screen deleted Successfully"})
+}
+
+
+
+
+
+
+func (h *VideoHandler) DeleteCta(c *gin.Context) {
+	
+
+	CtaIDRaw := c.Param("id")
+	CtaID, err := uuid.Parse(CtaIDRaw)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid  uuid format", "success": false})
+		return
+	}
+
+	workspaceIDRaw := c.Param("workspaceId")
+	workspaceID, workspaceErr := uuid.Parse(workspaceIDRaw)
+	if workspaceErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid workspace uuid format", "success": false})
+		return
+	}
+
+	userId, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false})
+		return
+	}
+
+	userID, ok := userId.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type assertion", "success": false})
+		return // 🚀 FIXED: Added missing return statement to prevent execution panics
+	}
+
+	err = h.VideoService.DeleteCta(c.Request.Context(), workspaceID, userID, CtaID)
+
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			fmt.Printf("⚠️ Business Logic Error [%d]: %s\n", appErr.Code, appErr.Message)
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Cta deleted Successfully"})
 }
