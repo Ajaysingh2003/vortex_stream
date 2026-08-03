@@ -88,3 +88,27 @@ type VideoChapterReq struct {
 	VideoID string              `json:"video_id" binding:"required,uuid"` 
 	Items   []VideoChapterInput `json:"items" binding:"required,dive"` 
 }
+
+
+type VideoCtaInput struct {
+
+	Title string `json:"title" binding:"required"`
+	StartTime string `json:"start_time" binding:"required"`
+	EndTime string `json:"end_time" binding:"required"`
+	Url string `json:"url" binding:"required"`
+	Position string `json:"position" binding:"required,oneof=top-left top_right bottom_left bottom_right center"`
+	OpenIn string `json:"open_in" binding:"required,oneof=same_tab new_tab"`
+	FontColor string `json:"font_color" binding:"omitempty,hexcolor"`
+	BackgroundColor string `json:"background_color" binding:"omitempty,hexcolor"`
+}
+
+
+type VideoCtaReq struct {
+
+	// Assumed mapping payload token from your layout configuration setup
+	VideoID string              `json:"video_id" binding:"required,uuid"` 
+	Items   []VideoCtaInput `json:"items" binding:"required,dive"` 
+}
+
+
+

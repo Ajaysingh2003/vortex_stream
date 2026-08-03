@@ -4,6 +4,7 @@ import Form from './Form';
 import EndScrennControl from './EndScrennControl';
 import SubtitleControl from './SubtitleControl';
 import Chapters from './Chapters';
+import CtaSetting from './CtaSetting';
 
 interface VideoSettingTypeProps {
   type: "general" | "thumbnail" | "controls" | "analytics" | string; // Type-safety strings
@@ -32,6 +33,9 @@ function VideoSettingType({ type }: VideoSettingTypeProps) {
       
     case 'chapter':
       settingContent = <Chapters/>;
+      break;
+    case 'cta':
+      settingContent = <CtaSetting/>;
       break;
 
     default:

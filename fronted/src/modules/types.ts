@@ -1,3 +1,4 @@
+import { url } from 'zod';
 import { IconSvgElement } from "@hugeicons/react";
 import { UPLOADPROVIDER } from "./constant";
 
@@ -389,4 +390,28 @@ export interface VideoSubtitle{
   file_name:string;
   code:string;
   label:string
+}
+
+
+
+export interface VideoChapter{
+  id:string;
+  video_id:string;
+  time:string;
+  label:string;
+  created_at:string;
+}
+
+export interface VideoCta{
+  id:string;
+  video_id:string;
+  start_time:string;
+  end_time:string;
+  title:string;
+  url:string;
+  open_in:string;
+  position:string;
+  font_color:string;
+  background_color:string;
+  created_at:string;
 }

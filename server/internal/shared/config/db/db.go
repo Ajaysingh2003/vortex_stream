@@ -74,6 +74,8 @@ func InitDb() *gorm.DB {
 		&domain.VideoEndScreen{},	
 		&domain.VideoSubtitle{},	
 		&domain.VideoChapters{},
+		&domain.VideoCtaSetting{},
+
 	)
 		  
 	if err != nil {

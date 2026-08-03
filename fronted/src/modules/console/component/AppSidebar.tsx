@@ -150,17 +150,17 @@ export function AppSidebar() {
   },
   { value: "cta", label: "CTA", icon: "lucide", lucideIcon: MousePointerClick },
   {
-    value: "review_link",
-    label: "Share link",
+    value: "domain_restriction",
+    label: "Domain Restriction",
     icon: "lucide",
     lucideIcon: Link2,
   },
-  {
-    value: "comment",
-    label: "Comments",
-    icon: "hugeicons",
-    hugeIcon: ConversationIcon,
-  },
+  // {
+  //   value: "comment",
+  //   label: "Comments",
+  //   icon: "hugeicons",
+  //   hugeIcon: ConversationIcon,
+  // },
   ] as const;
 
   return (
