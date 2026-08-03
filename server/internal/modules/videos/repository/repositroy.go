@@ -30,20 +30,27 @@ type VideoRepository interface {
 	DeleteSubtitle(ctx context.Context, id uuid.UUID) error
 	CountByFolderID(ctx context.Context, folderID *uuid.UUID) (int64, error)
 	DeleteEndScreen(ctx context.Context, videoId uuid.UUID) error
+	DeleteVideoChapter(ctx context.Context, id uuid.UUID) error
 	UpsertVideoEndScreen(ctx context.Context,endScreen *domain.VideoEndScreen) error
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	// subtitle
-
+	
 	GetSubtitleByVideoID(ctx context.Context,VideoID uuid.UUID) ([]domain.VideoSubtitle,error)
 	GetChaptersVideoID(ctx context.Context,VideoID uuid.UUID) ([]domain.VideoChapters,error)
-
+	
 	UpsertSubtitles(ctx context.Context,videoID uuid.UUID , items [] dto.SubtitleItemInput) (error)
 	UpsertVideosChapter(ctx context.Context,videoID uuid.UUID , items [] dto.VideoChapterInput) (error)
+	
+	
+	
+	UpsertVideosCta(ctx context.Context,videoID uuid.UUID , items [] dto.VideoCtaInput) (error)
+	DeleteVideoCta(ctx context.Context, id uuid.UUID) error
+	GetVideoCta(cta context.Context,videoID uuid.UUID) ([]domain.VideoCtaSetting,error)
 }
 
 type postgresVideoRepository struct {
@@ -163,6 +170,14 @@ func (r *postgresVideoRepository) DeleteSubtitle(ctx context.Context, id uuid.UU
 
 func (r *postgresVideoRepository) DeleteEndScreen(ctx context.Context, videoId uuid.UUID) error {
 	return r.db.WithContext(ctx).Delete(&domain.VideoEndScreen{}, "video_id = ?", videoId).Error
+}
+
+func (r *postgresVideoRepository) DeleteVideoCta(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(&domain.VideoCtaSetting{}, "id = ?", id).Error
+}
+
+func (r *postgresVideoRepository) DeleteVideoChapter(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(&domain.VideoChapters{}, "id = ?", id).Error
 }
 
 
@@ -362,6 +377,7 @@ func (r *postgresVideoRepository) UpsertSubtitles(ctx context.Context, videoID u
 		}),
 	}).Create(&subtitlesToUpsert).Error
 }
+
 func (r *postgresVideoRepository) UpsertVideosChapter(ctx context.Context, videoID uuid.UUID, items []dto.VideoChapterInput) error {
 
 	chaptersToUpsert := make([]domain.VideoChapters, len(items))
@@ -375,7 +391,7 @@ func (r *postgresVideoRepository) UpsertVideosChapter(ctx context.Context, video
     chaptersToUpsert[i] = domain.VideoChapters{
         VideoID:     videoID,
         Time:    item.Time,
-
+		ID: uuid.New(),
         Label:       item.Label,
 
     }
@@ -393,8 +409,47 @@ func (r *postgresVideoRepository) UpsertVideosChapter(ctx context.Context, video
 	}).Create(&chaptersToUpsert).Error
 }
 
+func (r *postgresVideoRepository) UpsertVideosCta(ctx context.Context, videoID uuid.UUID, items []dto.VideoCtaInput) error {
+	if len(items) == 0 {
+		return nil
+	}
 
+	ctaInput := make([]domain.VideoCtaSetting, len(items))
 
+	for i, item := range items {
+		ctaInput[i] = domain.VideoCtaSetting{
+			ID:              uuid.New(), 
+			VideoID:         videoID,
+			Title:           item.Title,
+			URL:             item.Url,
+			FontColor:       item.FontColor,
+			BackgroundColor: item.BackgroundColor,
+			OpenIn:          item.OpenIn,
+			Position:        item.Position,
+			StartTime:       item.StartTime,
+			EndTime:         item.EndTime,
+		}
+	}
+
+	return r.db.WithContext(ctx).Clauses(clause.OnConflict{
+		// Targets the composite index fields
+		Columns: []clause.Column{
+			{Name: "video_id"},
+			{Name: "start_time"},
+		},
+		// Updates properties if a CTA at that specific start time already exists
+		DoUpdates: clause.AssignmentColumns([]string{
+			"title", 
+			"url", 
+			"font_color", 
+			"background_color", 
+			"open_in", 
+			"position", 
+			"end_time", 
+			"updated_at",
+		}),
+	}).Create(&ctaInput).Error
+}
 
 func (r *postgresVideoRepository) GetSubtitleByVideoID(ctx context.Context, videoID uuid.UUID) ([]domain.VideoSubtitle, error) {
 	var subtitles []domain.VideoSubtitle
@@ -410,6 +465,7 @@ func (r *postgresVideoRepository) GetSubtitleByVideoID(ctx context.Context, vide
 
 	return subtitles, nil
 }
+
 func (r *postgresVideoRepository) GetChaptersVideoID(ctx context.Context, videoID uuid.UUID) ([]domain.VideoChapters, error) {
 	var chapters []domain.VideoChapters
 
@@ -423,4 +479,19 @@ func (r *postgresVideoRepository) GetChaptersVideoID(ctx context.Context, videoI
 	}
 
 	return chapters, nil
+}
+
+func (r *postgresVideoRepository) GetVideoCta(ctx context.Context, videoID uuid.UUID) ([]domain.VideoCtaSetting, error) {
+	var cta []domain.VideoCtaSetting
+
+	err := r.db.WithContext(ctx).
+		Where("video_id = ?", videoID).
+		Order("created_at asc").
+		Find(&cta).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return cta, nil
 }

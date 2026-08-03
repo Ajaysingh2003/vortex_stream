@@ -49,10 +49,10 @@ function Filters({parentId,workspaceID,onSucess}:PageProps) {
   return (
     <div className="flex gap-3 items-center justify-between w-full">
       <div className="flex gap-3 items-center">
-        <DropdownFilters label="Type" items={filterType} />
-        <DropdownFilters label="Date Modified" items={dateFilters} />
-        <DropdownFilters label="Sort By" items={sortFilters} />
-        <DropdownFilters label="Visibility" items={visibilityFilters} />
+        <DropdownFilters scope="type" label="Type" items={filterType} />
+        <DropdownFilters scope="date" label="Date Modified" items={dateFilters} />
+        <DropdownFilters scope="sort" label="Sort By" items={sortFilters} />
+        <DropdownFilters scope="visibility" label="Visibility" items={visibilityFilters} />
       </div>
       <div className="flex gap-4">
         <CreateFolder parentID={parentId} workspaceID={workspaceID} onSucess={onSucess}/>

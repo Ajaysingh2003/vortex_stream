@@ -79,7 +79,7 @@ function UploadUI() {
                   </div>
                   <div
                     role="button"
-                    className="bg-mutedz text-white border-black/30 border-[0.5px] bg-background-btn text-center rounded-md px-6 h-9 gap-2 flex items-center justify-center font-medium animate"
+                    className="bg-mutedz text-black border-black/30 border-[0.5px] bg-background-btn text-center rounded-md px-6 h-9 gap-2 flex items-center justify-center font-medium animate"
                   >
                     <Upload className="size-4" />
                     Upload
