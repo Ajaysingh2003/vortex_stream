@@ -300,3 +300,34 @@ type VideoChapters struct {
     UpdatedAt   time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
 }
 
+
+
+
+type VideoCtaSetting struct {
+    ID              uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+    
+    // 1. Composite Unique Index named 'idx_video_cta_time'
+    VideoID         uuid.UUID      `gorm:"type:uuid;not null;uniqueIndex:idx_video_cta_time" json:"video_id"`
+    Video           *Video         `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
+    
+    // 2. Bound to the same composite index so a video cannot have two CTAs at the exact same start time
+    StartTime       string         `gorm:"type:varchar(255);not null;uniqueIndex:idx_video_cta_time" json:"start_time"` 
+    EndTime         string         `gorm:"type:varchar(255);not null" json:"end_time"`
+    
+    Title           string         `gorm:"type:varchar(50);not null" json:"title"`     
+    URL             string         `gorm:"type:varchar(2048);not null" json:"url"`     
+    
+    FontColor       string         `gorm:"type:varchar(7);not null" json:"font_color"`        
+    BackgroundColor string         `gorm:"type:varchar(7);not null" json:"background_color"`  
+    OpenIn          string         `gorm:"type:varchar(20);default:'_blank'" json:"open_in"`  
+    Position        string         `gorm:"type:varchar(50);not null" json:"position"`         
+    
+    CreatedAt       time.Time      `gorm:"autoCreateTime" json:"created_at"`
+    UpdatedAt       time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+}
+
+
+
+
+
+

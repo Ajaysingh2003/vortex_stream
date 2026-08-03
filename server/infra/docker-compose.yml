@@ -45,16 +45,16 @@ services:
       - app-network
   redis:
     image: redis:latest
-    command: ["redis-server", "--appendonly", "yes"]
+    command: ["redis-server", "--port", "6377", "--appendonly", "yes"]
+    ports:
+      - "6377:6377"
     volumes:
       - redis-data:/data
-
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-p", "6377", "ping"] # 👈 Added -p 6377 here
       interval: 5s
       timeout: 3s
       retries: 5
-
     networks:
       - app-network
 
@@ -64,7 +64,8 @@ services:
     restart: always
 
     ports:
-      - "5432:5432"
+      # - "5432:5432"
+      - "5434:5432"
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
