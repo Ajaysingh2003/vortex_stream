@@ -48,14 +48,14 @@ export const libraryColumn: ColumnDef<LibraryType>[] = [
 
       const isRename = id == context?.rename?.id;
 
-      console.log(isRename, context?.rename, "hgs23");
+      // console.log(isRename, context?.rename, "hgs23");
       const Inputref = useRef<HTMLInputElement | null>(null);
       const trpc = useTRPC();
       const queryClient = useQueryClient();
       const [filters, setFilters] = useLibraryFilters();
       const params = useParams();
       const folderID = params.id as string;
-      console.log(folderID,"leah jaye")
+
       const rootfolder = folderID ==undefined;
       console.log(rootfolder,"yyyy")
       const updateFolder = useMutation(
@@ -210,27 +210,43 @@ export const libraryColumn: ColumnDef<LibraryType>[] = [
         }
       }, [isRename, Inputref.current]);
 
+       const randomNumber = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
+  const folderImage = `/assets/img${randomNumber}.jpeg`;
       return (
         <div className="flex items-center gap-3 min-w-0 px-2 py-1">
           <div className=" relative max-w-[100px] min-w-[80px] lg:min-w-[130px]">
             {type == "video" ? (
+
+              // <Image
+                        //   fill
+                        //   unoptimized
+                        //   src={
+                        //     row.original.thumbnailUrl
+                        //       ? `${process.env.NEXT_PUBLIC_CDN_URL}${row.original.thumbnailUrl}`
+                        //       : folderImage
+                        //   }
+                        //   alt={row.original.name}
+                        //   className="object-cover transition-transform border-none duration-300 group-hover:scale-[1.02]"
+                        // />
               <Image
                 height={100}
                 width={100}
                 unoptimized
-                src={row.original.thumbnailUrl ?? "/video-player.png"}
+                src={row.original.thumbnailUrl
+                              ? `${process.env.NEXT_PUBLIC_CDN_URL}${row.original.thumbnailUrl}`
+                              : folderImage}
                 alt={row.original.name}
                 className="w-28 h-18 rounded-lg object-cover border"
               />
             ) : (
               <div className="bg-blue-50 lg:w-28 lg:h-18 rounded-xl flex items-center justify-center">
                 <Image
-                  src={"/folder.png"}
+                  src={folderImage}
                   height={100}
                   width={100}
                   quality={100}
                   alt={row.original.name}
-                  className="w-16 h-12 rounded-lg object-cover border"
+                  className="w-full h-full rounded-lg object-cover border"
                 />
               </div>
             )}
@@ -421,6 +437,7 @@ export const libraryColumn: ColumnDef<LibraryType>[] = [
           });
         }
         if (row.original.type == "video") {
+          
         }
       };
 

@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TopHeader from "../component/TopHeader";
 import UploadFile from "../component/UploadFile";
 import ImportVideos from "@/modules/upload/component/ImportVideos";
@@ -13,10 +13,11 @@ import {
   WorkspaceType,
   LibraryType,
 } from "@/modules/types";
-import { Inbox, Loader2 } from "lucide-react";
+import { Grid, Inbox, Loader2 } from "lucide-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useLibraryFilters } from "@/lib/useLibraryFilters";
 import { useRouter } from "next/navigation";
+import GridDataView from "./GridDataView";
 
 interface LibraryViewProps {
   limit: number;
@@ -31,7 +32,7 @@ function LibraryView({ limit }: LibraryViewProps) {
     trpc.user.getWorkspace.queryOptions(),
   );
   const workspacesData = workspace as WorkspaceType;
-  const [filters, setFilters] = useLibraryFilters();
+  const [filters] = useLibraryFilters();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSuspenseInfiniteQuery(
@@ -40,6 +41,10 @@ function LibraryView({ limit }: LibraryViewProps) {
           limit,
           cursor: filters.cursor,
           workspaceID: workspacesData.id,
+          type: filters.type,
+          date: filters.date,
+          visibility: filters.visibility,
+          sort: filters.sort,
         },
         {
           getNextPageParam: (lastPage: LibraryContentType) =>
@@ -83,7 +88,7 @@ function LibraryView({ limit }: LibraryViewProps) {
   //       );
   // }
 
-  const handleSuccess = useCallback(async () => {
+  const handleSuccess = async () => {
     // ← use infiniteQueryOptions not queryOptions
     await queryClient.invalidateQueries(
         trpc.folder.getRootContent.infiniteQueryOptions(
@@ -91,6 +96,10 @@ function LibraryView({ limit }: LibraryViewProps) {
                 limit,
                 workspaceID: workspacesData.id,
                 cursor: "",
+                type: filters.type,
+                date: filters.date,
+                visibility: filters.visibility,
+                sort: filters.sort,
             },
             {
                 getNextPageParam: (lastPage: LibraryContentType) =>
@@ -101,7 +110,7 @@ function LibraryView({ limit }: LibraryViewProps) {
             }
         )
     )
-}, [queryClient, limit, workspacesData?.id])
+  };
 
 const router=useRouter()
 const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{
@@ -113,27 +122,40 @@ const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{
   router.push(url)
 }
 
+type typeViewMethod = "list" | "grid";
+  
+
+
+const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid");
+
+
   return (
     <div className="w-full h-full min-h-screen relative bg-transparent">
-      <div className="px-6 md:px-12 py-4 w-full">
+      <div className="px-4 md:px-12 py-4 w-full">
         <div className="flex flex-col gap-6 md:gap-4">
           <TopHeader
             Header="Library"
             Btnchild={
               <div className="flex flex-row gap-3">
-                <ImportVideos />
+               <div className="hidden md:inline-block">
+                 <ImportVideos />
+               </div>
                 <UploadFile />
               </div>
             }
           />
 
-          <div className="flex justify-end">
-            <Filters  workspaceID={workspacesData.id} parentId={null} onSucess={handleSuccess}/>
+          <div className=" hidden md:flex justify-end">
+            <Filters activeViewMethod={activeViewMethod} setActiveViewMethod={setActiveViewMethod} workspaceID={workspacesData.id} parentId={null} onSucess={handleSuccess}/>
           </div>
 
-          <div className="max-w-7xl"> 
+         { <div className="max-w-7xl"> 
             {items.length > 0 ? (
-              <DataTable name="library" columns={libraryColumn} data={items} onRowClick={handleRowClick} />
+              activeViewMethod === "list" ? (
+                <DataTable name="library" columns={libraryColumn} data={items} onRowClick={handleRowClick} />
+              ) : (
+                <GridDataView items={items} />
+              )
             ) : (
               <div className="w-full py-12 flex flex-col items-center justify-center border border-dashed rounded-xl bg-muted/20 text-muted-foreground gap-2">
                 <Inbox className="size-8 opacity-40" />
@@ -142,7 +164,7 @@ const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{
                 </p>
               </div>
             )}
-          </div>
+          </div>}
 
           <div
             ref={sentinelRef}

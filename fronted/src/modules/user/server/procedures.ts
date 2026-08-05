@@ -350,7 +350,7 @@ export const userRouter = createTRPCRouter({
         },
       });
       
-      console.log(res.data.data,"leah jaye")
+
     return res.data.data
 
     } catch (error) {

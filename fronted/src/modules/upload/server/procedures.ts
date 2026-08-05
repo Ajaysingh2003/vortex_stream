@@ -62,7 +62,7 @@ export const uploadsRouter = createTRPCRouter({
           },
         );
 
-        console.log(res.data, "leah jaye");
+
         return res.data;
       } catch (error: any) {
         console.log(error?.response as any, "a error occuried");

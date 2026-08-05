@@ -36,7 +36,7 @@ func (r *WorkspaceRepo) Create(ctx context.Context , workspace *domain.Workspace
 
 	// will be checking the user plan before createing workspace
 
-	fmt.Print(workspace,"leah jaye")
+
 
 	data,err:=r.workspaceRepo.Create(ctx , workspace)
 

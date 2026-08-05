@@ -4,7 +4,7 @@ from config.aws import get_client
 def upload_to_r2(local_folder: str, video_id: str):
     client = get_client()
     bucket = "vortex-primary"
-    print(bucket,"leah jaye")
+
     uploaded = 0
 
     for root, dirs, files in os.walk(local_folder):

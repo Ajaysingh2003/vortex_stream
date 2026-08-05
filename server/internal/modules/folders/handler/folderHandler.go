@@ -159,7 +159,7 @@ func (h *FolderHandler) GetChildren (c *gin.Context) {
 
 	data,err:=h.FolderService.GetChildren(c.Request.Context(),folderID,workspaceID,userID)
 	
-	fmt.Print("leah jaye",data)
+
 	
 	if  err!=nil{
 		if appErr, ok := err.(*utils.ApiError); ok {
@@ -418,7 +418,40 @@ func (r *FolderHandler) GetContent (c *gin.Context) {
     }
 	}
 
-	data,err:=r.FolderService.GetContent(c.Request.Context(), id,workspaceId,userId,cursor,limit)
+
+
+
+	typeFilter := c.Query("type")
+	dateFilter := c.Query("date")
+	visibilityFilter := c.Query("visibility")
+	sortFilter := c.Query("sort")
+
+	 if typeFilter == "" {
+		typeFilter = "all" // default value
+	}
+
+	if dateFilter == "" {
+		dateFilter = "any" // default value
+	}
+
+	if visibilityFilter == "" {
+		visibilityFilter = "all" // default value
+	}
+
+	if sortFilter == "" {
+		sortFilter = "created_asc" // default value
+	}
+
+
+	filterOptions := &dto.FilterOptions{
+		Type:       &typeFilter,
+		Date:       &dateFilter,
+		Visibility: &visibilityFilter,
+		Sort:       &sortFilter,
+	}
+
+
+	data,err:=r.FolderService.GetContent(c.Request.Context(), id,workspaceId,userId,cursor,limit,filterOptions)
 
 
 	if err != nil {
@@ -540,9 +573,40 @@ func (h *FolderHandler) GetRootData (c *gin.Context){
     }
 	}
 
-	fmt.Println(cursor,"sonali")
+	// handle optional filters for type, date, visibility, and sort
 
-	data,err:=h.FolderService.GetRootData(c.Request.Context(),workspaceId,userId,cursor,limit)
+	typeFilter := c.Query("type")
+	dateFilter := c.Query("date")
+	visibilityFilter := c.Query("visibility")
+	sortFilter := c.Query("sort")
+
+	 if typeFilter == "" {
+		typeFilter = "all" // default value
+	}
+
+	if dateFilter == "" {
+		dateFilter = "any" // default value
+	}
+
+	if visibilityFilter == "" {
+		visibilityFilter = "all" // default value
+	}
+
+	if sortFilter == "" {
+		sortFilter = "created_asc" // default value
+	}
+
+
+	filterOptions := &dto.FilterOptions{
+		Type:       &typeFilter,
+		Date:       &dateFilter,
+		Visibility: &visibilityFilter,
+		Sort:       &sortFilter,
+	}
+
+
+
+	data,err:=h.FolderService.GetRootData(c.Request.Context(),workspaceId,userId,cursor,limit,filterOptions)
 
 
 	if err != nil {

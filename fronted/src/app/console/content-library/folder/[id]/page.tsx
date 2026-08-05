@@ -39,6 +39,10 @@ async function page({ searchParams, params }: PageProps) {
         limit: currentLimit,
         cursor: currentCursor,
         folderID: id,
+        type: filters.type,
+        date: filters.date,
+        visibility: filters.visibility,
+        sort: filters.sort,
       }),
     );
   }

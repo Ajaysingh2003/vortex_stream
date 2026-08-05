@@ -24,17 +24,13 @@ interface TypeProps {
 
 function DropdownFilters({ label, items ,scope }: TypeProps) {
 
-  const [filters,setFilters]=useLibraryFilters()
+  const [, setFilters] = useLibraryFilters()
 
   const handleApply = (filter: string) => {
-
     setFilters({
-      [scope]:filter
+      [scope]: filter,
+      cursor: "",
     })
-    // setFilters({
-    //   type
-    // })
-    console.log(filter, label);
   };
   return (
     <DropdownMenu>

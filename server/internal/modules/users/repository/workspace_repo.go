@@ -102,7 +102,7 @@ func (r *postgresWorkspaceRepository) GetDefaultWorkspace (ctx context.Context,u
 
 func ( r *postgresWorkspaceRepository) GetWorkspaceWithUserId (ctx context.Context,id uuid.UUID,userId uuid.UUID) (*domain.Workspaces,error){
 	var workspace domain.Workspaces
-	fmt.Print(id,userId,"leah jaye")
+
 
 	err:=r.db.WithContext(ctx).Where( " id = ? AND user_id = ?", id,userId ).First(&workspace).Error
 

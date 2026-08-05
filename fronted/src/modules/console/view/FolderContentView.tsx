@@ -2,7 +2,7 @@
 
 import { DataTable } from "@/components/static/DataTable";
 import { Inbox, Loader2 } from "lucide-react";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { libraryColumn } from "../component/ColumnLibrary";
 import Filters from "../component/Filters";
 import UploadFile from "../component/UploadFile";
@@ -37,7 +37,7 @@ function FolderContentView({
     trpc.user.getWorkspace.queryOptions(),
   );
   const workspacesData = workspace as WorkspaceType;
-  const [filters, setFilters] = useLibraryFilters();
+  const [filters] = useLibraryFilters();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSuspenseInfiniteQuery(
@@ -47,6 +47,10 @@ function FolderContentView({
           folderID: folderID,
           cursor: filters.cursor,
           workspaceID: workspacesData.id,
+          type: filters.type,
+          date: filters.date,
+          visibility: filters.visibility,
+          sort: filters.sort,
         },
         {
           getNextPageParam: (lastPage: LibraryContentType) =>
@@ -58,25 +62,6 @@ function FolderContentView({
         },
       ),
     );
-  useSuspenseInfiniteQuery(
-    trpc.folder.getFolderContent.infiniteQueryOptions(
-      {
-        limit,
-        folderID: folderID,
-        cursor: filters.cursor,
-        workspaceID: workspacesData.id,
-      },
-      {
-        getNextPageParam: (lastPage: LibraryContentType) =>
-          lastPage.metadata.hasNextPage
-            ? lastPage.metadata.nextCursor
-            : undefined,
-
-        initialCursor: "",
-      },
-    ),
-  );
-
   const getFolderInfo = useSuspenseQuery(
     trpc.folder.getfolderInfo.queryOptions({
       folderID: folderID,
@@ -107,7 +92,7 @@ function FolderContentView({
 
   const queryClient = useQueryClient();
 
-  const handleSuccess = useCallback(async () => {
+  const handleSuccess = async () => {
     await queryClient.invalidateQueries(
       trpc.folder.getFolderContent.infiniteQueryOptions(
         {
@@ -115,6 +100,10 @@ function FolderContentView({
           workspaceID: workspacesData.id,
           cursor: "",
           folderID: folderID,
+          type: filters.type,
+          date: filters.date,
+          visibility: filters.visibility,
+          sort: filters.sort,
         },
         {
           getNextPageParam: (lastPage: LibraryContentType) =>
@@ -125,7 +114,7 @@ function FolderContentView({
         },
       ),
     );
-  }, [queryClient, limit, workspacesData?.id]);
+  };
 
   const router = useRouter();
   const handleRowClick = (row: { id: string; type: "video" | "folder" }) => {
@@ -138,6 +127,10 @@ function FolderContentView({
 
     router.push(url);
   };
+
+  type typeViewMethod = "list" | "grid";
+
+const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid");
 
   return (
     <div className="w-full h-full min-h-screen relative bg-transparent">
@@ -157,6 +150,8 @@ function FolderContentView({
             <Filters
               parentId={folderID}
               workspaceID={workspacesData.id}
+              activeViewMethod={activeViewMethod}
+              setActiveViewMethod={setActiveViewMethod}
               onSucess={handleSuccess}
             />
           </div>

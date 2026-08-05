@@ -32,7 +32,7 @@ func (h *UserHandler) Register (c *gin.Context) {
 		return
 	}
 	testUUid:=uuid.New()
-	fmt.Println(testUUid,"leah jaye")
+
 
 	err:=h.UserService.Register(c.Request.Context(), &domain.User{
 		Name: &req.Name,

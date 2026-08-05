@@ -170,7 +170,7 @@ export async function startUpload({
       // Always let the absolute final packet tick (100%) bypass the timing constraint
       if (now - lastCommittedTime > 150 || absoluteLoadedBytes === totalOriginalFileSize) {
         lastCommittedTime = now;
-        console.log(item,"leah jaye")
+
         onProgressThrottled({
           progress,
           uploadedBytes: absoluteLoadedBytes,

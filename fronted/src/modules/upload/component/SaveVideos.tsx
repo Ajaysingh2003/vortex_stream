@@ -4,13 +4,9 @@ import React from 'react'
 import Folder from './Folder'
 
 function SaveVideos() {
-    const trpc=useTRPC()
-    const {data:workspaces}=useSuspenseQuery(trpc.user.getWorkspace.queryOptions())
-
-    // console.log(workspaces,"leah jaye")
-    
+   
   return (
-    
+    // <div></div>
    <Folder/>
   )
 }
