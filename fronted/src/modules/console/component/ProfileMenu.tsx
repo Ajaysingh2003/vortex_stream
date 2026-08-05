@@ -67,7 +67,7 @@ function ProfileMenu() {
   );
   const profileData = profile as ProfileType;
   const workspacesData = workspaces as workspacesType[];
-  console.log(workspaces, "leah jaye");
+
   const [workspaceName, setWorkspaceName] = useState<string>("");
   const router=useRouter()
   const switchWorkspace = useMutation(

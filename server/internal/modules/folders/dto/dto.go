@@ -41,3 +41,13 @@ type FolderContentsDTO struct {
 type UpdateFolderRequest struct {
     Name string `json:"name" binding:"required"`
 }
+
+
+
+
+type FilterOptions struct {
+    Type       *string `json:"type,omitempty"`
+    Date       *string `json:"date,omitempty"`
+    Visibility *string `json:"visibility,omitempty"`
+    Sort       *string `json:"sort,omitempty"`
+}

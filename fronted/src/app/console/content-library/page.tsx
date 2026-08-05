@@ -34,6 +34,10 @@ async function page({ searchParams }: PageProps) {
         workspaceID: worksapceData.id,
         limit: currentLimit,
         cursor: currentCursor,
+        type: filters.type,
+        date: filters.date,
+        visibility: filters.visibility,
+        sort: filters.sort,
       }),
     );
     

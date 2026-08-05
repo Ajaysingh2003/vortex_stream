@@ -1,20 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 import DropdownFilters from "./DropdownFilters";
-
-import { TextAlignJustify } from "lucide-react";
-import { LayoutGrid } from "lucide-react";
+import { TextAlignJustify, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CreateFolder from "@/modules/upload/component/CreateFolder";
 
-interface PageProps{
-  parentId:string | null
-  workspaceID:string
-  onSucess:()=>void
+type TypeViewMethod = "list" | "grid";
+
+interface PageProps {
+  parentId: string | null;
+  workspaceID: string;
+  onSucess: () => void;
+  activeViewMethod: TypeViewMethod;
+  setActiveViewMethod: React.Dispatch<React.SetStateAction<TypeViewMethod>>;
 }
 
-type typeViewMethod = "list" | "grid";
-
-function Filters({parentId,workspaceID,onSucess}:PageProps) {
+function Filters({
+  parentId,
+  workspaceID,
+  onSucess,
+  activeViewMethod,
+  setActiveViewMethod,
+}: PageProps) {
   const filterType = [
     { label: "All Contents", filter: "all" },
     { label: "Videos Only", filter: "video" },
@@ -24,7 +30,7 @@ function Filters({parentId,workspaceID,onSucess}:PageProps) {
   const dateFilters = [
     { label: "Anytime", filter: "any" },
     { label: "Today", filter: "today" },
-    { label: "Last 7 Days", filter: "7_days" },
+    { label: "Last 7 Days", filter: "7_day" },
     { label: "Last 30 Days", filter: "30_days" },
     { label: "This Month", filter: "this_month" },
   ];
@@ -43,9 +49,6 @@ function Filters({parentId,workspaceID,onSucess}:PageProps) {
     { label: "Publicly Accessible", filter: "public" },
   ];
 
-  const [activeViewMethod, setActiveViewMethod] =
-    useState<typeViewMethod>("grid");
-
   return (
     <div className="flex gap-3 items-center justify-between w-full">
       <div className="flex gap-3 items-center">
@@ -55,18 +58,18 @@ function Filters({parentId,workspaceID,onSucess}:PageProps) {
         <DropdownFilters scope="visibility" label="Visibility" items={visibilityFilters} />
       </div>
       <div className="flex gap-4">
-        <CreateFolder parentID={parentId} workspaceID={workspaceID} onSucess={onSucess}/>
+        <CreateFolder parentID={parentId} workspaceID={workspaceID} onSucess={onSucess} />
         <Button
           onClick={() => setActiveViewMethod("list")}
           className={`${activeViewMethod === "list" ? "bg-stone-100" : "bg-transparent"} rounded-lg px-2 py-4 cursor-pointer`}
-          variant={"secondary"}
+          variant="secondary"
         >
           <TextAlignJustify />
         </Button>
         <Button
           onClick={() => setActiveViewMethod("grid")}
-          className={` ${activeViewMethod === "grid" ? "bg-stone-100" : "bg-transparent"} rounded-lg px-2 py-4 cursor-pointer`}
-          variant={"secondary"}
+          className={`${activeViewMethod === "grid" ? "bg-stone-100" : "bg-transparent"} rounded-lg px-2 py-4 cursor-pointer`}
+          variant="secondary"
         >
           <LayoutGrid />
         </Button>

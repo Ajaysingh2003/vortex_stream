@@ -6,13 +6,15 @@ import (
 	"fmt"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
+	"github.com/ajaysingh2003/vortex-stream/internal/modules/folders/dto"
+	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
+
 	// "github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type FolderRepository interface {
-
 	Create(ctx context.Context, folder *domain.Folder) (*domain.Folder, error)
 
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.Folder, error)
@@ -21,34 +23,33 @@ type FolderRepository interface {
 
 	GetChildren(ctx context.Context, parentID uuid.UUID) ([]domain.Folder, error)
 
-	GetChildrenPaginated(ctx  context.Context,
-    parentID *uuid.UUID,
-    workspaceID uuid.UUID,
-    afterID  *uuid.UUID,
-    limit    int) ([]domain.Folder,error)
+	GetChildrenPaginated(ctx context.Context,
+		parentID *uuid.UUID,
+		workspaceID uuid.UUID,
+		afterID *uuid.UUID,
+		limit int, filterOptions *dto.FilterOptions) ([]domain.Folder, error)
 
-	GetWithVideos (ctx context.Context, id uuid.UUID) (*domain.Folder, error)
+	GetWithVideos(ctx context.Context, id uuid.UUID) (*domain.Folder, error)
 
-	Update (ctx context.Context, folder *domain.Folder) (*domain.Folder, error)
+	Update(ctx context.Context, folder *domain.Folder) (*domain.Folder, error)
 
-	Delete (ctx context.Context, id uuid.UUID) error
+	Delete(ctx context.Context, id uuid.UUID) error
 
-	DeleteByIDandWorkspaceId (ctx context.Context, id uuid.UUID,workspaceID uuid.UUID) error
+	DeleteByIDandWorkspaceId(ctx context.Context, id uuid.UUID, workspaceID uuid.UUID) error
 
-	Move (ctx context.Context, id uuid.UUID, newParentID *uuid.UUID) error
+	Move(ctx context.Context, id uuid.UUID, newParentID *uuid.UUID) error
 
-	UpdatePosition (ctx context.Context, id uuid.UUID, position int) error
+	UpdatePosition(ctx context.Context, id uuid.UUID, position int) error
 
-	CountChildren (ctx context.Context,parentID *uuid.UUID) (int64 , error)
+	CountChildren(ctx context.Context, parentID *uuid.UUID) (int64, error)
 
-	CheckDuplicateName (ctx context.Context,name string,parentID *uuid.UUID,workspaceID uuid.UUID) (bool , error)
+	CheckDuplicateName(ctx context.Context, name string, parentID *uuid.UUID, workspaceID uuid.UUID) (bool, error)
 
-	GetAncestors (ctx context.Context,folderID uuid.UUID) ([]domain.Folder, error)
+	GetAncestors(ctx context.Context, folderID uuid.UUID) ([]domain.Folder, error)
 	// ExistsByNameAndParent(ctx context.Context, name string, workspaceID uuid.UUID, parentID *uuid.UUID) (bool, error)
 
-	UpdateFolder (ctx context.Context,folderID uuid.UUID ,workspaceID uuid.UUID,folder domain.Folder) error
+	UpdateFolder(ctx context.Context, folderID uuid.UUID, workspaceID uuid.UUID, folder domain.Folder) error
 }
-
 
 type postgresFolderRepository struct {
 	db *gorm.DB
@@ -58,85 +59,85 @@ func NewFolderRepo(db *gorm.DB) FolderRepository {
 	return &postgresFolderRepository{db: db}
 }
 
-func (r *postgresFolderRepository) UpdateFolder (ctx context.Context,folderID uuid.UUID,workspaceID uuid.UUID,folder domain.Folder) error {
+func (r *postgresFolderRepository) UpdateFolder(ctx context.Context, folderID uuid.UUID, workspaceID uuid.UUID, folder domain.Folder) error {
 	err := r.db.WithContext(ctx).
 		Model(&domain.Folder{}).
-		Where("id = ? AND workspace_id = ?", folderID,workspaceID).
+		Where("id = ? AND workspace_id = ?", folderID, workspaceID).
 		Updates(map[string]interface{}{
 			"name":     folder.Name,
 			"position": folder.Position,
 		}).Error
 
 	if err != nil {
-		return  err
+		return err
 	}
-	return  nil
+	return nil
 }
 
-func (r *postgresFolderRepository) Create (ctx context.Context,folder *domain.Folder) (*domain.Folder,error){
+func (r *postgresFolderRepository) Create(ctx context.Context, folder *domain.Folder) (*domain.Folder, error) {
 
-	if err:=r.db.WithContext(ctx).Create(folder).Error; err != nil{
+	if err := r.db.WithContext(ctx).Create(folder).Error; err != nil {
 		return nil, err
 	}
 
-	return folder,nil
+	return folder, nil
 }
 
-func (r *postgresFolderRepository) CheckDuplicateName (ctx context.Context, name string, parentID *uuid.UUID, workspaceID uuid.UUID) (bool, error) {
-    var exists bool
+func (r *postgresFolderRepository) CheckDuplicateName(ctx context.Context, name string, parentID *uuid.UUID, workspaceID uuid.UUID) (bool, error) {
+	var exists bool
 
-    // 1. Explicitly target the "folders" table so GORM builds the query correctly
-    query := r.db.WithContext(ctx).
-        Table("folder").
-        Select("1").
-        Where("name = ? AND workspace_id = ?", name, workspaceID)
+	// 1. Explicitly target the "folders" table so GORM builds the query correctly
+	query := r.db.WithContext(ctx).
+		Table("folder").
+		Select("1").
+		Where("name = ? AND workspace_id = ?", name, workspaceID)
 
-    // 2. FIXED: Inverted logic check
-    if parentID == nil {
-        // If parentID is nil, we are checking the root level
-        query = query.Where("parent_id IS NULL")
-    } else {
-        // If parentID is not nil, it is safe to dereference it for a sub-folder check
-        query = query.Where("parent_id = ?", *parentID)
-    }
+	// 2. FIXED: Inverted logic check
+	if parentID == nil {
+		// If parentID is nil, we are checking the root level
+		query = query.Where("parent_id IS NULL")
+	} else {
+		// If parentID is not nil, it is safe to dereference it for a sub-folder check
+		query = query.Where("parent_id = ?", *parentID)
+	}
 
-    err := query.Limit(1).Scan(&exists).Error
-    if err != nil {
-        return false, err
-    }
+	err := query.Limit(1).Scan(&exists).Error
+	if err != nil {
+		return false, err
+	}
 
-    return exists, nil
+	return exists, nil
 }
 
-func (r *postgresFolderRepository)  GetByID (ctx context.Context,id uuid.UUID) (*domain.Folder,error) {
+func (r *postgresFolderRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Folder, error) {
 	var folder domain.Folder
 
-	err:=r.db.WithContext(ctx).Where("id = ? ", id).First(&folder).Error
+	err := r.db.WithContext(ctx).Where("id = ? ", id).First(&folder).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	return  &folder,nil
+	return &folder, nil
 }
 
-func (r *postgresFolderRepository)  GetRootFolders (ctx context.Context,workspaceID uuid.UUID) ([]domain.Folder,error) {
+func (r *postgresFolderRepository) GetRootFolders(ctx context.Context, workspaceID uuid.UUID) ([]domain.Folder, error) {
 	var folder []domain.Folder
 
-	err:=r.db.WithContext(ctx).Where("workspace_id = ? AND parent_id IS NULL ", workspaceID).Order("position ASC, created_at ASC").Find(&folder).Error
-	
+	err := r.db.WithContext(ctx).Where("workspace_id = ? AND parent_id IS NULL ", workspaceID).Order("position ASC, created_at ASC").Find(&folder).Error
+
 	if err != nil {
 		return nil, err
 	}
 
-	return  folder,nil
+	return folder, nil
 }
 
-func (r *postgresFolderRepository) GetChildren (ctx context.Context, parentID uuid.UUID) ([]domain.Folder, error) {
-	
+func (r *postgresFolderRepository) GetChildren(ctx context.Context, parentID uuid.UUID) ([]domain.Folder, error) {
+
 	var folders []domain.Folder
 
-	fmt.Print(parentID,"parentIDTest")
+	fmt.Print(parentID, "parentIDTest")
 	err := r.db.WithContext(ctx).
 		Where("parent_id = ?", parentID).
 		Order("position ASC, created_at ASC").
@@ -185,9 +186,9 @@ func (r *postgresFolderRepository) Delete(ctx context.Context, id uuid.UUID) err
 		Where("id = ?", id).
 		Delete(&domain.Folder{}).Error
 }
-func (r *postgresFolderRepository) DeleteByIDandWorkspaceId(ctx context.Context, id uuid.UUID,workspaceID uuid.UUID) error {
+func (r *postgresFolderRepository) DeleteByIDandWorkspaceId(ctx context.Context, id uuid.UUID, workspaceID uuid.UUID) error {
 	return r.db.WithContext(ctx).
-		Where("id = ? AND workspace_id = ?", id,workspaceID).
+		Where("id = ? AND workspace_id = ?", id, workspaceID).
 		Delete(&domain.Folder{}).Error
 }
 
@@ -206,72 +207,80 @@ func (r *postgresFolderRepository) UpdatePosition(ctx context.Context, id uuid.U
 }
 
 func (r *postgresFolderRepository) GetChildrenPaginated(
-		ctx      context.Context,
-		parentID *uuid.UUID,
-		workspaceID uuid.UUID,
-		afterID  *uuid.UUID,
-		limit    int,
+	ctx context.Context,
+	parentID *uuid.UUID,
+	workspaceID uuid.UUID,
+	afterID *uuid.UUID,
+	limit int,
+	filterOptions *dto.FilterOptions,
 ) ([]domain.Folder, error) {
 
-		query := r.db.WithContext(ctx).
+	query := r.db.WithContext(ctx).
 		Where("workspace_id = ?", workspaceID).
-		Order("position ASC, created_at ASC").
 		Limit(limit)
 
-		if parentID != nil {
+	if parentID != nil {
 		query = query.Where("parent_id = ?", parentID)
 	} else {
 		query = query.Where("parent_id IS NULL")
 	}
-    
-		
-    if afterID != nil {
-        var cursorFolder domain.Folder
-        err := r.db.WithContext(ctx).
-            Select("position", "created_at").
-            First(&cursorFolder, "id = ?", *afterID).Error
-        if err != nil {
-            return nil, fmt.Errorf("invalid cursor: %w", err)
-        }
 
-        query = query.Where(
-            "(position, created_at) > (?, ?)",
-            cursorFolder.Position,
-            cursorFolder.CreatedAt,
-        )
-    }
+	if afterID != nil {
+		var cursorFolder domain.Folder
+		err := r.db.WithContext(ctx).
+			Select("id", "position", "name", "created_at").
+			First(&cursorFolder, "id = ?", *afterID).Error
+		if err != nil {
+			return nil, fmt.Errorf("invalid cursor: %w", err)
+		}
 
-    var folders []domain.Folder
-    if err := query.Find(&folders).Error; err != nil {
-        return nil, fmt.Errorf("failed to fetch folders: %w", err)
-    }
-    return folders, nil
+		sort := "created_asc"
+		if filterOptions != nil && filterOptions.Sort != nil {
+			sort = *filterOptions.Sort
+		}
+		switch sort {
+		case "created_desc":
+			query = query.Where("(created_at, id) < (?, ?)", cursorFolder.CreatedAt, cursorFolder.ID)
+		case "name_asc":
+			query = query.Where("(name, id) > (?, ?)", cursorFolder.Name, cursorFolder.ID)
+		case "name_desc":
+			query = query.Where("(name, id) < (?, ?)", cursorFolder.Name, cursorFolder.ID)
+		default:
+			query = query.Where("(created_at, id) > (?, ?)", cursorFolder.CreatedAt, cursorFolder.ID)
+		}
+	}
+
+	var folders []domain.Folder
+	if err := query.Scopes(utils.ApplyContentFilters(filterOptions)).Find(&folders).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch folders: %w", err)
+	}
+	return folders, nil
 }
 
 func (r *postgresFolderRepository) CountChildren(ctx context.Context, parentID *uuid.UUID) (int64, error) {
-    var count int64
+	var count int64
 
-    query := r.db.WithContext(ctx).Model(&domain.Folder{})
+	query := r.db.WithContext(ctx).Model(&domain.Folder{})
 
-    if parentID != nil {
-        query = query.Where("parent_id = ?", parentID)
-    } else {
-        query = query.Where("parent_id IS NULL")
-    }
+	if parentID != nil {
+		query = query.Where("parent_id = ?", parentID)
+	} else {
+		query = query.Where("parent_id IS NULL")
+	}
 
-    err := query.Count(&count).Error
-    if err != nil {
-        return 0, fmt.Errorf("failed to count children: %w", err)
-    }
+	err := query.Count(&count).Error
+	if err != nil {
+		return 0, fmt.Errorf("failed to count children: %w", err)
+	}
 
-    return count, nil
+	return count, nil
 }
 
 func (r *postgresFolderRepository) GetAncestors(ctx context.Context, folderID uuid.UUID) ([]domain.Folder, error) {
-    var ancestors []domain.Folder
+	var ancestors []domain.Folder
 
-    // Recursive Common Table Expression (CTE) to climb UP the folder tree
-    query := `
+	// Recursive Common Table Expression (CTE) to climb UP the folder tree
+	query := `
         WITH RECURSIVE folder_tree AS (
             SELECT id, workspace_id, parent_id, position, name, created_at, updated_at
             FROM folder
@@ -286,15 +295,15 @@ func (r *postgresFolderRepository) GetAncestors(ctx context.Context, folderID uu
         SELECT * FROM folder_tree;
     `
 
-    err := r.db.WithContext(ctx).Raw(query, folderID).Scan(&ancestors).Error
-    if err != nil {
-        return nil, err
-    }
+	err := r.db.WithContext(ctx).Raw(query, folderID).Scan(&ancestors).Error
+	if err != nil {
+		return nil, err
+	}
 
 	// Reverse the slice so it reads from Root -> Subfolder instead of Current -> Root
 	for i, j := 0, len(ancestors)-1; i < j; i, j = i+1, j-1 {
 		ancestors[i], ancestors[j] = ancestors[j], ancestors[i]
 	}
 
-    return ancestors, nil
+	return ancestors, nil
 }

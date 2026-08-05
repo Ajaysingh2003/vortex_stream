@@ -30,7 +30,7 @@ const params = {
 
   type:parseAsStringEnum<contentTypeEnums>(contentTypeValues).withDefault("all").withOptions({clearOnDefault:true}),
   date:parseAsStringEnum<dateTypeEnums>(dateTypeValues).withDefault("any").withOptions({clearOnDefault:true}),
-  Visibility:parseAsStringEnum<VisibilityTypeEnums>(VisibilityTypeValues).withDefault("all").withOptions({clearOnDefault:true}),
+  visibility:parseAsStringEnum<VisibilityTypeEnums>(VisibilityTypeValues).withDefault("all").withOptions({clearOnDefault:true}),
   sort:parseAsStringEnum<sortTypeEnums>(sortTypeValues).withDefault("created_asc").withOptions({clearOnDefault:true}),
 }
 

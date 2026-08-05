@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
+	folderdto "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/dto"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/dto"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -23,34 +24,27 @@ type VideoRepository interface {
 	AddAllowedDomain(ctx context.Context, dom *domain.VideoDomain) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetVideosPaginated(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursorID **uuid.UUID, limit int) ([]domain.Video, error)
-	GetByFolderIdPaginated(ctx context.Context, folderID *uuid.UUID, workspaceID uuid.UUID, afterID string, remaining int) ([]domain.Video, error)
-	
+	GetByFolderIdPaginated(ctx context.Context, folderID *uuid.UUID, workspaceID uuid.UUID, afterID string, remaining int, filterOptions *folderdto.FilterOptions) ([]domain.Video, error)
+
 	GetEndScreenByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.VideoEndScreen, error)
-	
+
 	DeleteSubtitle(ctx context.Context, id uuid.UUID) error
 	CountByFolderID(ctx context.Context, folderID *uuid.UUID) (int64, error)
 	DeleteEndScreen(ctx context.Context, videoId uuid.UUID) error
 	DeleteVideoChapter(ctx context.Context, id uuid.UUID) error
-	UpsertVideoEndScreen(ctx context.Context,endScreen *domain.VideoEndScreen) error
-	
-	
-	
-	
-	
-	
+	UpsertVideoEndScreen(ctx context.Context, endScreen *domain.VideoEndScreen) error
+
 	// subtitle
-	
-	GetSubtitleByVideoID(ctx context.Context,VideoID uuid.UUID) ([]domain.VideoSubtitle,error)
-	GetChaptersVideoID(ctx context.Context,VideoID uuid.UUID) ([]domain.VideoChapters,error)
-	
-	UpsertSubtitles(ctx context.Context,videoID uuid.UUID , items [] dto.SubtitleItemInput) (error)
-	UpsertVideosChapter(ctx context.Context,videoID uuid.UUID , items [] dto.VideoChapterInput) (error)
-	
-	
-	
-	UpsertVideosCta(ctx context.Context,videoID uuid.UUID , items [] dto.VideoCtaInput) (error)
+
+	GetSubtitleByVideoID(ctx context.Context, VideoID uuid.UUID) ([]domain.VideoSubtitle, error)
+	GetChaptersVideoID(ctx context.Context, VideoID uuid.UUID) ([]domain.VideoChapters, error)
+
+	UpsertSubtitles(ctx context.Context, videoID uuid.UUID, items []dto.SubtitleItemInput) error
+	UpsertVideosChapter(ctx context.Context, videoID uuid.UUID, items []dto.VideoChapterInput) error
+
+	UpsertVideosCta(ctx context.Context, videoID uuid.UUID, items []dto.VideoCtaInput) error
 	DeleteVideoCta(ctx context.Context, id uuid.UUID) error
-	GetVideoCta(cta context.Context,videoID uuid.UUID) ([]domain.VideoCtaSetting,error)
+	GetVideoCta(cta context.Context, videoID uuid.UUID) ([]domain.VideoCtaSetting, error)
 }
 
 type postgresVideoRepository struct {
@@ -89,20 +83,20 @@ func (r *postgresVideoRepository) GetByID(ctx context.Context, id uuid.UUID) (*d
 }
 
 func (r *postgresVideoRepository) GetEndScreenByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.VideoEndScreen, error) {
-    var videoEndScreen domain.VideoEndScreen
+	var videoEndScreen domain.VideoEndScreen
 
-    err := r.db.WithContext(ctx).
-        First(&videoEndScreen,"video_id = ?", videoID).
-        Error
+	err := r.db.WithContext(ctx).
+		First(&videoEndScreen, "video_id = ?", videoID).
+		Error
 
-    if err != nil {
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            return nil, nil
-        }
-        return nil, err
-    }
-    
-    return &videoEndScreen, nil
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &videoEndScreen, nil
 }
 
 func (r *postgresVideoRepository) GetByUserID(ctx context.Context, userID uuid.UUID) ([]domain.Video, error) {
@@ -167,7 +161,6 @@ func (r *postgresVideoRepository) DeleteSubtitle(ctx context.Context, id uuid.UU
 	return r.db.WithContext(ctx).Delete(&domain.VideoSubtitle{}, "id = ?", id).Error
 }
 
-
 func (r *postgresVideoRepository) DeleteEndScreen(ctx context.Context, videoId uuid.UUID) error {
 	return r.db.WithContext(ctx).Delete(&domain.VideoEndScreen{}, "video_id = ?", videoId).Error
 }
@@ -179,7 +172,6 @@ func (r *postgresVideoRepository) DeleteVideoCta(ctx context.Context, id uuid.UU
 func (r *postgresVideoRepository) DeleteVideoChapter(ctx context.Context, id uuid.UUID) error {
 	return r.db.WithContext(ctx).Delete(&domain.VideoChapters{}, "id = ?", id).Error
 }
-
 
 // func (r *postgresVideoRepository) GetByIdAndUserId (ctx context.Context,id uuid.UUID,userId uuid.UUID) (*domain.Video,error) {
 // 	var video domain.Video
@@ -243,7 +235,7 @@ func (r *postgresVideoRepository) GetByIdAndUserId(ctx context.Context, id uuid.
 // 	return videos,nil
 // }
 
-func (r *postgresVideoRepository) GetByFolderIdPaginated(ctx context.Context, folderID *uuid.UUID, workspaceID uuid.UUID, afterID string, remaining int) ([]domain.Video, error) {
+func (r *postgresVideoRepository) GetByFolderIdPaginated(ctx context.Context, folderID *uuid.UUID, workspaceID uuid.UUID, afterID string, remaining int, filterOptions *folderdto.FilterOptions) ([]domain.Video, error) {
 
 	query := r.db.WithContext(ctx).Model(&domain.Video{}).Where("workspace_id", workspaceID)
 
@@ -253,20 +245,72 @@ func (r *postgresVideoRepository) GetByFolderIdPaginated(ctx context.Context, fo
 		query = query.Where("folder_id IS NULL")
 	}
 
-	query = query.Order("created_at ASC, id ASC").Limit(remaining)
+	query = query.Limit(remaining)
 
 	if afterID != "" {
 		var cursorVideo domain.Video
 
 		err := r.db.WithContext(ctx).
-			Select("created_at", "id").
+			Select("created_at", "title", "size", "id").
 			First(&cursorVideo, "id = ?", afterID).Error
 		if err != nil {
 			return nil, fmt.Errorf("failed to locate pagination cursor anchor element: %w", err)
 		}
 
-		// This avoids forcing PostgreSQL to cast type values to text strings on millions of rows
-		query = query.Where("(created_at, id) > (?, ?)", cursorVideo.CreatedAt, cursorVideo.ID)
+		sort := "created_asc"
+		if filterOptions != nil && filterOptions.Sort != nil {
+			sort = *filterOptions.Sort
+		}
+		switch sort {
+		case "created_desc":
+			query = query.Where("(created_at, id) < (?, ?)", cursorVideo.CreatedAt, cursorVideo.ID)
+		case "name_asc":
+			query = query.Where("(title, id) > (?, ?)", cursorVideo.Title, cursorVideo.ID)
+		case "name_desc":
+			query = query.Where("(title, id) < (?, ?)", cursorVideo.Title, cursorVideo.ID)
+		case "size_desc":
+			query = query.Where("(size, id) < (?, ?)", cursorVideo.Size, cursorVideo.ID)
+		default:
+			query = query.Where("(created_at, id) > (?, ?)", cursorVideo.CreatedAt, cursorVideo.ID)
+		}
+	}
+
+	if filterOptions != nil {
+		if filterOptions.Date != nil {
+			switch *filterOptions.Date {
+			case "today":
+				query = query.Where("created_at >= CURRENT_DATE")
+			case "7_day":
+				query = query.Where("created_at >= NOW() - INTERVAL '7 days'")
+			case "30_days":
+				query = query.Where("created_at >= NOW() - INTERVAL '30 days'")
+			case "this_month":
+				query = query.Where("created_at >= DATE_TRUNC('month', CURRENT_DATE)")
+			}
+		}
+		if filterOptions.Visibility != nil {
+			switch *filterOptions.Visibility {
+			case "private":
+				query = query.Where("is_private = ?", true)
+			case "public":
+				query = query.Where("is_private = ?", false)
+			}
+		}
+	}
+
+	if filterOptions != nil && filterOptions.Sort != nil {
+		switch *filterOptions.Sort {
+		case "created_desc":
+			query = query.Order("created_at DESC, id DESC")
+		case "name_asc":
+			query = query.Order("title ASC, id ASC")
+		case "name_desc":
+			query = query.Order("title DESC, id DESC")
+		case "size_desc":
+			query = query.Order("size DESC, id DESC")
+		default:
+			query = query.Order("created_at ASC, id ASC")
+		}
 	}
 
 	// 4. Execute the database retrieval using our pointer reference
@@ -346,8 +390,6 @@ func (r *postgresVideoRepository) UpsertVideoEndScreen(ctx context.Context, endS
 	return nil
 }
 
-
-
 func (r *postgresVideoRepository) UpsertSubtitles(ctx context.Context, videoID uuid.UUID, items []dto.SubtitleItemInput) error {
 
 	subtitlesToUpsert := make([]domain.VideoSubtitle, len(items))
@@ -356,16 +398,15 @@ func (r *postgresVideoRepository) UpsertSubtitles(ctx context.Context, videoID u
 		return nil
 	}
 
-
-	for i, item := range items{
-    subtitlesToUpsert[i] = domain.VideoSubtitle{
-        VideoID:     videoID,
-        FileName:    item.FileName,
-        Code:        item.Code,
-        Label:       item.Label,
-        SubtitleUrl: item.SubtitleUrl,
-    }
-}
+	for i, item := range items {
+		subtitlesToUpsert[i] = domain.VideoSubtitle{
+			VideoID:     videoID,
+			FileName:    item.FileName,
+			Code:        item.Code,
+			Label:       item.Label,
+			SubtitleUrl: item.SubtitleUrl,
+		}
+	}
 
 	return r.db.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns: []clause.Column{
@@ -386,25 +427,22 @@ func (r *postgresVideoRepository) UpsertVideosChapter(ctx context.Context, video
 		return nil
 	}
 
-
-	for i, item := range items{
-    chaptersToUpsert[i] = domain.VideoChapters{
-        VideoID:     videoID,
-        Time:    item.Time,
-		ID: uuid.New(),
-        Label:       item.Label,
-
-    }
-}
+	for i, item := range items {
+		chaptersToUpsert[i] = domain.VideoChapters{
+			VideoID: videoID,
+			Time:    item.Time,
+			ID:      uuid.New(),
+			Label:   item.Label,
+		}
+	}
 
 	return r.db.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns: []clause.Column{
 			{Name: "video_id"},
 			{Name: "time"},
-
 		},
 		DoUpdates: clause.AssignmentColumns([]string{
-			 "label", "updated_at",
+			"label", "updated_at",
 		}),
 	}).Create(&chaptersToUpsert).Error
 }
@@ -418,7 +456,7 @@ func (r *postgresVideoRepository) UpsertVideosCta(ctx context.Context, videoID u
 
 	for i, item := range items {
 		ctaInput[i] = domain.VideoCtaSetting{
-			ID:              uuid.New(), 
+			ID:              uuid.New(),
 			VideoID:         videoID,
 			Title:           item.Title,
 			URL:             item.Url,
@@ -439,13 +477,13 @@ func (r *postgresVideoRepository) UpsertVideosCta(ctx context.Context, videoID u
 		},
 		// Updates properties if a CTA at that specific start time already exists
 		DoUpdates: clause.AssignmentColumns([]string{
-			"title", 
-			"url", 
-			"font_color", 
-			"background_color", 
-			"open_in", 
-			"position", 
-			"end_time", 
+			"title",
+			"url",
+			"font_color",
+			"background_color",
+			"open_in",
+			"position",
+			"end_time",
 			"updated_at",
 		}),
 	}).Create(&ctaInput).Error

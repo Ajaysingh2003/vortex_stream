@@ -39,7 +39,7 @@ export const folderRouter = createTRPCRouter({
           },
         );
 
-        console.log(res.data, "leah jaye");
+
         return res.data.data;
       } catch (error: any) {
         console.log(error?.response as any, "a error occuried");
@@ -82,7 +82,7 @@ export const folderRouter = createTRPCRouter({
           },
         );
 
-        console.log(res.data.data ,"leah jaye");
+
 
         return res.data.data;
       } catch (error: any) {
@@ -136,7 +136,7 @@ export const folderRouter = createTRPCRouter({
           },
         );
 
-        console.log(res.data.data ,"leah jaye");
+
 
         return res.data.data;
       } catch (error: any) {
@@ -189,7 +189,7 @@ export const folderRouter = createTRPCRouter({
           },
         );
 
-        console.log(res.data.data ,"leah jaye");
+
 
         return res.data.data;
         } catch (error: any) {
@@ -249,7 +249,7 @@ console.log(body,"lol")
           },
         );
 
-        // console.log(res.data.data ,"leah jaye");
+
 
         return res.data.data;
         } catch (error: any) {
@@ -279,7 +279,11 @@ console.log(body,"lol")
   getRootContent:getUserProcedure.input(z.object({
     workspaceID:z.string(),
     limit:z.number(),
-    cursor :z.string().nullable()
+    cursor :z.string().nullable(),
+    type:z.string().optional().nullable(),
+    date:z.string().optional().nullable(),
+    visibility:z.string().optional().nullable(),
+    sort:z.string().optional().nullable()
 
   })).query(async({ctx ,input})=>{
 
@@ -290,7 +294,7 @@ console.log(body,"lol")
         const access_token = cookieStore.get("access_token")?.value;
         
         const res = await axios.get(
-          `${process.env.BASE_API}/v1/workspaces/${input.workspaceID}/content-library?limit=${input.limit}&cursor=${input.cursor}`,
+          `${process.env.BASE_API}/v1/workspaces/${input.workspaceID}/content-library?limit=${input.limit}&cursor=${input.cursor ?? ""}&type=${input.type ?? "all"}&date=${input.date ?? "any"}&visibility=${input.visibility ?? "all"}&sort=${input.sort ?? "created_asc"}`,
           {
             withCredentials: true,
             headers: {
@@ -299,7 +303,7 @@ console.log(body,"lol")
           },
         );
 
-        console.log(res.data.data,"leah jaye fuck")
+
 
         return res.data.data;
         } catch (error: any) {
@@ -331,7 +335,11 @@ console.log(body,"lol")
     workspaceID:z.string(),
     folderID:z.string(),
     limit:z.number(),
-    cursor :z.string().nullable()
+    cursor :z.string().nullable(),
+    type:z.string().optional().nullable(),
+    date:z.string().optional().nullable(),
+    visibility:z.string().optional().nullable(),
+    sort:z.string().optional().nullable()
 
   })).query(async({ctx ,input})=>{
 
@@ -342,7 +350,7 @@ console.log(body,"lol")
         const access_token = cookieStore.get("access_token")?.value;
         
         const res = await axios.get(
-          `${process.env.BASE_API}/v1/workspaces/${input.workspaceID}/folder/${input.folderID}/content?limit=${input.limit}&cursor=${input.cursor}`,
+          `${process.env.BASE_API}/v1/workspaces/${input.workspaceID}/folder/${input.folderID}/content?limit=${input.limit}&cursor=${input.cursor ?? ""}&type=${input.type ?? "all"}&date=${input.date ?? "any"}&visibility=${input.visibility ?? "all"}&sort=${input.sort ?? "created_asc"}`,
           {
             withCredentials: true,
             headers: {
@@ -350,8 +358,6 @@ console.log(body,"lol")
             },
           },
         );
-
-        console.log(res.data.data,"leah jaye fuck")
 
         return res.data.data;
         } catch (error: any) {
