@@ -21,10 +21,12 @@ import { FolderAddIcon, FolderArchiveIcon } from "@hugeicons/core-free-icons";
 function CreateFolder({
   parentID,
   workspaceID,
+  children,
   onSucess,
 }: {
   parentID: string | null;
   workspaceID: string;
+  children?: React.ReactNode;
   onSucess: () => void;
 }) {
   const [openDialog, setOpenDialog] = useState(false);
@@ -58,14 +60,12 @@ function CreateFolder({
   return (
     <Dialog open={openDialog} onOpenChange={(e) => setOpenDialog(e)}>
       <DialogTrigger asChild>
-        <Button
+        { children || <Button
           variant={"secondary"}
           className="rounded-md cursor-pointer bg-black/5 hover:bg-black/8 text-stone-700 leading-relaxed  max-h-8  text-xs flex items-center justify-center gap-1 border-[0.5px] border-stone-200"
         >
-          {/* <FolderKanbanIcon className="size-4" /> <span> New Folder</span> */}
-          {/* <HugeiconsIcon icon={FolderArchiveIcon} /> */}
           <HugeiconsIcon icon={FolderAddIcon} />
-        </Button>
+        </Button>}
       </DialogTrigger>
       <DialogContent className="lg:w-84 rounded-xl">
         <DialogHeader>

@@ -23,7 +23,9 @@ type VideoRepository interface {
 	AddResolution(ctx context.Context, res *domain.VideoResolution) error
 	AddAllowedDomain(ctx context.Context, dom *domain.VideoDomain) error
 	Delete(ctx context.Context, id uuid.UUID) error
-	GetVideosPaginated(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursorID **uuid.UUID, limit int) ([]domain.Video, error)
+
+	GetVideosPaginated(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursorID **uuid.UUID, limit int, filterOptions *dto.FilterOptions) ([]domain.Video, error)
+
 	GetByFolderIdPaginated(ctx context.Context, folderID *uuid.UUID, workspaceID uuid.UUID, afterID string, remaining int, filterOptions *folderdto.FilterOptions) ([]domain.Video, error)
 
 	GetEndScreenByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.VideoEndScreen, error)
@@ -341,25 +343,100 @@ func (r *postgresVideoRepository) CountByFolderID(ctx context.Context, folderID 
 
 	return count, nil
 }
-
-func (r *postgresVideoRepository) GetVideosPaginated(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursorID **uuid.UUID, limit int) ([]domain.Video, error) {
+func (r *postgresVideoRepository) GetVideosPaginated(
+	ctx context.Context,
+	workspaceID uuid.UUID,
+	userID uuid.UUID,
+	cursorID **uuid.UUID,
+	limit int,
+	filterOptions *dto.FilterOptions,
+) ([]domain.Video, error) {
 	var videos []domain.Video
 
-	// Set a default safety limit if not provided
 	if limit <= 0 {
 		limit = 10
 	}
 
 	query := r.db.WithContext(ctx).
-		Where("workspace_id = ?", workspaceID).
-		Order("created_at DESC, id DESC").
-		Limit(limit)
+		Where("workspace_id = ?", workspaceID)
 
-	// Apply cursor condition if it exists
-	if cursorID != nil {
-		// Assuming descending order pagination (newest videos first)
-		query = query.Where("id < ?", cursorID)
+	// Apply Filter Options
+	if filterOptions != nil {
+		// 1. Visibility Filter (e.g., "public", "private", "unlisted")
+		if filterOptions.Visibility != nil && *filterOptions.Visibility != "" {
+
+			switch *filterOptions.Visibility {
+			case "public":
+				query = query.Where("is_private = ?", false)
+			case "private":
+				query = query.Where("is_private = ?", true)
+			case "all":
+
+			default:
+
+			}
+
+		}
+
+		// 2. Date Filter
+		if filterOptions.Date != nil && *filterOptions.Date != "" {
+	switch *filterOptions.Date {
+	case "today":
+		query = query.Where("created_at >= NOW() - INTERVAL '24 hours'")
+
+	case "this_week":
+		query = query.Where("created_at >= NOW() - INTERVAL '7 days'")
+
+	case "30_days":
+		query = query.Where("created_at >= NOW() - INTERVAL '30 days'")
+
+	case "this_month":
+		// Truncates created_at check to the start of the current calendar month
+		query = query.Where("created_at >= date_trunc('month', CURRENT_DATE)")
+
+	case "any":
+		// "Anytime" selected — do not add any date filter to the query
+
+	default:
+		// Fallback for specific ISO date string (e.g. YYYY-MM-DD from a datepicker)
+		if parsedDate, err := time.Parse("2006-01-02", *filterOptions.Date); err == nil {
+			query = query.Where("created_at >= ? AND created_at < ?", parsedDate, parsedDate.AddDate(0, 0, 1))
+		}
 	}
+}
+
+		// 3. Dynamic Sorting
+		if filterOptions.Sort != nil && *filterOptions.Sort != "" {
+			switch *filterOptions.Sort {
+			case "asc", "oldest":
+				query = query.Order("created_at ASC, id ASC")
+			case "name_asc":
+				query = query.Order("title ASC, id ASC")
+			case "name_desc":
+				query = query.Order("title DESC, id DESC")
+			default:
+				query = query.Order("created_at DESC, id DESC")
+			}
+		} else {
+			query = query.Order("created_at DESC, id DESC")
+		}
+	} else {
+		// Default sort order when filterOptions is nil
+		query = query.Order("created_at DESC, id DESC")
+	}
+
+	// Apply Cursor Condition for ID-based pagination
+	if cursorID != nil {
+		// If sorted oldest first (ASC), fetch IDs greater than cursor
+		if filterOptions != nil && filterOptions.Sort != nil && (*filterOptions.Sort == "asc" || *filterOptions.Sort == "oldest") {
+			query = query.Where("id > ?", *cursorID)
+		} else {
+			// Default descending (DESC) pagination
+			query = query.Where("id < ?", *cursorID)
+		}
+	}
+
+	query = query.Limit(limit)
 
 	if err := query.Find(&videos).Error; err != nil {
 		return nil, err

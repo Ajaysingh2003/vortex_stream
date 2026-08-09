@@ -23,7 +23,7 @@ type VideoInterface interface {
 
 	CreateVideo(ctx context.Context, video *domain.Video) (*domain.Video, error)
 	ListVideo(ctx context.Context, userID uuid.UUID) ([]domain.Video, error)
-	ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.VideoContentsDTO, error)
+	ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int, filterOptions *dto.FilterOptions) (*dto.VideoContentsDTO, error)
 	UpdateVideo(ctx context.Context, userID uuid.UUID, video domain.Video) error
 	ProcessVideo(ctx context.Context, videoID uuid.UUID, userID uuid.UUID) (*domain.Video, error)
 	StreamVideo(ctx context.Context, videoID uuid.UUID) (*domain.Video, error)
@@ -236,7 +236,29 @@ func (r *VideoServiceRepo) GetCtaByVideoId(ctx context.Context,videoID uuid.UUID
 
 }
 
-func (r *VideoServiceRepo) ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int) (*dto.VideoContentsDTO, error) {
+func (r *VideoServiceRepo) ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int, filterOptions *dto.FilterOptions) (*dto.VideoContentsDTO, error) {
+
+ workspaceData,err:=r.workspaceRepo.GetByID(ctx, workspaceID)
+
+	if err != nil {
+		return nil, err
+	}
+	
+	if workspaceData == nil {
+		return nil, &utils.ApiError{
+			Code:    404,
+			Message: "Workspace not found",
+		}
+	}
+
+	if workspaceData.UserID != userID {
+		return nil, &utils.ApiError{
+			Code:    403,
+			Message: "You don't have permission for this action.",
+		}
+	}
+
+
 	var cursorID **uuid.UUID
 
 	if cursor != "" {
@@ -248,7 +270,7 @@ func (r *VideoServiceRepo) ListVideoByWorkspaceID(ctx context.Context, workspace
 		cursorID = &decodedID
 	}
 
-	videos, err := r.videoRepo.GetVideosPaginated(ctx, workspaceID, userID, cursorID, limit+1)
+	videos, err := r.videoRepo.GetVideosPaginated(ctx, workspaceID, userID, cursorID, limit+1,filterOptions)
 	if err != nil {
 		return nil, err
 	}

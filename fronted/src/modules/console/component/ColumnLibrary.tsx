@@ -44,6 +44,7 @@ export const libraryColumn: ColumnDef<LibraryType>[] = [
     cell: ({ row }) => {
       const { id, type } = row.original;
 
+      
       const context = useConsoleContext();
 
       const isRename = id == context?.rename?.id;

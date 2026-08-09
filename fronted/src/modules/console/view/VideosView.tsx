@@ -11,19 +11,22 @@ import { useTRPC } from "@/trpc/client";
 import {
   LibraryContentType,
   WorkspaceType,
-  LibraryType,
+  VideoListType,
+  VideoAsset,
 } from "@/modules/types";
 import { Grid, Inbox, Loader2 } from "lucide-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useLibraryFilters } from "@/lib/useLibraryFilters";
 import { useRouter } from "next/navigation";
 import GridDataView from "./GridDataView";
+import { VideoDataTable } from "../component/VideoDataTable";
+import { VideoColumn } from "../component/VideoColumn";
 
-interface LibraryViewProps {
+interface VideosViewProps {
   limit: number;
 }
 
-function LibraryView({ limit }: LibraryViewProps) {
+function VideosView({ limit }: VideosViewProps) {
   const queryClient=useQueryClient()
   const trpc = useTRPC();
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -36,18 +39,17 @@ function LibraryView({ limit }: LibraryViewProps) {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSuspenseInfiniteQuery(
-      trpc.folder.getRootContent.infiniteQueryOptions(
+      trpc.video.videoListFromWorkspace.infiniteQueryOptions(
         {
           limit,
           cursor: filters.cursor,
-          workspaceID: workspacesData.id,
-          type: filters.type,
+          workspaceId: workspacesData.id,
           date: filters.date,
           visibility: filters.visibility,
           sort: filters.sort,
         },
         {
-          getNextPageParam: (lastPage: LibraryContentType) =>
+          getNextPageParam: (lastPage: VideoListType) =>
             lastPage.metadata.hasNextPage
               ? lastPage.metadata.nextCursor
               : undefined,
@@ -57,7 +59,7 @@ function LibraryView({ limit }: LibraryViewProps) {
       ),
     );
 
-  const items: LibraryType[] = data.pages.flatMap((page) => page.items);
+  const items: VideoAsset[] = data.pages.flatMap((page) => page.items);
 
 
 
@@ -91,12 +93,11 @@ function LibraryView({ limit }: LibraryViewProps) {
   const handleSuccess = async () => {
     // ← use infiniteQueryOptions not queryOptions
     await queryClient.invalidateQueries(
-        trpc.folder.getRootContent.infiniteQueryOptions(
+        trpc.video.videoListFromWorkspace.infiniteQueryOptions(
             {
                 limit,
-                workspaceID: workspacesData.id,
+                workspaceId: workspacesData.id,
                 cursor: "",
-                type: filters.type,
                 date: filters.date,
                 visibility: filters.visibility,
                 sort: filters.sort,
@@ -113,11 +114,11 @@ function LibraryView({ limit }: LibraryViewProps) {
   };
 
 const router=useRouter()
-const handleRowClick=(row:{id:string,type: "video" | "folder"})=>{
+const handleRowClick=(row:{id:string})=>{
   console.log("row.id",row.id)
   let url=`/`
 
-  row.type == "video" ? url=`/console/content-library/video/${row.id}` : url = `/console/content-library/folder/${row.id}`
+  url=`/console/content-library/video/${row.id}`
 
   router.push(url)
 }
@@ -134,7 +135,7 @@ const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid")
       <div className="px-4 md:px-12 py-4 w-full">
         <div className="flex flex-col gap-6 md:gap-4">
           <TopHeader
-            Header="Library"
+            Header="Videos"
             Btnchild={
               <div className="flex flex-row gap-3">
                <div className="hidden md:inline-block">
@@ -146,15 +147,16 @@ const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid")
           />
 
           <div className=" hidden md:flex justify-end">
-            <Filters typeAllowed={true} activeViewMethod={activeViewMethod} setActiveViewMethod={setActiveViewMethod} workspaceID={workspacesData.id} parentId={null} onSucess={handleSuccess}/>
+            <Filters  activeViewMethod={activeViewMethod} setActiveViewMethod={setActiveViewMethod} workspaceID={workspacesData.id} parentId={null} onSucess={handleSuccess}/>
           </div>
 
          { <div className="max-w-7xl"> 
             {items.length > 0 ? (
               activeViewMethod === "list" ? (
-                <DataTable name="library" columns={libraryColumn} data={items} onRowClick={handleRowClick} />
+                <VideoDataTable name="library" columns={VideoColumn} data={items} onRowClick={handleRowClick} />
               ) : (
-                <GridDataView items={items} />
+                null
+                // <GridDataView items={items} />
               )
             ) : (
               <div className="w-full py-12 flex flex-col items-center justify-center border border-dashed rounded-xl bg-muted/20 text-muted-foreground gap-2">
@@ -185,4 +187,4 @@ const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid")
   );
 }
 
-export default LibraryView;
+export default VideosView;

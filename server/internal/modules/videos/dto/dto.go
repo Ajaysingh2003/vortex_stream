@@ -112,3 +112,10 @@ type VideoCtaReq struct {
 
 
 
+
+
+type FilterOptions struct {
+    Date       *string `json:"date,omitempty"`
+    Visibility *string `json:"visibility,omitempty"`
+    Sort       *string `json:"sort,omitempty"`
+}

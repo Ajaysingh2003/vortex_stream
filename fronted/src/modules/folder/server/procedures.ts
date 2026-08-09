@@ -480,6 +480,45 @@ console.log(body,"lol")
     });
       }
   })),
+  moveFolder: getUserProcedure.input(z.object({
+    folderID: z.string(),
+    workspaceID: z.string(),
+    parentID: z.string().nullable(),
+  })).mutation(async ({ input }) => {
+    try {
+      const cookieStore = await cookies();
+      const access_token = cookieStore.get("access_token")?.value;
+
+      const res = await axios.patch(
+        `${process.env.BASE_API}/v1/workspaces/${input.workspaceID}/folder/${input.folderID}/move`,
+        { new_parent_id: input.parentID },
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${access_token}` },
+        },
+      );
+
+      return res.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        let code: TRPCError["code"] = "BAD_REQUEST";
+        if (status === 401) code = "UNAUTHORIZED";
+        if (status === 403) code = "FORBIDDEN";
+        if (status === 404) code = "NOT_FOUND";
+
+        throw new TRPCError({
+          code,
+          message: error.response?.data?.message || "Unable to move folder",
+        });
+      }
+
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Unable to move folder",
+      });
+    }
+  }),
   updateFolder:getUserProcedure.input(z.object({
     folderID:z.string(),
     name:z.string(),

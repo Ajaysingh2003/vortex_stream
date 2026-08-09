@@ -10,12 +10,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LibraryContentType, LibraryType } from "@/modules/types";
+import { LibraryType } from "@/modules/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { useTRPC } from "@/trpc/client";
 import { useParams } from "next/navigation";
-import { useLibraryFilters } from "@/lib/useLibraryFilters";
 import RenameInterface from "./RenameInterface";
 import MoveItems from "./MoveItems";
 
@@ -31,7 +30,6 @@ function DropDownOption({
   workspaceId: string;
 }) {
   const trpc = useTRPC();
-  const [filters] = useLibraryFilters();
   const queryClient = useQueryClient();
   const params = useParams();
   const folderID = params.id as string;
@@ -95,7 +93,16 @@ function DropDownOption({
         setOpenDialog={setOpenDialog}
       />
 
-      <MoveItems open={openMoveSheet} onOpenChange={setOpenMoveSheet} />
+      <MoveItems
+        item={item}
+        workspaceId={workspaceId}
+        open={openMoveSheet}
+        onOpenChange={setOpenMoveSheet}
+        onMoved={() => {
+          void queryClient.invalidateQueries();
+          setOpenMoveSheet(false);
+        }}
+      />
 
       {/* 2. Dropdown Menu */}
       <DropdownMenu open={open} onOpenChange={setOpen}>
