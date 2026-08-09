@@ -1171,4 +1171,112 @@ export const videoRouter = createTRPCRouter({
         });
       }
     }),
+  deleteVideo: getUserProcedure
+    .input(
+      z.object({
+        workspaceId: z.string(),
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const cookieStore = await cookies();
+        const access_token = cookieStore.get("access_token")?.value;
+
+        // const id = input.videoId;
+
+        const res = await axios.delete(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/cta/${input.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+              // "Content-Type": "application/json",
+            },
+          },
+        );
+
+        console.log(res.data.data, "iouo");
+
+        return res.data.data;
+      } catch (error) {
+        console.log(error, "a error occuried");
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+
+          if (status === 403) code = "FORBIDDEN";
+
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
+  videoListFromWorkspace: getUserProcedure
+    .input(
+      z.object({
+        workspaceId: z.string(),
+        limit: z.number().default(10),
+        cursor: z.string().nullable().optional(),
+        date:z.string().optional().nullable(),
+    visibility:z.string().optional().nullable(),
+    sort:z.string().optional().nullable()
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const cookieStore = await cookies();
+        const access_token = cookieStore.get("access_token")?.value;
+
+        // const id = input.videoId;
+
+        const res = await axios.get(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceId}/video/video-list?limit=${input.limit}&cursor=${input.cursor}&date=${input.date}&visibility=${input.visibility}&sort=${input.sort}`,
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+              // "Content-Type": "application/json",
+            },
+          },
+        );
+
+        console.log(res.data.data, "iouo");
+
+        return res.data.data;
+      } catch (error) {
+        console.log(error, "a error occuried");
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+
+          let code: TRPCError["code"] = "BAD_REQUEST";
+
+          if (status === 401) code = "UNAUTHORIZED";
+
+          if (status === 403) code = "FORBIDDEN";
+
+          if (status === 404) code = "NOT_FOUND";
+
+          throw new TRPCError({
+            code: code,
+            message: error.response?.data?.message || "Operation failed",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
 });

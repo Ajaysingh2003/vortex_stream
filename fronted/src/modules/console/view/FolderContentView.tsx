@@ -22,6 +22,7 @@ import {
 } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { useRouter } from "next/navigation";
+import GridDataView from "./GridDataView";
 
 function FolderContentView({
   folderID,
@@ -158,13 +159,12 @@ const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid")
 
           <div className="max-w-7xl">
             {items.length > 0 ? (
-              <DataTable
-                name="folder"
-                onRowClick={handleRowClick}
-                columns={libraryColumn}
-                data={items}
-              />
-            ) : (
+                          activeViewMethod === "list" ? (
+                            <DataTable name="library" columns={libraryColumn} data={items} onRowClick={handleRowClick} />
+                          ) : (
+                            <GridDataView items={items} />
+                          )
+                        ) : (
               <div className="w-full py-12 flex flex-col items-center justify-center border border-dashed rounded-xl bg-muted/20 text-muted-foreground gap-2">
                 <Inbox className="size-8 opacity-40" />
                 <p className="text-sm font-medium">

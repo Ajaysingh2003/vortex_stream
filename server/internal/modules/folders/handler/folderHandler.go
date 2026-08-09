@@ -422,8 +422,8 @@ func (r *FolderHandler) GetContent (c *gin.Context) {
 
 
 	typeFilter := c.Query("type")
-	dateFilter := c.Query("date")
 	visibilityFilter := c.Query("visibility")
+	dateFilter := c.Query("date")
 	sortFilter := c.Query("sort")
 
 	 if typeFilter == "" {

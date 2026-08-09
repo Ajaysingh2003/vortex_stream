@@ -119,7 +119,6 @@ function RenameInterface({
   };
 
   return (
-    // Component boundary isolation: Stops React synthetic event tree propagation
     <div
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}

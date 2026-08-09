@@ -8,6 +8,7 @@ type TypeViewMethod = "list" | "grid";
 
 interface PageProps {
   parentId: string | null;
+  typeAllowed ?:boolean
   workspaceID: string;
   onSucess: () => void;
   activeViewMethod: TypeViewMethod;
@@ -15,6 +16,7 @@ interface PageProps {
 }
 
 function Filters({
+  typeAllowed = false,
   parentId,
   workspaceID,
   onSucess,
@@ -30,7 +32,7 @@ function Filters({
   const dateFilters = [
     { label: "Anytime", filter: "any" },
     { label: "Today", filter: "today" },
-    { label: "Last 7 Days", filter: "7_day" },
+    { label: "Last 7 Days", filter: "this_week" },
     { label: "Last 30 Days", filter: "30_days" },
     { label: "This Month", filter: "this_month" },
   ];
@@ -49,10 +51,11 @@ function Filters({
     { label: "Publicly Accessible", filter: "public" },
   ];
 
+
   return (
     <div className="flex gap-3 items-center justify-between w-full">
       <div className="flex gap-3 items-center">
-        <DropdownFilters scope="type" label="Type" items={filterType} />
+       { typeAllowed &&  <DropdownFilters scope="type" label="Type" items={filterType} /> }
         <DropdownFilters scope="date" label="Date Modified" items={dateFilters} />
         <DropdownFilters scope="sort" label="Sort By" items={sortFilters} />
         <DropdownFilters scope="visibility" label="Visibility" items={visibilityFilters} />

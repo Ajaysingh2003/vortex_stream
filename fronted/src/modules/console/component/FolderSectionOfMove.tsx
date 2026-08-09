@@ -1,120 +1,92 @@
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { FolderDataType, WorkspaceType } from "@/modules/types";
+import CreateFolder from "@/modules/upload/component/CreateFolder";
 import { useTRPC } from "@/trpc/client";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { EllipsisVertical } from "lucide-react";
-import Image from "next/image";
+import { Plus } from "lucide-react";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+interface FolderSectionOfMoveProps {
+  selectedFolderChildren: FolderDataType[];
+  onOpenFolder: (id: string) => void;
+  onCreateFolder?: () => void;
+}
 
-import React from 'react'
-import { usePathname, useRouter } from "next/navigation";
+const gradients = [
+  "from-blue-500 via-indigo-400 to-white",
+  "from-pink-500 via-fuchsia-300 to-white",
+  "from-green-500 via-emerald-300 to-white",
+  "from-violet-500 via-indigo-300 to-white",
+  "from-orange-500 via-yellow-300 to-white",
+];
 
-function FolderSectionOfMove({selectedFolderChildren, setIsOnRootFolder}:{selectedFolderChildren:FolderDataType[], setIsOnRootFolder: React.Dispatch<React.SetStateAction<boolean>>}) {
-    // const trpc=useTRPC()
-
-    const router=useRouter()
-    const pathName=usePathname()
-
-    // const handleOpenFolder=(id:string)=>{
-    //     setIsOnRootFolder(false);
-    //     router.push(`${pathName}?id=${id}`,{scroll:false})
-    // }
-   
+export default function FolderSectionOfMove({
+  selectedFolderChildren,
+  onOpenFolder,
+  onCreateFolder,
+}: FolderSectionOfMoveProps) {
 
 
   return (
-    <Table>
-  <TableCaption className=" capitalize text-xs md:text-sm">
-    {
-      selectedFolderChildren.length > 0 ?  "A List Of your recent folder" : "This Folder is empty."
-    }
-  </TableCaption>
-  <TableHeader className=" rounded-md p-1">
-    <TableRow className="font-subheading text-xs border-b-[0.5px] border-stone-300 p-1">
-      <TableHead className=" w-[120px] tracking-wide">Name</TableHead>
-      <TableHead>Type</TableHead>
-      <TableHead>Modified</TableHead>
-      <TableHead className="w-[50px]"></TableHead>
-    </TableRow>
-  </TableHeader>
-  
-  <TableBody className="text-xs font-content text-stone-700 ">
-    {selectedFolderChildren && selectedFolderChildren.length > 0 ? (
-      selectedFolderChildren.map((e) => (
-        <TableRow key={e.id} className="hover:bg-stone-100  border-b-[0.01px] border-stone-300 cursor-pointer rounded-sm   transition-colors" role="button" >
-          
-          {/* <Button onClick={()=>alert(e.name)} className="" variant={"secondary"} > */}
-            <TableCell className="font-medium max-w-[250px] text-lg" >
-            <div className="flex items-center gap-2">
-              <Image 
-                src="/folder.png" 
-                height={18} 
-                width={18} 
-                alt="folder icon" 
-                className="shrink-0"
-              />
-              <span className="truncate text-xs md:text-sm  inline-block" title={e.name}>
-                {e.name}
-              </span>
+    <div className="space-y-2">
+      {/* Create Folder */}
+
+
+      {/* <CreateFolder parentID={folder} /> */}
+
+
+
+      {
+        selectedFolderChildren.length === 0 && (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 p-6 text-center">
+            <div className="text-gray-500">No folders found.</div>
+            {/* <CreateFolder
+              parentID={currentFolderId}
+              workspaceID={"workspaceId"}
+              onSucess={()=>{}}
+            >
+              <button className="flex items-center gap-2 rounded-full bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                <Plus size={16} />
+                Create Folder
+              </button>
+            </CreateFolder> */}
+          </div>
+        )
+      }
+     
+
+      { selectedFolderChildren.length>0 && selectedFolderChildren.map((folder, index) => (
+        <button
+          key={folder.id}
+          onClick={() => onOpenFolder(folder.id)}
+          className="flex w-full items-center gap-4 rounded-2xl p-2 text-left transition hover:bg-zinc-100"
+        >
+          {/* Thumbnail */}
+          <div
+            className={`relative h-16 w-24 overflow-hidden rounded-lg bg-gradient-to-br ${
+              gradients[index % gradients.length]
+            }`}
+          >
+            {/* Blur blob */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,.8),transparent_40%)]" />
+
+            <div className="absolute -bottom-4 -left-3 h-14 w-14 rounded-full bg-white/25 blur-xl" />
+          </div>
+
+          {/* Content */}
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-bold uppercase tracking-wide text-green-600">
+              Folder
             </div>
-          </TableCell>
-          
-          <TableCell className="text-stone-500 text-xs md:text-sm">
-            Folder
-          </TableCell>
-          
-          <TableCell className="text-stone-500 text-xs md:text-sm" suppressHydrationWarning>
-            {new Date(e.updatedAt).toLocaleDateString()}
-          </TableCell>
-          
-          <TableCell className="text-right">
 
-                <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" className="bg-transparent hover:bg-transparent" >
-                        <EllipsisVertical className="  size-3"/>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[100px] rounded-lg overflow-hidden">
-                    <DropdownMenuGroup>
-                    <DropdownMenuLabel className="py-1">Controls</DropdownMenuLabel>
-                    <DropdownMenuSeparator/>
-                    <DropdownMenuItem className="py-1 px-2 uppercases tracking-wide text-[13px] rounded-md" >Rename</DropdownMenuItem>
-                    <DropdownMenuItem className="py-1 px-2 rounded-md text-[13px] tracking-wide uppercases ">Delete</DropdownMenuItem>
-                    </DropdownMenuGroup>
-                </DropdownMenuContent>
-                </DropdownMenu>
+            <div className="truncate text-[17px] font-medium text-zinc-900">
+              {folder.name}
+            </div>
 
-          </TableCell>
-
-          {/* </Button> */}
-        </TableRow>
-      ))
-    ) : (
-      null
-    )}
-  </TableBody>
-</Table>
-  )
+            <div className="mt-1 text-[13px] text-zinc-500">
+              Updated{" "}
+              {new Date(folder.updatedAt).toLocaleDateString("en-US")}
+            </div>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
 }
-
-export default FolderSectionOfMove

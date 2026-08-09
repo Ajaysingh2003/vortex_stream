@@ -51,14 +51,15 @@ import { HugeiconsIcon } from "@hugeicons/react";
 
 export function AppSidebar() {
 
-  const trpc=useTRPC()
-  const {data:workspace}=useSuspenseQuery(trpc.user.getWorkspace.queryOptions())
+  const trpc = useTRPC();
+  const { data: workspace } = useSuspenseQuery(trpc.user.getWorkspace.queryOptions());
 
-  const workspaceData= workspace as WorkspaceType
+  const workspaceData = workspace as WorkspaceType;
   const { open } = useSidebar();
   const pathName = usePathname();
 
-
+  // Matches /video, /video/, /video/[id], or /console/.../video/[id]
+  const isVideoRoute = /\/video(\/.*)?$/i.test(pathName);
 
   const menuItems = [
     {
@@ -104,63 +105,50 @@ export function AppSidebar() {
     },
   ];
 
-
   const TABS = [
-  // {
-  //   value: "general",
-  //   label: "General",
-  //   icon: "hugeicons",
-  //   hugeIcon: Setting07Icon,
-  // },
-  {
-    value: "thumbnail",
-    label: "Thumbnail",
-    icon: "lucide",
-    lucideIcon: GalleryThumbnailsIcon,
-  },
-  {
-    value: "form",
-    label: "Form's",
-    icon: "lucide",
-    lucideIcon: SlidersHorizontal,
-  },
-  {
-    value: "analytics",
-    label: "Analytics",
-    icon: "hugeicons",
-    hugeIcon: AnalyticsUpIcon,
-  },
-  {
-    value: "end_screen",
-    label: "End screen",
-    icon: "lucide",
-    lucideIcon: MonitorPlay,
-  },
-  {
-    value: "subtitle",
-    label: "Subtitles",
-    icon: "hugeicons",
-    hugeIcon: SubtitleIcon,
-  },
-  {
-    value: "chapter",
-    label: "Chapters",
-    icon: "lucide",
-    lucideIcon: BookMarked,
-  },
-  { value: "cta", label: "CTA", icon: "lucide", lucideIcon: MousePointerClick },
-  {
-    value: "domain_restriction",
-    label: "Domain Restriction",
-    icon: "lucide",
-    lucideIcon: Link2,
-  },
-  // {
-  //   value: "comment",
-  //   label: "Comments",
-  //   icon: "hugeicons",
-  //   hugeIcon: ConversationIcon,
-  // },
+    {
+      value: "thumbnail",
+      label: "Thumbnail",
+      icon: "lucide",
+      lucideIcon: GalleryThumbnailsIcon,
+    },
+    {
+      value: "form",
+      label: "Form's",
+      icon: "lucide",
+      lucideIcon: SlidersHorizontal,
+    },
+    {
+      value: "analytics",
+      label: "Analytics",
+      icon: "hugeicons",
+      hugeIcon: AnalyticsUpIcon,
+    },
+    {
+      value: "end_screen",
+      label: "End screen",
+      icon: "lucide",
+      lucideIcon: MonitorPlay,
+    },
+    {
+      value: "subtitle",
+      label: "Subtitles",
+      icon: "hugeicons",
+      hugeIcon: SubtitleIcon,
+    },
+    {
+      value: "chapter",
+      label: "Chapters",
+      icon: "lucide",
+      lucideIcon: BookMarked,
+    },
+    { value: "cta", label: "CTA", icon: "lucide", lucideIcon: MousePointerClick },
+    {
+      value: "domain_restriction",
+      label: "Domain Restriction",
+      icon: "lucide",
+      lucideIcon: Link2,
+    },
   ] as const;
 
   return (
@@ -174,77 +162,76 @@ export function AppSidebar() {
 
       <SidebarContent className="bg-surface">
 
-        {
-        pathName.includes("/video") &&  <SidebarGroup  className="space-y-1">
-            {
-              TABS.map((item)=>{
-                return <SidebarMenuButton key={item.label} className={cn(
-                        "pl-4 transition-all duration-150 ease-in-out hover:bg-black/5",
-                        false&& "bg-black/5 font-semibold text-slate-900"
-                      )}>
+        {isVideoRoute ? (
+          <SidebarGroup className="space-y-1">
+            {TABS.map((item) => {
+              return (
+                <SidebarMenuButton
+                  key={item.label}
+                  className={cn(
+                    "pl-4 transition-all duration-150 ease-in-out hover:bg-black/5"
+                  )}
+                >
                   <Link href={`?setting_scope=${item.value}`} className="flex items-center gap-4">
-                        {item.icon === "hugeicons" ? (
-                  <HugeiconsIcon
-                    icon={(item as any).hugeIcon}
-                    size={18}
-                    strokeWidth={1.6}
-                    className="shrink-0 size-6"
-                  />
-                ) : (
-                  React.createElement((item as any).lucideIcon, {
-                    size: 15,
-                    strokeWidth: 1.6,
-                    className: "shrink-0",
-                  })
-                )}
-                        <span className="text-accent tracking-wide font-heading">
-                          {item.label}
-                        </span>
-                      </Link>
+                    {item.icon === "hugeicons" ? (
+                      <HugeiconsIcon
+                        icon={(item as any).hugeIcon}
+                        size={18}
+                        strokeWidth={1.6}
+                        className="shrink-0 size-6"
+                      />
+                    ) : (
+                      React.createElement((item as any).lucideIcon, {
+                        size: 15,
+                        strokeWidth: 1.6,
+                        className: "shrink-0",
+                      })
+                    )}
+                    <span className="text-accent tracking-wide font-heading">
+                      {item.label}
+                    </span>
+                  </Link>
                 </SidebarMenuButton>
-              })
-            }
+              );
+            })}
           </SidebarGroup>
-        }
+        ) : (
+          <SidebarGroup>
+            <SidebarGroupContent className="pt-4 md:pt-2">
+              <SidebarMenu className="space-y-1">
+                {menuItems.map((item) => {
+                  const Icon = item.icon;
 
-       { !pathName.includes("/video") && <SidebarGroup>
-          <SidebarGroupContent className="pt-4z md:pt-z2">
-            <SidebarMenu className="space-y-1">
-              
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                
-                // 💡 Check active state checking rules dynamically
-                const isActive = item.exact 
-                  ? pathName === item.href || pathName === `${item.href}/`
-                  : pathName.startsWith(item.href);
+                  const isActive = item.exact 
+                    ? pathName === item.href || pathName === `${item.href}/`
+                    : pathName.startsWith(item.href);
 
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      className={cn(
-                        "pl-4 transition-all duration-150 ease-in-out hover:bg-black/5",
-                        isActive && "bg-black/5 font-semibold text-slate-900"
-                      )}
-                    >
-                      <Link href={item.href}>
-                        <Icon className={cn("size-4 text-slate-500", isActive && "text-slate-900")} />
-                        <span className="text-accent tracking-wide font-heading">
-                          {item.title}
-                        </span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>}
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        className={cn(
+                          "pl-4 transition-all duration-150 ease-in-out hover:bg-black/5",
+                          isActive && "bg-black/5 font-semibold text-slate-900"
+                        )}
+                      >
+                        <Link href={item.href}>
+                          <Icon className={cn("size-4 text-slate-500", isActive && "text-slate-900")} />
+                          <span className="text-accent tracking-wide font-heading">
+                            {item.title}
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         <SidebarGroup className="mt-10 md:mt-24 pl-4">
-          <SidebarStorage/>
+          <SidebarStorage />
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>

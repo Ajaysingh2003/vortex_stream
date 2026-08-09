@@ -139,7 +139,7 @@ func (h *VideoHandler) ListVideoByWorkspace(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": true})
 		return
 	}
-	fmt.Print(userId, "lollol")
+
 
 	userID, ok := userId.(uuid.UUID)
 	if !ok {
@@ -163,9 +163,31 @@ func (h *VideoHandler) ListVideoByWorkspace(c *gin.Context) {
 		}
 	}
 
-	data, err := h.VideoService.ListVideoByWorkspaceID(c.Request.Context(), workspaceID, userID, cursor, limit)
 
-	fmt.Print(data, "data-v3")
+
+	visibilityFilter := c.Query("visibility")
+	dateFilter := c.Query("date")
+	sortFilter := c.Query("sort")
+
+	if dateFilter == "" {
+		dateFilter = "any"
+	}
+
+	if visibilityFilter == "" {
+		visibilityFilter = "all" 
+	}
+
+	if sortFilter == "" {
+		sortFilter = "created_asc" 
+	}
+
+	filterOptions := &dto.FilterOptions{
+		Date:       &dateFilter,
+		Visibility: &visibilityFilter,
+		Sort:       &sortFilter,
+	}
+
+	data, err := h.VideoService.ListVideoByWorkspaceID(c.Request.Context(), workspaceID, userID, cursor, limit, filterOptions)
 
 	if err != nil {
 		if appErr, ok := err.(*utils.ApiError); ok {

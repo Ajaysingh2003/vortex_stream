@@ -29,16 +29,25 @@ async function page({ searchParams }: PageProps) {
 
   if (worksapceData && worksapceData.id) {
 
-    void queryClient.prefetchQuery(
-      trpc.folder.getRootContent.queryOptions({
-        workspaceID: worksapceData.id,
-        limit: currentLimit,
-        cursor: currentCursor,
-        type: filters.type,
-        date: filters.date,
-        visibility: filters.visibility,
-        sort: filters.sort,
-      }),
+    await queryClient.prefetchInfiniteQuery(
+      trpc.folder.getRootContent.infiniteQueryOptions(
+        {
+          workspaceID: worksapceData.id,
+          limit: currentLimit,
+          cursor: currentCursor,
+          type: filters.type,
+          date: filters.date,
+          visibility: filters.visibility,
+          sort: filters.sort,
+        },
+        {
+          getNextPageParam: (lastPage) =>
+            lastPage.metadata.hasNextPage
+              ? lastPage.metadata.nextCursor
+              : undefined,
+          initialCursor: "",
+        },
+      ),
     );
     
   }
