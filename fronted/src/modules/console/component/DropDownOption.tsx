@@ -77,6 +77,28 @@ function DropDownOption({
     }
   };
 
+  const addFavoriteMutate=useMutation(trpc.favorite.add.mutationOptions({
+    onSuccess:()=>{
+      toast.success("Video Added to Favorite.")
+    },
+    onError:(err)=>{
+      toast.error(err.message || "Something went wrong.")
+    }
+  }))
+  const addChannelMutate=useMutation(trpc.channel.create.mutationOptions({
+    onSuccess:()=>{
+      toast.success("Video Added to Favorite.")
+    },
+    onError:(err)=>{
+      toast.error(err.message || "Something went wrong.")
+    }
+  }))
+
+
+  const handleFavoriteAdd=async()=>{
+    await addFavoriteMutate.mutateAsync({videoId:item.id})
+  }
+
   const openRenameDialog = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     e.preventDefault();
@@ -166,9 +188,9 @@ function DropDownOption({
             </>
           )}
 
-          <DropdownMenuItem className="cursor-pointer text-accent text-sm font-medium px-2.5 py-1.5 rounded-md hover:bg-muted focus:bg-muted">
+          { item.type == "video" &&<DropdownMenuItem onClick={handleFavoriteAdd} className="cursor-pointer text-accent text-sm font-medium px-2.5 py-1.5 rounded-md hover:bg-muted focus:bg-muted">
             Add to favorite
-          </DropdownMenuItem>
+          </DropdownMenuItem>}
 
           <DeleteBox
             message="Delete this folder permanently? This action cannot be undone and all contained media will be lost."

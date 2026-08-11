@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import TopHeader from "../component/TopHeader";
-import UploadFile from "../component/UploadFile";
+// import TopHeader from "../component/TopHeader";
+// import UploadFile from "../component/UploadFile";
 import ImportVideos from "@/modules/upload/component/ImportVideos";
-import Filters from "../component/Filters";
+// import Filters from "../component/Filters";
 import { useQueryClient, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import {
@@ -16,15 +16,20 @@ import { Inbox, Loader2 } from "lucide-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useLibraryFilters } from "@/lib/useLibraryFilters";
 import { useRouter } from "next/navigation";
-import { VideoDataTable } from "../component/VideoDataTable";
-import { VideoColumn } from "../component/VideoColumn";
+import TopHeader from "@/modules/console/component/TopHeader";
+import UploadFile from "@/modules/console/component/UploadFile";
+import Filters from "@/modules/console/component/Filters";
+import { VideoDataTable } from "@/modules/console/component/VideoDataTable";
+import { VideoColumn } from "@/modules/console/component/VideoColumn";
+// import { VideoDataTable } from "../component/VideoDataTable";
+// import { VideoColumn } from "../component/VideoColumn";
 
 interface VideosViewProps {
   limit: number;
   favorite?: boolean;
 }
 
-function VideosView({ limit, favorite = false }: VideosViewProps) {
+function FavoritesView({ limit, favorite = false }: VideosViewProps) {
   const queryClient=useQueryClient()
   const trpc = useTRPC();
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -164,13 +169,10 @@ const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid")
       <div className="px-4 md:px-12 py-4 w-full">
         <div className="flex flex-col gap-6 md:gap-4">
           <TopHeader
-            Header="Videos"
+            Header="Favorites video"
             Btnchild={
               <div className="flex flex-row gap-3">
-               <div className="hidden md:inline-block">
-                 <ImportVideos />
-               </div>
-                <UploadFile />
+               
               </div>
             }
           />
@@ -216,4 +218,4 @@ const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid")
   );
 }
 
-export default VideosView;
+export default FavoritesView;

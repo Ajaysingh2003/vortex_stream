@@ -6,6 +6,7 @@ import { ArrowDown, ArrowUp, ChevronDown, ChevronUp } from "lucide-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 
 type UploadStatus =
+  | "preparing"
   | "queued"
   | "uploading"
   | "paused"
@@ -47,12 +48,12 @@ function UploadMangager({
   onResume,
   onRetry,
 }: UploadTypes) {
-  const [open, setOpen] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(true);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const activeItems = items.filter(
-    (i) => !["done", "cancelled", "TRANSCODING"].includes(i.status),
-  );
+
+  console.log(items,"leah jaye")
+  const activeItems = items;
 
   const overallPercentage = useMemo(() => {
     if (items.length === 0) return 0;
@@ -77,7 +78,7 @@ function UploadMangager({
     <>
 
       {activeItems.length > 0 && (
-        <div className="  fixed  w-full max-w-sm lg:max-w-128  shadow-sm rounded-[10px] shadow-black/28 bg-[#fafafa]  bottom-6 -translate-x-1/2 left-[50%]  overflow-hidden">
+        <div className="  fixed  w-full max-w-sm lg:max-w-128  shadow-sm rounded-[10px] shadow-black/28 bg-[#fafafa] z-50  bottom-[50px] -translate-x-1/2 left-[50%]  overflow-hidden">
           <div className="bg-[#f7f7f7] border-b border-[#eee] py-2 px-4 w-full flex justify-between items-center">
             <p className=" capitalize text-md font-normal text-[#040404] leading-6  text-nowrap   tracking-wide">
               Uploading -{" "}

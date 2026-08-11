@@ -45,7 +45,6 @@ type Folder struct {
 	Videos    []Video   `gorm:"foreignKey:FolderID;constraint:onDelete:CASCADE;" json:"videos,omitempty"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-
 }
 
 const (
@@ -63,7 +62,6 @@ const (
 	Business PlanTier = "BUSINESS"
 )
 
-
 type User struct {
 	// Changed ID back to uuid.UUID for consistency with Video and VideoResolution
 	ID        uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
@@ -80,10 +78,9 @@ type User struct {
 	Workspaces []Workspaces `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"workspaces,omitempty"`
 	Accounts   []Account    `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"accounts,omitempty"`
 
-	Subscriptions *Subscription `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"subscriptions,omitempty"`
+	Subscriptions *Subscription     `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"subscriptions,omitempty"`
 	UsageCounters UserUsageCounters `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"usageCounters,omitempty"`
 }
-
 
 type Subscription struct {
 	ID                   uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
@@ -91,13 +88,13 @@ type Subscription struct {
 	StripeSubscriptionID string    `gorm:"type:varchar(255);not null" json:"stripe_subscription_id"`
 	StripePriceID        string    `gorm:"type:varchar(255);not null" json:"stripe_price_id"`
 	Plan                 PlanTier  `gorm:"type:varchar(50);not null;default:'free'" json:"plan"`
-	Status               string `gorm:"type:varchar(50);not null;default:'active'" json:"status"`
+	Status               string    `gorm:"type:varchar(50);not null;default:'active'" json:"status"`
 	PeriodStart          time.Time `gorm:"type:timestamptz;not null" json:"period_start"`
 	PeriodEnd            time.Time `gorm:"type:timestamptz;not null" json:"period_end"`
 	CreatedAt            time.Time `json:"createdAt"`
 	UpdatedAt            time.Time `json:"updatedAt"`
 }
-  
+
 type UserUsageCounters struct {
 	ID                      uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
 	UserID                  uuid.UUID      `gorm:"type:uuid;uniqueIndex;not null" json:"user_id"`
@@ -116,12 +113,12 @@ type Workspaces struct {
 	UserID uuid.UUID `gorm:"type:uuid;index" json:"userId"`
 	User   *User     `gorm:"foreignKey:UserID;references:ID" json:"user,omitempty"`
 
-	IsDefault bool           `gorm:"default:false" json:"isDefault"`
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	Videos    []Video        `gorm:"foreignKey:WorkspaceID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
-	Folders []Folder `gorm:"foreignKey:WorkspaceID" json:"folders,omitempty"`
+	IsDefault      bool            `gorm:"default:false" json:"isDefault"`
+	CreatedAt      time.Time       `json:"createdAt"`
+	UpdatedAt      time.Time       `json:"updatedAt"`
+	DeletedAt      gorm.DeletedAt  `gorm:"index" json:"-"`
+	Videos         []Video         `gorm:"foreignKey:WorkspaceID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
+	Folders        []Folder        `gorm:"foreignKey:WorkspaceID" json:"folders,omitempty"`
 	PlayerSettings *PlayerSettings `gorm:"foreignKey:WorkspaceID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"playerSettings,omitempty"`
 }
 
@@ -135,11 +132,10 @@ type PlayerSettings struct {
 	BrandingSettings datatypes.JSON `json:"branding_settings" gorm:"type:jsonb;default:'{}'"`
 	SecuritySettings datatypes.JSON `json:"security_settings" gorm:"type:jsonb;default:'{}'"`
 	AdvancedSettings datatypes.JSON `json:"advanced_settings" gorm:"type:jsonb;default:'{}'"`
-	
+
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
-
 
 type Account struct {
 	ID         uuid.UUID     `gorm:"type:uuid;primaryKey" json:"id"`
@@ -150,12 +146,12 @@ type Account struct {
 }
 
 type Video struct {
-	ID          uuid.UUID   `gorm:"type:uuid;primaryKey" json:"id"`
-	Title       string      `gorm:"type:varchar(255);not null" json:"title"`
-	FolderID    *uuid.UUID  `gorm:"type:uuid;index" json:"folderId"`
-	WorkspaceID uuid.UUID   `gorm:"type:uuid;index" json:"WorkspaceId"`
-	
-	Workspace   *Workspaces `gorm:"foreignKey:WorkspaceID;references:ID" json:"workspace,omitempty"`
+	ID          uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
+	Title       string     `gorm:"type:varchar(255);not null" json:"title"`
+	FolderID    *uuid.UUID `gorm:"type:uuid;index" json:"folderId"`
+	WorkspaceID uuid.UUID  `gorm:"type:uuid;index" json:"WorkspaceId"`
+
+	Workspace *Workspaces `gorm:"foreignKey:WorkspaceID;references:ID" json:"workspace,omitempty"`
 	// Paths in S3/MinIO
 	VideoKey  string `gorm:"not null" json:"videoKey"`
 	MasterKey string `gorm:"not null" json:"masterKey"`
@@ -165,20 +161,45 @@ type Video struct {
 	Duration  int    `json:"duration"`
 	IsPrivate bool   `gorm:"default:true" json:"isPrivate"`
 
-	Status         VideoStatus       `gorm:"type:varchar(20);default:'PENDING'" json:"status"`
+	Status VideoStatus `gorm:"type:varchar(20);default:'PENDING'" json:"status"`
 
-	Resolutions    []VideoResolution `gorm:"foreignKey:VideoID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"resolutions"`
+	Resolutions []VideoResolution `gorm:"foreignKey:VideoID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"resolutions"`
 
-	Form           *LeadForm         `gorm:"foreignKey:VideoID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"form"`
-	
-	AllowedDomains []VideoDomain     `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE" json:"allowedDomains,omitempty"`
+	Form *LeadForm `gorm:"foreignKey:VideoID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"form"`
 
-	CreatedAt      time.Time         `json:"createdAt"`
-	UpdatedAt      time.Time         `json:"updatedAt"`
-	DeletedAt      gorm.DeletedAt    `gorm:"index" json:"-"`
+	AllowedDomains []VideoDomain `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE" json:"allowedDomains,omitempty"`
+
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+// Channel is a workspace-owned collection that can be followed/favorited by a user.
+// Keeping the workspace owner on the channel lets the favorite service enforce
+// ownership without trusting IDs supplied by the client.
+type Channel struct {
+	ID          uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
+	WorkspaceID uuid.UUID      `gorm:"type:uuid;not null;index" json:"workspaceId"`
+	Workspace   *Workspaces    `gorm:"foreignKey:WorkspaceID;references:ID" json:"workspace,omitempty"`
+	Name        string         `gorm:"type:varchar(255);not null" json:"name"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:"updatedAt"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+}
 
+type ChannelVideo struct {
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+	ChannelID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_channel_video" json:"channelId"`
+	VideoID   uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_channel_video" json:"videoId"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+type FavoriteVideo struct {
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+	UserID    uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_favorite_video_user_video" json:"userId"`
+	VideoID   uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_favorite_video_user_video;index" json:"videoId"`
+	CreatedAt time.Time `json:"createdAt"`
+}
 
 type VideoResolution struct {
 	ID      uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
@@ -199,135 +220,115 @@ type VideoDomain struct {
 	VideoID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_video_domain" json:"videoId"`
 
 	Video *Video `gorm:"foreignKey:VideoID;references:ID" json:"-"`
- 
+
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-
-
-
-
 type LeadForm struct {
-    ID          uuid.UUID    `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
-    VideoID     uuid.UUID    `gorm:"not null;uniqueIndex;type:uuid" json:"videoId"`
-    WorkspaceID uuid.UUID    `gorm:"not null;index;type:uuid" json:"workspaceId"`
-    Placement   string    `gorm:"not null" json:"placement"` // before_video | during_video | after_video
-    ShowAt      *float64  `gorm:"default:null" json:"showAt"` // seconds, only for during_video
-    AllowSkip   bool      `gorm:"default:false" json:"allowSkip"`
-    CreatedAt   time.Time `json:"createdAt"`
-    UpdatedAt   time.Time `json:"updatedAt"`
+	ID          uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+	VideoID     uuid.UUID `gorm:"not null;uniqueIndex;type:uuid" json:"videoId"`
+	WorkspaceID uuid.UUID `gorm:"not null;index;type:uuid" json:"workspaceId"`
+	Placement   string    `gorm:"not null" json:"placement"`  // before_video | during_video | after_video
+	ShowAt      *float64  `gorm:"default:null" json:"showAt"` // seconds, only for during_video
+	AllowSkip   bool      `gorm:"default:false" json:"allowSkip"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 
-    Fields []LeadFormField `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE" json:"fields" `
+	Fields []LeadFormField `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE" json:"fields" `
 }
 
 type LeadFormField struct {
-    ID       uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
-    FormID   uuid.UUID `gorm:"not null;index;type:uuid" json:"formId"`
-    Label    string `gorm:"not null" json:"label"`
-    // Scope    string `gorm:"not null"`
-    Type     string `gorm:"not null" json:"type"` 
-    Position int    `gorm:"not null" json:"position"`
+	ID     uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+	FormID uuid.UUID `gorm:"not null;index;type:uuid" json:"formId"`
+	Label  string    `gorm:"not null" json:"label"`
+	// Scope    string `gorm:"not null"`
+	Type     string `gorm:"not null" json:"type"`
+	Position int    `gorm:"not null" json:"position"`
 
-    Options []LeadFormFieldOption `gorm:"foreignKey:FieldID;constraint:OnDelete:CASCADE" json:"options"`
+	Options []LeadFormFieldOption `gorm:"foreignKey:FieldID;constraint:OnDelete:CASCADE" json:"options"`
 }
 
-
 type LeadFormFieldOption struct {
-    ID      uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
-    FieldID uuid.UUID `gorm:"not null;index;type:uuid" json:"fieldId"`
-    Label   string `gorm:"not null" json:"label"`
-
+	ID      uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+	FieldID uuid.UUID `gorm:"not null;index;type:uuid" json:"fieldId"`
+	Label   string    `gorm:"not null" json:"label"`
 }
 
 type LeadFormSubmission struct {
-    ID        uuid.UUID    `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
-    FormID    uuid.UUID    `gorm:"not null;index;type:uuid" json:"formId"`
-    VideoID   uuid.UUID    `gorm:"not null;index;type:uuid" json:"videoId"`
-    SessionID uuid.UUID    `gorm:"not null" json:"sessionId"`
-    Skipped   bool         `gorm:"default:false" json:"skipped"`
-    CreatedAt time.Time `json:"createdAt"`
-    Answers []LeadFormAnswer `gorm:"foreignKey:SubmissionID;constraint:OnDelete:CASCADE" json:"answers"` 
+	ID        uuid.UUID        `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+	FormID    uuid.UUID        `gorm:"not null;index;type:uuid" json:"formId"`
+	VideoID   uuid.UUID        `gorm:"not null;index;type:uuid" json:"videoId"`
+	SessionID uuid.UUID        `gorm:"not null" json:"sessionId"`
+	Skipped   bool             `gorm:"default:false" json:"skipped"`
+	CreatedAt time.Time        `json:"createdAt"`
+	Answers   []LeadFormAnswer `gorm:"foreignKey:SubmissionID;constraint:OnDelete:CASCADE" json:"answers"`
 }
-
 
 type LeadFormAnswer struct {
-    ID           uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
-    SubmissionID uuid.UUID `gorm:"not null;index;type:uuid" json:"submissionId"`
-    FieldID      uuid.UUID `gorm:"not null;type:uuid" json:"fieldId"`
-    // Scope        string `gorm:"not null"` // denormalized for query convenience
-    Value        string `gorm:"not null" json:"value" ` // always string, cast on read
+	ID           uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+	SubmissionID uuid.UUID `gorm:"not null;index;type:uuid" json:"submissionId"`
+	FieldID      uuid.UUID `gorm:"not null;type:uuid" json:"fieldId"`
+	// Scope        string `gorm:"not null"` // denormalized for query convenience
+	Value string `gorm:"not null" json:"value" ` // always string, cast on read
 }
 
-
-
-
-
 type VideoEndScreen struct {
-	ID        uint              `gorm:"primaryKey" json:"id"`
-	VideoID   uuid.UUID            `gorm:"type:varchar(255);not null;uniqueIndex" json:"video_id"`
-	
-	Video     *Video            `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
-	
-	Type      string            `gorm:"type:varchar(50);not null" json:"type"`
-	
-	Payload   datatypes.JSONMap `gorm:"type:jsonb;not null" json:"payload"`
-	
-	CreatedAt time.Time         `json:"created_at"`
-	UpdatedAt time.Time         `json:"updated_at"`
+	ID      uint      `gorm:"primaryKey" json:"id"`
+	VideoID uuid.UUID `gorm:"type:varchar(255);not null;uniqueIndex" json:"video_id"`
+
+	Video *Video `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
+
+	Type string `gorm:"type:varchar(50);not null" json:"type"`
+
+	Payload datatypes.JSONMap `gorm:"type:jsonb;not null" json:"payload"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type VideoSubtitle struct {
-    ID          uint           `gorm:"primaryKey" json:"id"`
-    // Combined composite unique index named "idx_video_lang"
-    VideoID     uuid.UUID      `gorm:"type:uuid;not null;uniqueIndex:idx_video_lang" json:"video_id"`
-    Video       *Video         `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
-    FileName    string         `gorm:"type:varchar(255);not null" json:"file_name"` // Increased to 255 for long filenames
-    Code        string         `gorm:"type:varchar(50);not null;uniqueIndex:idx_video_lang" json:"code"`
-    Label       string         `gorm:"type:varchar(50);not null" json:"label"`
-    SubtitleUrl string         `gorm:"type:varchar(512);column:subtitle_url;not null" json:"subtitle_url"` 
-    CreatedAt   time.Time      `json:"created_at"`
-    UpdatedAt   time.Time      `json:"updated_at"`
+	ID uint `gorm:"primaryKey" json:"id"`
+	// Combined composite unique index named "idx_video_lang"
+	VideoID     uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_video_lang" json:"video_id"`
+	Video       *Video    `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
+	FileName    string    `gorm:"type:varchar(255);not null" json:"file_name"` // Increased to 255 for long filenames
+	Code        string    `gorm:"type:varchar(50);not null;uniqueIndex:idx_video_lang" json:"code"`
+	Label       string    `gorm:"type:varchar(50);not null" json:"label"`
+	SubtitleUrl string    `gorm:"type:varchar(512);column:subtitle_url;not null" json:"subtitle_url"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type VideoChapters struct {
-    ID          uuid.UUID           `gorm:"primaryKey" json:"id"`
+	ID uuid.UUID `gorm:"primaryKey" json:"id"`
 
-    VideoID     uuid.UUID      `gorm:"type:uuid;not null;uniqueIndex:idx_video_chapter_time" json:"video_id"`
-    Video       *Video         `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
-    Time        string         `gorm:"type:varchar(255);not null;uniqueIndex:idx_video_chapter_time" json:"time"` 
-    Label       string         `gorm:"type:varchar(50);not null" json:"label"` 
-    CreatedAt   time.Time      `gorm:"autoCreateTime" json:"created_at"`
-    UpdatedAt   time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+	VideoID   uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_video_chapter_time" json:"video_id"`
+	Video     *Video    `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
+	Time      string    `gorm:"type:varchar(255);not null;uniqueIndex:idx_video_chapter_time" json:"time"`
+	Label     string    `gorm:"type:varchar(50);not null" json:"label"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
-
-
-
 
 type VideoCtaSetting struct {
-    ID              uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-    
-    // 1. Composite Unique Index named 'idx_video_cta_time'
-    VideoID         uuid.UUID      `gorm:"type:uuid;not null;uniqueIndex:idx_video_cta_time" json:"video_id"`
-    Video           *Video         `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
-    
-    // 2. Bound to the same composite index so a video cannot have two CTAs at the exact same start time
-    StartTime       string         `gorm:"type:varchar(255);not null;uniqueIndex:idx_video_cta_time" json:"start_time"` 
-    EndTime         string         `gorm:"type:varchar(255);not null" json:"end_time"`
-    
-    Title           string         `gorm:"type:varchar(50);not null" json:"title"`     
-    URL             string         `gorm:"type:varchar(2048);not null" json:"url"`     
-    
-    FontColor       string         `gorm:"type:varchar(7);not null" json:"font_color"`        
-    BackgroundColor string         `gorm:"type:varchar(7);not null" json:"background_color"`  
-    OpenIn          string         `gorm:"type:varchar(20);default:'_blank'" json:"open_in"`  
-    Position        string         `gorm:"type:varchar(50);not null" json:"position"`         
-    
-    CreatedAt       time.Time      `gorm:"autoCreateTime" json:"created_at"`
-    UpdatedAt       time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+	ID uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+
+	// 1. Composite Unique Index named 'idx_video_cta_time'
+	VideoID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_video_cta_time" json:"video_id"`
+	Video   *Video    `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE;" json:"video,omitempty"`
+
+	// 2. Bound to the same composite index so a video cannot have two CTAs at the exact same start time
+	StartTime string `gorm:"type:varchar(255);not null;uniqueIndex:idx_video_cta_time" json:"start_time"`
+	EndTime   string `gorm:"type:varchar(255);not null" json:"end_time"`
+
+	Title string `gorm:"type:varchar(50);not null" json:"title"`
+	URL   string `gorm:"type:varchar(2048);not null" json:"url"`
+
+	FontColor       string `gorm:"type:varchar(7);not null" json:"font_color"`
+	BackgroundColor string `gorm:"type:varchar(7);not null" json:"background_color"`
+	OpenIn          string `gorm:"type:varchar(20);default:'_blank'" json:"open_in"`
+	Position        string `gorm:"type:varchar(50);not null" json:"position"`
+
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
-
-
-
-
-
-

@@ -24,6 +24,8 @@ func (h *VideoHandler) CreateVideo(c *gin.Context) {
 	var req struct {
 		Title       string             `json:"title" binding:"required"`
 		VideoKey    string             `json:"videoKey" binding:"required"`
+		Thumbnail   string             `json:"thumbnail" binding:"required"`
+		FolderID    *uuid.UUID         `json:"folderId"`
 		Status      domain.VideoStatus `json:"status" binding:"required"`
 		WorkspaceId string             `json:"workspaceId" binding:"required"`
 		Size        int64              `json:"size" binding:"required"`
@@ -52,6 +54,8 @@ func (h *VideoHandler) CreateVideo(c *gin.Context) {
 		WorkspaceID: workspaceId,
 		Title:       req.Title,
 		VideoKey:    req.VideoKey,
+		Thumbnail:   req.Thumbnail,
+		FolderID:    req.FolderID,
 		Duration:    req.Duration,
 	}
 
@@ -140,7 +144,6 @@ func (h *VideoHandler) ListVideoByWorkspace(c *gin.Context) {
 		return
 	}
 
-
 	userID, ok := userId.(uuid.UUID)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration", "success": false})
@@ -163,8 +166,6 @@ func (h *VideoHandler) ListVideoByWorkspace(c *gin.Context) {
 		}
 	}
 
-
-
 	visibilityFilter := c.Query("visibility")
 	dateFilter := c.Query("date")
 	sortFilter := c.Query("sort")
@@ -174,11 +175,11 @@ func (h *VideoHandler) ListVideoByWorkspace(c *gin.Context) {
 	}
 
 	if visibilityFilter == "" {
-		visibilityFilter = "all" 
+		visibilityFilter = "all"
 	}
 
 	if sortFilter == "" {
-		sortFilter = "created_asc" 
+		sortFilter = "created_asc"
 	}
 
 	filterOptions := &dto.FilterOptions{
@@ -743,26 +744,6 @@ func (h *VideoHandler) VideoSubtitle(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Subtitle saved Successfully"})
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 func (h *VideoHandler) VideoChapters(c *gin.Context) {
 
 	var req dto.VideoChapterReq
@@ -818,11 +799,9 @@ func (h *VideoHandler) VideoChapters(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Subtitle saved Successfully"})
 }
 
-
 func (h *VideoHandler) VideoCtaUpsert(c *gin.Context) {
 
 	var req dto.VideoCtaReq
-
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		// 🎯 This print statement will tell you EXACTLY what field failed validation
@@ -873,12 +852,6 @@ func (h *VideoHandler) VideoCtaUpsert(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Subtitle saved Successfully"})
 }
-
-
-
-
-
-
 
 func (h *VideoHandler) GetVideoChapterByVideoID(c *gin.Context) {
 	videoIDRaw := c.Param("videoId")
@@ -958,26 +931,7 @@ func (h *VideoHandler) GetVideoCtaByVideoID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": videoChapters})
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 func (h *VideoHandler) DeleteChapter(c *gin.Context) {
-	
 
 	ChapterIDRaw := c.Param("id")
 	chapterID, err := uuid.Parse(ChapterIDRaw)
@@ -1020,13 +974,7 @@ func (h *VideoHandler) DeleteChapter(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "End Screen deleted Successfully"})
 }
 
-
-
-
-
-
 func (h *VideoHandler) DeleteCta(c *gin.Context) {
-	
 
 	CtaIDRaw := c.Param("id")
 	CtaID, err := uuid.Parse(CtaIDRaw)

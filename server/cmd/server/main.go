@@ -25,6 +25,14 @@ import (
 
 	billingRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/routes"
 	billingService "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/services"
+	channelHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/channels/handler"
+	channelRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/channels/repository"
+	channelRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/channels/routes"
+	channelService "github.com/ajaysingh2003/vortex-stream/internal/modules/channels/service"
+	favoriteHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/handler"
+	favoriteRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/repository"
+	favoriteRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/routes"
+	favoriteService "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/service"
 	folderRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/routes"
 	folderService "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/services"
 	formService "github.com/ajaysingh2003/vortex-stream/internal/modules/form/service"
@@ -86,10 +94,12 @@ func main() {
 	workspaceService := services.NewWorkspaceService(userRepo, workspaceRepo)
 	uploadService := serviceUpload.NewUploadService(userRepo)
 	videoService := videoService.NewVideoService(userRepo, videoRepo, workspaceRepo, folderRepo)
+	favoriteRepo := favoriteRepository.NewPostgresRepository(database)
+	favorites := favoriteService.New(database, favoriteRepo)
+	channels := channelService.New(database, channelRepository.New(database))
 	billingService := billingService.NewBillingService(userRepo, videoRepo, workspaceRepo, folderRepo, subscriptionRepo, userUsageRepo, database)
 
-	formService := formService.NewFormService(userRepo, workspaceRepo, videoRepo,leadFormRepo, leadFormFieldRepo, leadFormFieldOptionRepo, database)
-
+	formService := formService.NewFormService(userRepo, workspaceRepo, videoRepo, leadFormRepo, leadFormFieldRepo, leadFormFieldOptionRepo, database)
 
 	userhandler := &handler.UserHandler{
 		UserService:       userService,
@@ -121,9 +131,11 @@ func main() {
 		PaymentService: billingService,
 	}
 
-	formHandler:=&formHandler.FormHandler{
+	formHandler := &formHandler.FormHandler{
 		FormService: formService,
 	}
+	favoritehandler := &favoriteHandler.Handler{Service: favorites}
+	channelhandler := &channelHandler.Handler{Service: channels}
 
 	r := gin.Default()
 
@@ -142,7 +154,9 @@ func main() {
 	folderRoutes.SetupRouter(r, folderhandler, jwtToken)
 	billingRoutes.SetupRouter(r, *billingHandler, jwtToken)
 	playerRoutes.SetupRouter(r, playerdhandler, jwtToken)
-	formRoutes.SetupRouter(r , formHandler, jwtToken)
+	formRoutes.SetupRouter(r, formHandler, jwtToken)
+	favoriteRoutes.SetupRouter(r, favoritehandler, jwtToken)
+	channelRoutes.SetupRouter(r, channelhandler, jwtToken)
 
 	if err := r.Run(":3000"); err != nil {
 		log.Fatal("Failed to start server:", err)

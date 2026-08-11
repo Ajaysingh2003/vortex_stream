@@ -1,31 +1,21 @@
-import { formatBytes, formatTime, getFileExtension } from "@/utils/utils";
+/* eslint-disable @next/next/no-img-element */
+import { formatBytes, formatTime } from "@/utils/utils";
 import {
   AlertCircle,
   CheckCircle2,
-  CirclePause,
   Clock,
-  Film,
   Pause,
   Play,
-  PlayCircle,
   RotateCcw,
   Trash2,
-  TvMinimalPlay,
-  Video,
   Wifi,
   WifiOff,
   X,
 } from "lucide-react";
 import { ProgressBar } from "./ProgressBar";
-import { useVideoThumbnail } from "@/hooks/useVideoThumbnail";
-import { useEffect, useState } from "react";
-import { error } from "console";
-import Image from "next/image";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { useTRPC } from "@/trpc/client";
-import { file } from "zod";
 
 type UploadStatus =
+  | "preparing"
   | "queued"
   | "uploading"
   | "paused"
@@ -44,6 +34,8 @@ interface UploadItem {
   eta: number;
   errorMessage?: string;
   key?: string;
+  thumbnailKey?: string;
+  thumbnailPreviewUrl?: string;
   startedAt?: number;
   xhr?: XMLHttpRequest;
   chunkOffset: number;
@@ -64,90 +56,19 @@ export const UploadCard = ({
   onCancel: (id: string) => void;
   onRemove: (id: string) => void;
 }) => {
-  const ext = getFileExtension(item.file.name);
-
   const isActive = item.status === "uploading";
   const isPaused = item.status === "paused";
   const isDone = item.status === "done";
   const isError = item.status === "error";
   const isQueued = item.status === "queued";
+  const isPreparing = item.status === "preparing";
   const isCancelled = item.status === "cancelled";
-
-  const statusLabel: Record<UploadStatus, string> = {
-    queued: "Queued",
-    uploading: "Uploading…",
-    paused: "Paused",
-    done: "Complete",
-    error: "Failed",
-    cancelled: "Cancelled",
-    TRANSCODING: "TRANSCODING",
-  };
-
-  // const { thumbnail , generateThumbnail ,loading} = useVideoThumbnail();
-
-  // useEffect(() => {
-  //   if (item.file && item.file.size > 0){
-  //     console.log("Generating thumbnail for", item.file);
-  //     generateThumbnail(item.file,2)
-
-  //   }
-
-  // }, [item.file,generateThumbnail]);
-  // const [hasUploadedThumbnail, setHasUploadedThumbnail] = useState(false);
-
-  // const trpc=useTRPC()
-
-  // const presignedUrlMutate=useMutation(trpc.upload.getSignedUrl.mutationOptions())
-
-  // useEffect(()=>{
-  //   console.log("before check")
-  //   if (!thumbnail || hasUploadedThumbnail) return
-  //   console.log("blob started")
-  //   const handleThumbnailUpload = async () => {
-  //   try {
-  //     setHasUploadedThumbnail(true)
-
-  //     const response = await fetch(thumbnail);
-  //     const blobData = await response.blob();
-
-  //     // Convert to a formal file metadata construct
-  //     const thumbnailFile = new File([blobData], "thumbnail.jpg", { type: "image/jpeg" });
-
-  //     const payload=[{name:item.file.name,type:blobData.type,size:blobData.size}]
-
-  //     const presignedUrl =await presignedUrlMutate.mutateAsync(payload)
-  //     const uploadResult = await fetch(presignedUrl.files[0].UploadUrl, {
-  //       method: "PUT",
-  //       headers: { "Content-Type": "image/jpeg" },
-  //       body: thumbnailFile,
-  //     });
-
-  //     console.log("log23",uploadResult)
-
-  //     if (!uploadResult.ok) throw new Error("Failed to upload assets to bucket storage engine");
-
-  //     console.log("Thumbnail permanently stored! Public URL ->", uploadResult);
-
-  //   } catch (error) {
-  //     console.error("Critical thumbnail synchronization fallback loop triggered:", error);
-  //   }
-  //    };
-
-  // handleThumbnailUpload()
-
-  // },[thumbnail,hasUploadedThumbnail,item.file.name])
-
-  // console.log(item,thumbnail, "item")
-
-  const statusColor: Record<UploadStatus, string> = {
-    queued: "text-slate-400",
-    uploading: "text-red-300",
-    paused: "text-amber-500",
-    done: "text-emerald-600",
-    error: "text-red-500",
-    cancelled: "text-slate-400",
-    TRANSCODING: "text-slate-600",
-  };
+  const cdnBaseUrl = process.env.NEXT_PUBLIC_CDN_URL ?? "";
+  const thumbnailSrc = item.thumbnailPreviewUrl
+    ? item.thumbnailPreviewUrl
+    : item.thumbnailKey
+      ? `${cdnBaseUrl.replace(/\/$/, "")}/${item.thumbnailKey.replace(/^\//, "")}`
+      : "/video-player.png";
 
   return (
     <li
@@ -161,16 +82,13 @@ export const UploadCard = ({
 
       <div className="flex items-start gap-3">
         <div className="flex items-center justify-center size-10z bg-slate-100a border border-slate-200/30 rounded-lg">
-          {
-            <Image
-              height={70}
-              width={70}
-              quality={100}
-              src={"/video-player.png"}
-              alt="Thumbnail"
-              className="flex-shrink-0 size-9 rounded-md object-cover"
-            />
-          }
+          <img
+            height={70}
+            width={70}
+            src={thumbnailSrc}
+            alt="Video thumbnail"
+            className="flex-shrink-0 size-9 rounded-md object-cover"
+          />
         </div>
         {/* File info */}
         <div className="flex-1 min-w-0">
@@ -181,6 +99,11 @@ export const UploadCard = ({
             <span className="text-[11px] text-slate-400">
               {formatBytes(item.file.size)}
             </span>
+            {isPreparing && (
+              <span className="text-[11px] text-violet-500 font-medium">
+                Preparing upload…
+              </span>
+            )}
             {isActive && item.speed > 0 && (
               <>
                 <span className="text-slate-200">·</span>
@@ -242,7 +165,7 @@ export const UploadCard = ({
             </button>
           )}
 
-          {(isActive || isPaused || isQueued) && (
+          {(isActive || isPaused || isQueued || isPreparing) && (
             <button
               type="button"
               onClick={() => onCancel(item.id)}
