@@ -68,13 +68,13 @@ export const uploadsRouter = createTRPCRouter({
         console.log(error?.response as any, "a error occuried");
 
         if (axios.isAxiosError(error)) {
-          if (error.response?.status === 400) {
-            console.log("Bad request:", error.response.data);
-            return;
-          }
+          throw new TRPCError({
+            code: error.response?.status === 401 ? "UNAUTHORIZED" : "BAD_REQUEST",
+            message: error.response?.data?.message || "Failed to get upload URL",
+            cause: error.response?.data,
+          });
         }
-
-        throw error;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to get upload URL" });
       }
     }),
 
@@ -86,6 +86,8 @@ export const uploadsRouter = createTRPCRouter({
         title: z.string(),
         userId: z.string(),
         videoKey: z.string(),
+        thumbnail: z.string(),
+        folderId: z.string().uuid().nullable().optional(),
         size: z.number(),
         status: z.string(),
       }),
@@ -122,13 +124,13 @@ export const uploadsRouter = createTRPCRouter({
       } catch (error: any) {
         console.log(error?.response as any, "error occuried");
         if (axios.isAxiosError(error)) {
-          if (error.response?.status === 400) {
-            console.log("Bad request:", error.response.data);
-            return;
-          }
+          throw new TRPCError({
+            code: error.response?.status === 401 ? "UNAUTHORIZED" : "BAD_REQUEST",
+            message: error.response?.data?.message || "Failed to register video",
+            cause: error.response?.data,
+          });
         }
-
-        throw error;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to register video" });
       }
     }),
 

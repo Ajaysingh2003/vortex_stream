@@ -10,6 +10,8 @@ import { useConsoleContext } from "../context/ConsoleContext";
 import { googleAbortMap } from "@/modules/upload/component/ConnectGoogleDrive";
 import { UploadItem, UserType, WorkspaceType } from "@/modules/types";
 
+import { useVideoThumbnail } from "@/hooks/useVideoThumbnail";
+
 function uploadFileXHR(
   file: File,
   uploadUrl: string,
@@ -21,7 +23,7 @@ function uploadFileXHR(
   const xhr = new XMLHttpRequest();
   let lastLoaded = 0;
   let lastTime = Date.now();
-
+  
   xhr.upload.addEventListener("progress", (e) => {
     if (!e.lengthComputable) return;
     const now = Date.now();
@@ -48,11 +50,12 @@ function uploadFileXHR(
   return xhr;
 }
 
-function UploadFile() {
+function UploadFile({ folderId = null }: { folderId?: string | null }) {
   const trpc = useTRPC();
   const { data: user } = useSuspenseQuery(trpc.user.profile.queryOptions());
   const { data: workspace } = useSuspenseQuery(trpc.user.getWorkspace.queryOptions());
   const { items, setItems } = useConsoleContext()!;
+  const { generateThumbnail } = useVideoThumbnail();
 
   const userData = user as UserType;
   const workspaceData = workspace as WorkspaceType;
@@ -81,12 +84,13 @@ function UploadFile() {
     }),
   );
 
+  const startProcessingRef = useRef(startProcessing.mutateAsync);
+  useEffect(() => {
+    startProcessingRef.current = startProcessing.mutateAsync;
+  }, [startProcessing.mutateAsync]);
+
   const createVideo = useMutation(
     trpc.upload.createVideo.mutationOptions({
-      onSuccess: async (data) => {
-        console.log(data,"kira queen")
-        await startProcessing.mutateAsync({ id: data.data.id });
-      },
       onError: (err) => toast.error(err.message),
     }),
   );
@@ -140,15 +144,22 @@ function UploadFile() {
           });
 
           try {
-            await createVideoRef.current({
+            const createdVideo = await createVideoRef.current({
               workspaceId: workspaceDataRef.current.id, 
               videoKey: key,
+              thumbnail: item.thumbnailKey || "",
+              folderId,
               title: item.file.name,
               duration: item.file.duration || 0, 
               status: "PENDING",
               userId: userDataRef.current.id,
               size: item.file.size,
             });
+            const videoId = createdVideo?.data?.id;
+            if (!videoId) throw new Error("Video was not registered");
+
+            await startProcessingRef.current({ id: videoId });
+            updateItemRef.current(item.id, { status: "TRANSCODING" });
           } catch {
             updateItemRef.current(item.id, {
               status: "error",
@@ -169,7 +180,7 @@ function UploadFile() {
 
       xhrMapRef.current.set(item.id, xhr);
     },
-    [],
+    [folderId],
   );
 
   const startUploadRef = useRef(startUpload);
@@ -204,15 +215,11 @@ function UploadFile() {
         return;
       }
 
-      const durations = await Promise.all(
-        newFiles.map((f) => getVideoDuration(f).catch(() => 0)),
-      );
-
-      const newItems: UploadItem[] = newFiles.map((file, idx) => ({
+      const newItems: UploadItem[] = newFiles.map((file) => ({
         id: generateId(),
         file,
-        duration: durations[idx] as number,
-        status: "queued" as const,
+        duration: 0,
+        status: "preparing" as const,
         progress: 0,
         uploadedBytes: 0,
         speed: 0,
@@ -227,30 +234,111 @@ function UploadFile() {
         return next;
       });
 
-      let urls: { UploadUrl: string; Key: string }[];
-      try {
-        const res = await getSignedUrl.mutateAsync(
-          newFiles.map((f) => ({ name: f.name, type: f.type, size: f.size })),
-        );
-        urls = res.files;
-      } catch {
-        newItems.forEach((item) =>
+      // Prepare files one at a time because the thumbnail hook owns one video
+      // decoder. Each video upload starts immediately after its own thumbnail
+      // is ready; later files do not wait for earlier video uploads to finish.
+      for (const [index, file] of newFiles.entries()) {
+        const item = newItems[index];
+        try {
+          let thumbnailUrl = "";
+          let thumbnailError: unknown;
+          for (let attempt = 0; attempt < 3 && !thumbnailUrl; attempt += 1) {
+            try {
+              thumbnailUrl = await generateThumbnail(file, 2);
+            } catch (error) {
+              thumbnailError = error;
+              await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
+            }
+          }
+          if (!thumbnailUrl) {
+            throw new Error(
+              thumbnailError instanceof Error
+                ? thumbnailError.message
+                : "Thumbnail generation failed",
+            );
+          }
+          const duration = await getVideoDuration(file).catch(() => 0);
+          if (!itemsRef.current.some((current) => current.id === item.id)) continue;
+          if (!thumbnailUrl) throw new Error("Could not generate thumbnail");
+
+          updateItemRef.current(item.id, {
+            duration,
+            thumbnailPreviewUrl: thumbnailUrl,
+          });
+
+          const thumbnailBlob = await (await fetch(thumbnailUrl)).blob();
+          let thumbnailTicket;
+          for (let attempt = 0; attempt < 3; attempt += 1) {
+            try {
+              thumbnailTicket = await getSignedUrl.mutateAsync([{
+                name: `${file.name}-thumbnail.jpg`,
+                type: "image/jpeg",
+                size: thumbnailBlob.size,
+              }]);
+              break;
+            } catch (error) {
+              if (attempt === 2) throw error;
+              await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+            }
+          }
+          if (!thumbnailTicket?.files[0]) throw new Error("Thumbnail upload URL was not returned");
+
+          const thumbnailUpload = await fetch(thumbnailTicket.files[0].UploadUrl, {
+            method: "PUT",
+            headers: { "Content-Type": "image/jpeg" },
+            body: thumbnailBlob,
+          });
+          if (!thumbnailUpload.ok) throw new Error("Thumbnail upload failed");
+
+          if (!itemsRef.current.some((current) => current.id === item.id)) continue;
+
+          let videoTicket;
+          for (let attempt = 0; attempt < 3; attempt += 1) {
+            try {
+              videoTicket = await getSignedUrl.mutateAsync([{
+                name: file.name,
+                type: file.type,
+                size: file.size,
+              }]);
+              break;
+            } catch (error) {
+              if (attempt === 2) throw error;
+              await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+            }
+          }
+          const videoUploadTicket = videoTicket?.files[0];
+          if (!videoUploadTicket) throw new Error("Video upload URL was not returned");
+
+          if (!itemsRef.current.some((current) => current.id === item.id)) continue;
+
+          const preparedItem: UploadItem = {
+            ...item,
+            duration,
+            thumbnailKey: thumbnailTicket.files[0].Key,
+            thumbnailPreviewUrl: undefined,
+          };
+          updateItemRef.current(item.id, {
+            status: "queued",
+            duration,
+            thumbnailKey: thumbnailTicket.files[0].Key,
+            thumbnailPreviewUrl: undefined,
+          });
+          startUploadRef.current(
+            preparedItem,
+            videoUploadTicket.UploadUrl,
+            videoUploadTicket.Key,
+          );
+        } catch (error) {
           updateItemRef.current(item.id, {
             status: "error",
-            errorMessage: "Failed to get upload URL. Please retry.",
-          }),
-        );
-        toast.error("Could not connect to server. Check your connection.");
-        return;
+            errorMessage: error instanceof Error
+              ? `Could not prepare this video: ${error.message}`
+              : "Could not prepare this video for upload.",
+          });
+        }
       }
-
-      newItems.forEach((item, idx) => {
-        const urlResult = urls[idx];
-        if (!urlResult) return;
-        startUploadRef.current(item, urlResult.UploadUrl, urlResult.Key);
-      });
     },
-    [getSignedUrl, setItems],
+    [generateThumbnail, getSignedUrl, setItems],
   );
 
   // ── actions ────────────────────────────────────────────────────────────────
@@ -280,7 +368,15 @@ function UploadFile() {
       return;
     }
 
-    startUploadRef.current(item, urls[0].UploadUrl, item.key, item.uploadedBytes);
+    if (!urls[0]) {
+      updateItemRef.current(id, { status: "error", errorMessage: "Failed to refresh upload URL." });
+      return;
+    }
+
+    // R2 presigned PUTs are not resumable. Restart from byte zero with the
+    // newly signed key instead of uploading a suffix to a different object.
+    updateItemRef.current(id, { status: "queued", uploadedBytes: 0, progress: 0, chunkOffset: 0 });
+    startUploadRef.current(item, urls[0].UploadUrl, urls[0].Key, 0);
   }, [getSignedUrl]);
 
   const handleRetry = useCallback(async (id: string) => {
@@ -306,6 +402,11 @@ function UploadFile() {
         status: "error",
         errorMessage: "Failed to get upload URL.",
       });
+      return;
+    }
+
+    if (!urls[0]) {
+      updateItemRef.current(id, { status: "error", errorMessage: "Failed to get upload URL." });
       return;
     }
 

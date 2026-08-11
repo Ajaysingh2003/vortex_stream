@@ -47,6 +47,7 @@ export type GooglePickerFile = {
 };
 
 type UploadStatus =
+  | "preparing"
   | "queued"
   | "uploading"
   | "paused"
@@ -58,6 +59,7 @@ type UploadStatus =
 export interface UploadItem {
   id: string;
   file: File & { duration?: number };
+  duration?: number;
   status: UploadStatus;
   progress: number;
   uploadedBytes: number;
@@ -65,6 +67,8 @@ export interface UploadItem {
   eta: number;
   errorMessage?: string;
   key?: string;
+  thumbnailKey?: string;
+  thumbnailPreviewUrl?: string;
   startedAt?: number;
   xhr?: XMLHttpRequest;
   chunkOffset: number;

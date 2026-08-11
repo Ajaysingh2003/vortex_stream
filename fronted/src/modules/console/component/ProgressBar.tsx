@@ -1,4 +1,5 @@
 type UploadStatus =
+  | "preparing"
   | "queued"
   | "uploading"
   | "paused"

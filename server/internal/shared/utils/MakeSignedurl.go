@@ -17,7 +17,7 @@ func GenerateUploadURL(client *s3.Client, bucket, key, contentType string) (stri
             Bucket:      &bucket,
             Key:         &key,
         },
-        s3.WithPresignExpires(10*time.Minute),
+		s3.WithPresignExpires(time.Hour),
     )
 
     if err != nil {

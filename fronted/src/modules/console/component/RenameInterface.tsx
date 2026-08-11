@@ -32,11 +32,11 @@ function RenameInterface({
   const trpc = useTRPC();
   const params = useParams();
   const queryClient = useQueryClient();
-  const rootfolder = item.parentId == null;
-
+  
   const [filters] = useLibraryFilters();
   const folderID = params.id as string;
   const [newName, setNewName] = useState(item.name);
+  const rootfolder = folderID == null;
 
   // 1. Folder Mutation
   const updateFolder = useMutation(
@@ -52,6 +52,7 @@ function RenameInterface({
             }),
           });
         } else {
+          console.log("working",987)
           await queryClient.invalidateQueries({
             queryKey: trpc.folder.getFolderContent.infiniteQueryKey({
               workspaceID,
@@ -74,12 +75,14 @@ function RenameInterface({
         setOpenDialog(false);
 
         if (rootfolder) {
+          console.log(true)
           await queryClient.invalidateQueries({
             queryKey: trpc.folder.getRootContent.infiniteQueryKey({
               workspaceID,
             }),
           });
         } else {
+          console.log("false")
           await queryClient.invalidateQueries({
             queryKey: trpc.folder.getFolderContent.infiniteQueryKey({
               workspaceID,

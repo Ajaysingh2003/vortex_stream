@@ -1,11 +1,9 @@
-
 package services
 
 import (
 	"context"
 	// "errors"
 	"fmt"
-	"time"
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	folderRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/repository"
 	userRpo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
@@ -16,11 +14,11 @@ import (
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
+	"time"
 	// "gorm.io/gorm"
 )
 
 type VideoInterface interface {
-
 	CreateVideo(ctx context.Context, video *domain.Video) (*domain.Video, error)
 	ListVideo(ctx context.Context, userID uuid.UUID) ([]domain.Video, error)
 	ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int, filterOptions *dto.FilterOptions) (*dto.VideoContentsDTO, error)
@@ -31,31 +29,23 @@ type VideoInterface interface {
 	GetEndScreenByVideoid(ctx context.Context, workspaceId uuid.UUID, videoID uuid.UUID) (*domain.VideoEndScreen, error)
 	UpsertEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, dto dto.EndScreenUpsertDTO) error
 	DeleteEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, videoID uuid.UUID) error
-	
+
 	DeleteSubtitle(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error
-
-
 
 	DeleteChapter(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error
 
 	GetChaptersVideoid(ctx context.Context, videoID uuid.UUID) ([]domain.VideoChapters, error)
-	
-	GetSubtitleByVideoID(ctx context.Context,videoId uuid.UUID) ([] domain.VideoSubtitle ,error)
-	
-	
-	
-	
-	UpsertVideoSubtitles(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, subtitles [] dto.SubtitleItemInput) error
-	
-	
-	UpsertVideoChapters(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, chapters [] dto.VideoChapterInput) error
-	
-	UpsertVideoCta(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, cta [] dto.VideoCtaInput) error
+
+	GetSubtitleByVideoID(ctx context.Context, videoId uuid.UUID) ([]domain.VideoSubtitle, error)
+
+	UpsertVideoSubtitles(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID, subtitles []dto.SubtitleItemInput) error
+
+	UpsertVideoChapters(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID, chapters []dto.VideoChapterInput) error
+
+	UpsertVideoCta(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID, cta []dto.VideoCtaInput) error
 	DeleteCta(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error
 
 	GetCtaByVideoId(ctx context.Context, videoID uuid.UUID) ([]domain.VideoCtaSetting, error)
-
-
 }
 
 type VideoServiceRepo struct {
@@ -153,6 +143,12 @@ func (r *VideoServiceRepo) CreateVideo(ctx context.Context, video *domain.Video)
 	if err != nil || existingUser == nil {
 		return nil, err
 	}
+	if video.FolderID != nil {
+		folder, folderErr := r.folderRepo.GetByID(ctx, *video.FolderID)
+		if folderErr != nil || folder == nil || folder.WorkspaceID != video.WorkspaceID {
+			return nil, &utils.ApiError{Code: 403, Message: "The selected folder is not part of this workspace."}
+		}
+	}
 
 	vidData, err := r.videoRepo.Create(ctx, video)
 
@@ -186,18 +182,17 @@ func (r *VideoServiceRepo) GetSubtitleByVideoID(ctx context.Context, videoID uui
 	return data, nil
 
 }
-func (r *VideoServiceRepo) GetChaptersVideoid(ctx context.Context,videoID uuid.UUID) ([]domain.VideoChapters, error) {
+func (r *VideoServiceRepo) GetChaptersVideoid(ctx context.Context, videoID uuid.UUID) ([]domain.VideoChapters, error) {
 
-	videoData,err:=r.videoRepo.GetByID(ctx , videoID)
-
+	videoData, err := r.videoRepo.GetByID(ctx, videoID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if videoData ==nil {
-		return  nil,&utils.ApiError{
-			Code: 404,
+	if videoData == nil {
+		return nil, &utils.ApiError{
+			Code:    404,
 			Message: "Video does not Exist.",
 		}
 	}
@@ -211,18 +206,17 @@ func (r *VideoServiceRepo) GetChaptersVideoid(ctx context.Context,videoID uuid.U
 
 }
 
-func (r *VideoServiceRepo) GetCtaByVideoId(ctx context.Context,videoID uuid.UUID) ([]domain.VideoCtaSetting, error) {
+func (r *VideoServiceRepo) GetCtaByVideoId(ctx context.Context, videoID uuid.UUID) ([]domain.VideoCtaSetting, error) {
 
-	videoData,err:=r.videoRepo.GetByID(ctx , videoID)
-
+	videoData, err := r.videoRepo.GetByID(ctx, videoID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if videoData ==nil {
-		return  nil,&utils.ApiError{
-			Code: 404,
+	if videoData == nil {
+		return nil, &utils.ApiError{
+			Code:    404,
 			Message: "Video does not Exist.",
 		}
 	}
@@ -238,12 +232,12 @@ func (r *VideoServiceRepo) GetCtaByVideoId(ctx context.Context,videoID uuid.UUID
 
 func (r *VideoServiceRepo) ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int, filterOptions *dto.FilterOptions) (*dto.VideoContentsDTO, error) {
 
- workspaceData,err:=r.workspaceRepo.GetByID(ctx, workspaceID)
+	workspaceData, err := r.workspaceRepo.GetByID(ctx, workspaceID)
 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if workspaceData == nil {
 		return nil, &utils.ApiError{
 			Code:    404,
@@ -258,7 +252,6 @@ func (r *VideoServiceRepo) ListVideoByWorkspaceID(ctx context.Context, workspace
 		}
 	}
 
-
 	var cursorID **uuid.UUID
 
 	if cursor != "" {
@@ -270,7 +263,7 @@ func (r *VideoServiceRepo) ListVideoByWorkspaceID(ctx context.Context, workspace
 		cursorID = &decodedID
 	}
 
-	videos, err := r.videoRepo.GetVideosPaginated(ctx, workspaceID, userID, cursorID, limit+1,filterOptions)
+	videos, err := r.videoRepo.GetVideosPaginated(ctx, workspaceID, userID, cursorID, limit+1, filterOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -341,7 +334,6 @@ func (r *VideoServiceRepo) ProcessVideo(ctx context.Context, videoID uuid.UUID, 
 		return nil, err
 	}
 
-
 	return data, nil
 }
 
@@ -350,7 +342,7 @@ func (r *VideoServiceRepo) StreamVideo(ctx context.Context, videoID uuid.UUID) (
 	videoData, err := r.videoRepo.GetByID(ctx, videoID)
 
 	if err != nil {
-		
+
 		return nil, err
 	}
 
@@ -444,7 +436,6 @@ func (s *VideoServiceRepo) UpsertEndScreen(ctx context.Context, workspaceId uuid
 	return nil
 }
 
-
 func (s *VideoServiceRepo) DeleteEndScreen(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, videoID uuid.UUID) error {
 
 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceId)
@@ -497,7 +488,6 @@ func (s *VideoServiceRepo) DeleteEndScreen(ctx context.Context, workspaceId uuid
 	return nil
 }
 
-
 func (s *VideoServiceRepo) DeleteSubtitle(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error {
 
 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceId)
@@ -527,7 +517,6 @@ func (s *VideoServiceRepo) DeleteSubtitle(ctx context.Context, workspaceId uuid.
 			Message: "You don't have permission.",
 		}
 	}
-
 
 	err = s.videoRepo.DeleteSubtitle(ctx, ID)
 
@@ -568,7 +557,6 @@ func (s *VideoServiceRepo) DeleteCta(ctx context.Context, workspaceId uuid.UUID,
 		}
 	}
 
-
 	err = s.videoRepo.DeleteVideoCta(ctx, ID)
 
 	if err != nil {
@@ -608,7 +596,6 @@ func (s *VideoServiceRepo) DeleteChapter(ctx context.Context, workspaceId uuid.U
 		}
 	}
 
-
 	err = s.videoRepo.DeleteVideoChapter(ctx, ID)
 
 	if err != nil {
@@ -621,7 +608,7 @@ func (s *VideoServiceRepo) DeleteChapter(ctx context.Context, workspaceId uuid.U
 func (s *VideoServiceRepo) GetEndScreenByVideoid(ctx context.Context, workspaceID uuid.UUID, videoID uuid.UUID) (*domain.VideoEndScreen, error) {
 
 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceID)
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -633,9 +620,8 @@ func (s *VideoServiceRepo) GetEndScreenByVideoid(ctx context.Context, workspaceI
 		}
 	}
 
-
 	videoData, err := s.videoRepo.GetByID(ctx, videoID)
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -647,24 +633,23 @@ func (s *VideoServiceRepo) GetEndScreenByVideoid(ctx context.Context, workspaceI
 		}
 	}
 
-
 	if videoData.WorkspaceID != workspaceData.ID {
-    return nil, &utils.ApiError{
-        Code:    403,
-        Message: "Unauthorized access: Video does not belong to this workspace.",
-    }
-}
+		return nil, &utils.ApiError{
+			Code:    403,
+			Message: "Unauthorized access: Video does not belong to this workspace.",
+		}
+	}
 	endScreen, err := s.videoRepo.GetEndScreenByVideoID(ctx, videoData.ID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return  endScreen,nil
+	return endScreen, nil
 
 }
 
-func (s *VideoServiceRepo) UpsertVideoSubtitles(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, subtitles [] dto.SubtitleItemInput) error {
+func (s *VideoServiceRepo) UpsertVideoSubtitles(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID, subtitles []dto.SubtitleItemInput) error {
 
 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceID)
 
@@ -694,9 +679,7 @@ func (s *VideoServiceRepo) UpsertVideoSubtitles(ctx context.Context, videoID uui
 		}
 	}
 
-	
-
-	err = s.videoRepo.UpsertSubtitles(ctx, videoID,subtitles)
+	err = s.videoRepo.UpsertSubtitles(ctx, videoID, subtitles)
 
 	if err != nil {
 		return err
@@ -705,10 +688,7 @@ func (s *VideoServiceRepo) UpsertVideoSubtitles(ctx context.Context, videoID uui
 	return nil
 }
 
-
-
-
-func (s *VideoServiceRepo) UpsertVideoChapters(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, chapters [] dto.VideoChapterInput) error {
+func (s *VideoServiceRepo) UpsertVideoChapters(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID, chapters []dto.VideoChapterInput) error {
 
 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceID)
 
@@ -738,9 +718,7 @@ func (s *VideoServiceRepo) UpsertVideoChapters(ctx context.Context, videoID uuid
 		}
 	}
 
-	
-
-	err = s.videoRepo.UpsertVideosChapter(ctx, videoID,chapters)
+	err = s.videoRepo.UpsertVideosChapter(ctx, videoID, chapters)
 
 	if err != nil {
 		return err
@@ -749,10 +727,7 @@ func (s *VideoServiceRepo) UpsertVideoChapters(ctx context.Context, videoID uuid
 	return nil
 }
 
-
-
-
-func (s *VideoServiceRepo) UpsertVideoCta(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID ,userID uuid.UUID, cta [] dto.VideoCtaInput) error {
+func (s *VideoServiceRepo) UpsertVideoCta(ctx context.Context, videoID uuid.UUID, workspaceID uuid.UUID, userID uuid.UUID, cta []dto.VideoCtaInput) error {
 
 	workspaceData, err := s.workspaceRepo.GetByID(ctx, workspaceID)
 
@@ -782,9 +757,7 @@ func (s *VideoServiceRepo) UpsertVideoCta(ctx context.Context, videoID uuid.UUID
 		}
 	}
 
-	
-
-	err = s.videoRepo.UpsertVideosCta(ctx, videoID,cta)
+	err = s.videoRepo.UpsertVideosCta(ctx, videoID, cta)
 
 	if err != nil {
 		return err

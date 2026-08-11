@@ -17,14 +17,14 @@ import (
 var DB *gorm.DB
 
 func InitDb() *gorm.DB {
-	
-	err := godotenv.Load() 
-	
+
+	err := godotenv.Load()
+
 	if err != nil {
 		log.Println("No .env file found, using system environment variables")
 	}
 
-	fmt.Printf(os.Getenv("DB_HOST"),78)
+	fmt.Printf(os.Getenv("DB_HOST"), 78)
 
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
@@ -48,13 +48,13 @@ func InitDb() *gorm.DB {
 	// pkg.ResetDatabase(db)
 
 	// err = db.Exec(`
-    //     DROP TABLE IF EXISTS video_domains CASCADE;
-    //     DROP TABLE IF EXISTS video_resolutions CASCADE;
-    //     DROP TABLE IF EXISTS videos CASCADE;
-    //     DROP TABLE IF EXISTS workspaces CASCADE;
-    //     DROP TABLE IF EXISTS users CASCADE;
-    // `).Error
-	
+	//     DROP TABLE IF EXISTS video_domains CASCADE;
+	//     DROP TABLE IF EXISTS video_resolutions CASCADE;
+	//     DROP TABLE IF EXISTS videos CASCADE;
+	//     DROP TABLE IF EXISTS workspaces CASCADE;
+	//     DROP TABLE IF EXISTS users CASCADE;
+	// `).Error
+
 	fmt.Print("hii")
 
 	err = db.AutoMigrate(
@@ -62,28 +62,30 @@ func InitDb() *gorm.DB {
 		&domain.Folder{},
 		&domain.User{},
 		&domain.Video{},
+		&domain.Channel{},
+		&domain.ChannelVideo{},
+		&domain.FavoriteVideo{},
 		&domain.Account{},
 		&domain.PlayerSettings{},
 		&domain.VideoResolution{},
 		&domain.VideoDomain{},
 		&domain.Subscription{},
-		&domain.UserUsageCounters{},	
-		&domain.LeadForm{},	
-		&domain.LeadFormField{},	
-		&domain.LeadFormFieldOption{},	
-		&domain.VideoEndScreen{},	
-		&domain.VideoSubtitle{},	
+		&domain.UserUsageCounters{},
+		&domain.LeadForm{},
+		&domain.LeadFormField{},
+		&domain.LeadFormFieldOption{},
+		&domain.VideoEndScreen{},
+		&domain.VideoSubtitle{},
 		&domain.VideoChapters{},
 		&domain.VideoCtaSetting{},
-
 	)
-		  
+
 	if err != nil {
 		log.Fatal("❌ Migration  failed: for db ", err)
 	}
-	
+
 	DB = db
 	fmt.Println("✅ Database connection established successfully!")
-	
+
 	return DB
 }

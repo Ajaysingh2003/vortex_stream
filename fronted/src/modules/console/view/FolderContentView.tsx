@@ -142,7 +142,7 @@ const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid")
             Btnchild={
               <div className="flex flex-row gap-3">
                 <ImportVideos />
-                <UploadFile />
+                <UploadFile folderId={folderID} />
               </div>
             }
           />
