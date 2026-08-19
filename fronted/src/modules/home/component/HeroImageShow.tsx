@@ -84,7 +84,7 @@ function HeroImageShow() {
                 className="w-full flex items-center no-scrollbar  justify-center gap-8 overflow-scroll fade-middle-window"
               >
                 {tabsData.map((e, i) => (
-                  <button onClick={() => setActiveIndex(i)} className="w-fit">
+                  <button key={i} onClick={() => setActiveIndex(i)} className="w-fit">
                     <p
                       className={`text-md ${activeIndex == i ? "text-black" : "text-black/50"}  md:text-[18px]   whitespace-nowrap  capitalize font-subheading font-semibold`}
                     >

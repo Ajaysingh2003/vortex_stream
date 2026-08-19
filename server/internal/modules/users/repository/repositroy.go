@@ -22,7 +22,7 @@ type UserRepository interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 	IsOwned(ctx context.Context,workspaceID uuid.UUID,userID uuid.UUID) (bool,error)
 	GetCurrentActivePlan(ctx context.Context,userID uuid.UUID) (*domain.Subscription,error) 
-	CreateUserUsage(ctx context.Context,tx *gorm.DB,usage domain.UserStorageUsage) error
+	CreateUserUsage(ctx context.Context,tx *gorm.DB,usage *domain.UserStorageUsage) error
 }
 
 
@@ -53,16 +53,36 @@ func (r *postgresUserRepository) Create(ctx context.Context, user *domain.User) 
 	return user, nil
 }
 func (r *postgresUserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
-	var user domain.User
+	// var user domain.User
 	
-	if err := r.db.WithContext(ctx).Preload("UsageCounters").First(&user, "id = ?", id).Error; err != nil {
+	// if err := r.db.WithContext(ctx).Preload("UsageCounters").First(&user, "id = ?", id).Error; err != nil {
 
-		if (errors.Is(err,gorm.ErrRecordNotFound)) {
-			return nil ,nil
-		}
-		return nil, err
-	}
-	return &user, nil
+	// 	if (errors.Is(err,gorm.ErrRecordNotFound)) {
+	// 		return nil ,nil
+	// 	}
+	// 	return nil, err
+	// }
+	// return &user, nil
+
+
+
+	var user domain.User
+now := time.Now()
+
+err := r.db.WithContext(ctx).
+	Preload("UserStorageUsage").
+    Preload("UsageCounters", "period_start <= ? AND period_end >= ?", now, now).
+    First(&user, "id = ?", id).
+    Error
+
+if err != nil {
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        return nil, nil
+    }
+    return nil, err
+}
+
+return &user, nil
 }
 
 func (r *postgresUserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
@@ -140,7 +160,7 @@ func (r *postgresUserRepository) GetCurrentActivePlan(ctx context.Context, userI
 
 
 
-func (postgresUserRepository) CreateUserUsage(ctx context.Context,tx *gorm.DB,usage domain.UserStorageUsage) error {
+func (postgresUserRepository) CreateUserUsage(ctx context.Context,tx *gorm.DB,usage *domain.UserStorageUsage) error {
 
 	if err := tx.WithContext(ctx).Create(usage).Error; err != nil {
         return err

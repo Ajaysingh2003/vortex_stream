@@ -100,27 +100,27 @@ type Subscription struct {
 }
 
 type UserStorageUsage struct {
-	ID     uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
-	UserID uuid.UUID `gorm:"type:uuid;uniqueIndex;not null" json:"user_id"`
+    ID     uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+    UserID uuid.UUID `gorm:"type:uuid;uniqueIndex;not null" json:"userId"`
 
-	UsedBytes int64 `gorm:"type:bigint;default:0;not null" json:"used_bytes"`
+    UsedBytes int64 `gorm:"type:bigint;default:0;not null" json:"usedBytes"`
 
-	UpdatedAt time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+    UpdatedAt time.Time      `gorm:"autoUpdateTime" json:"updatedAt,omitempty"`
+    DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 type UserUsageCounters struct {
-	ID     uuid.UUID `gorm:"type:uuid;primaryKey"`
-	UserID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_usage_period"`
+    ID     uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+    UserID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_usage_period" json:"userId"`
 
-	PeriodStart time.Time `gorm:"type:timestamptz;not null;uniqueIndex:idx_user_usage_period"`
-	PeriodEnd   time.Time `gorm:"type:timestamptz;not null"`
+    PeriodStart time.Time `gorm:"type:timestamptz;not null;uniqueIndex:idx_user_usage_period" json:"periodStart"`
+    PeriodEnd   time.Time `gorm:"type:timestamptz;not null" json:"periodEnd"`
 
-	BandwidthBytesUsed       int64 `gorm:"type:bigint;default:0;not null"`
-	SubtitleGenerationsUsed  int64 `gorm:"type:bigint;default:0;not null"`
+    BandwidthBytesUsed      int64 `gorm:"type:bigint;default:0;not null" json:"bandwidthBytesUsed"`
+    SubtitleGenerationsUsed int64 `gorm:"type:bigint;default:0;not null" json:"subtitleGenerationsUsed"`
 
-	CreatedAt time.Time `gorm:"autoCreateTime"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime"`
+    CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt,omitempty"`
+    UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt,omitempty"`
 }
 
 type BandwidthUsageEvent struct {

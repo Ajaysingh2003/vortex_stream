@@ -434,13 +434,19 @@ export interface UserDataType{
   isActive:boolean;
   usageCounters:{
     id:string;
-    user_id:string;
-    storage_bytes_used:number;
-    playback_minutes_used:number;
-    subtitle_generations_used:number;
-    reset_at:string;
-    updated_at:string;
+    userId:string;
+    BandwidthBytesUsed:number;
+    SubtitleGenerationsUsed:number;
+    PeriodEnd:string;
+    PeriodStart:string;
+    UpdatedAt:string;
+  };
+  userStorageUsage:{
+    id:string;
+    userId:string;
+    usedBytes:number;
   }
+
 }
 
 
