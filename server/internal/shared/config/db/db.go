@@ -36,6 +36,11 @@ func InitDb() *gorm.DB {
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		// The deployed database contains legacy rows that do not satisfy every
+		// newly inferred relationship (for example, orphaned lead forms). Do not
+		// make application startup destructive or fail while AutoMigrate tries to
+		// add those constraints. Existing database constraints are untouched.
+		DisableForeignKeyConstraintWhenMigrating: true,
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix:   "",   // no prefix (e.g., "tbl_")
 			SingularTable: true, // 🔥 disables pluralization: user_models → user_model
@@ -78,6 +83,10 @@ func InitDb() *gorm.DB {
 		&domain.VideoSubtitle{},
 		&domain.VideoChapters{},
 		&domain.VideoCtaSetting{},
+		
+		&domain.UserStorageUsage{},
+		&domain.UserUsageCounters{},
+		&domain.BandwidthUsageEvent{},
 	)
 
 	if err != nil {

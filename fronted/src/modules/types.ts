@@ -419,3 +419,34 @@ export interface VideoCta{
   background_color:string;
   created_at:string;
 }
+
+
+
+
+
+export interface UserDataType{
+  id:string;
+  email:string;
+  name:string;
+  role:string;
+  createdAt:string;
+  updatedAt:string;
+  isActive:boolean;
+  usageCounters:{
+    id:string;
+    user_id:string;
+    storage_bytes_used:number;
+    playback_minutes_used:number;
+    subtitle_generations_used:number;
+    reset_at:string;
+    updated_at:string;
+  }
+}
+
+
+export interface UserSubscriptionType{
+  id:string;
+  user_id:string;
+  plan:string;
+  status:string;
+}

@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	// "github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
@@ -19,6 +21,8 @@ type UserRepository interface {
 	Update(ctx context.Context, user *domain.User) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	IsOwned(ctx context.Context,workspaceID uuid.UUID,userID uuid.UUID) (bool,error)
+	GetCurrentActivePlan(ctx context.Context,userID uuid.UUID) (*domain.Subscription,error) 
+	CreateUserUsage(ctx context.Context,tx *gorm.DB,usage domain.UserStorageUsage) error
 }
 
 
@@ -51,7 +55,7 @@ func (r *postgresUserRepository) Create(ctx context.Context, user *domain.User) 
 func (r *postgresUserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	var user domain.User
 	
-	if err := r.db.WithContext(ctx).First(&user, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("UsageCounters").First(&user, "id = ?", id).Error; err != nil {
 
 		if (errors.Is(err,gorm.ErrRecordNotFound)) {
 			return nil ,nil
@@ -97,4 +101,49 @@ func (r *postgresUserRepository) IsOwned(ctx context.Context, workspaceID uuid.U
     }
 
     return exists, nil
+}
+
+
+
+
+func (r *postgresUserRepository) GetCurrentActivePlan(ctx context.Context, userID uuid.UUID) (*domain.Subscription, error) {
+	var subscription domain.Subscription
+	now := time.Now()
+
+	// Query for an active or trialing subscription where the period has not expired yet.
+	// We also account for 'canceled' status if period_end is still in the future.
+	err := r.db.WithContext(ctx).
+		Where("user_id = ?", userID).
+		Where("status IN ?", []string{"active", "trialing", "canceled"}).
+		Where("period_end > ?", now).
+		Order("period_end DESC"). // Gets the latest valid period if multiple exist
+		First(&subscription).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// Option A: Return custom error
+			// return nil, fmt.Errorf("no active subscription found for user: %w", err)
+			
+			
+			return &domain.Subscription{
+				UserID: userID,
+				Plan:   domain.Free,
+				Status: "active",
+			}, nil
+			
+		}
+		return nil, fmt.Errorf("failed to fetch active subscription: %w", err)
+	}
+
+	return &subscription, nil
+}
+
+
+
+func (postgresUserRepository) CreateUserUsage(ctx context.Context,tx *gorm.DB,usage domain.UserStorageUsage) error {
+
+	if err := tx.WithContext(ctx).Create(usage).Error; err != nil {
+        return err
+    }
+    return nil
 }

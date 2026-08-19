@@ -1,15 +1,9 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-// import TopHeader from "../component/TopHeader";
-// import UploadFile from "../component/UploadFile";
-import ImportVideos from "@/modules/upload/component/ImportVideos";
-// import Filters from "../component/Filters";
-import { useQueryClient, useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import {
-  LibraryContentType,
   WorkspaceType,
-  VideoListType,
   VideoAsset,
 } from "@/modules/types";
 import { Inbox, Loader2 } from "lucide-react";
@@ -17,20 +11,15 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useLibraryFilters } from "@/lib/useLibraryFilters";
 import { useRouter } from "next/navigation";
 import TopHeader from "@/modules/console/component/TopHeader";
-import UploadFile from "@/modules/console/component/UploadFile";
-import Filters from "@/modules/console/component/Filters";
 import { VideoDataTable } from "@/modules/console/component/VideoDataTable";
 import { VideoColumn } from "@/modules/console/component/VideoColumn";
-// import { VideoDataTable } from "../component/VideoDataTable";
-// import { VideoColumn } from "../component/VideoColumn";
+import DropdownFilters from "@/modules/console/component/DropdownFilters";
 
 interface VideosViewProps {
   limit: number;
-  favorite?: boolean;
 }
 
-function FavoritesView({ limit, favorite = false }: VideosViewProps) {
-  const queryClient=useQueryClient()
+function FavoritesView({ limit }: VideosViewProps) {
   const trpc = useTRPC();
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -40,42 +29,22 @@ function FavoritesView({ limit, favorite = false }: VideosViewProps) {
   const workspacesData = workspace as WorkspaceType;
   const [filters] = useLibraryFilters();
 
-  const listOptions = favorite
-    ? trpc.favorite.list.infiniteQueryOptions(
-        {
-          limit,
-          cursor: filters.cursor,
-          workspaceID: workspacesData.id,
-          type: filters.type,
-          date: filters.date,
-          visibility: filters.visibility,
-          sort: filters.sort,
-        },
-        {
-          getNextPageParam: (lastPage) =>
-            lastPage.metadata.hasNextPage
-              ? lastPage.metadata.nextCursor
-              : undefined,
-          initialCursor: "",
-        },
-      )
-    : trpc.video.videoListFromWorkspace.infiniteQueryOptions(
-        {
-          limit,
-          cursor: filters.cursor,
-          workspaceId: workspacesData.id,
-          date: filters.date,
-          visibility: filters.visibility,
-          sort: filters.sort,
-        },
-        {
-          getNextPageParam: (lastPage: VideoListType) =>
-            lastPage.metadata.hasNextPage
-              ? lastPage.metadata.nextCursor
-              : undefined,
-          initialCursor: "",
-        },
-      );
+  const listOptions = trpc.favorite.list.infiniteQueryOptions(
+    {
+      limit,
+      cursor: filters.cursor,
+      workspaceID: workspacesData.id,
+      type: filters.type,
+      date: filters.date,
+      visibility: filters.visibility,
+      sort: filters.sort,
+    },
+    {
+      getNextPageParam: (lastPage) =>
+        lastPage.metadata.hasNextPage ? lastPage.metadata.nextCursor : undefined,
+      initialCursor: "",
+    },
+  );
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSuspenseInfiniteQuery(listOptions);
@@ -111,42 +80,6 @@ function FavoritesView({ limit, favorite = false }: VideosViewProps) {
   //       );
   // }
 
-  const handleSuccess = async () => {
-    // ← use infiniteQueryOptions not queryOptions
-    await queryClient.invalidateQueries(
-        favorite
-          ? trpc.favorite.list.infiniteQueryOptions(
-              {
-                limit,
-                workspaceID: workspacesData.id,
-                cursor: "",
-                type: filters.type,
-                date: filters.date,
-                visibility: filters.visibility,
-                sort: filters.sort,
-              },
-              { getNextPageParam: (lastPage) => lastPage.metadata.hasNextPage ? lastPage.metadata.nextCursor : undefined, initialCursor: "" },
-            )
-          : trpc.video.videoListFromWorkspace.infiniteQueryOptions(
-            {
-                limit,
-                workspaceId: workspacesData.id,
-                cursor: "",
-                date: filters.date,
-                visibility: filters.visibility,
-                sort: filters.sort,
-            },
-            {
-                getNextPageParam: (lastPage: LibraryContentType) =>
-                    lastPage.metadata.hasNextPage
-                        ? lastPage.metadata.nextCursor
-                        : undefined,
-                initialCursor: "",
-            }
-            )
-    )
-  };
-
 const router=useRouter()
 const handleRowClick=(row:{id:string})=>{
   console.log("row.id",row.id)
@@ -157,11 +90,7 @@ const handleRowClick=(row:{id:string})=>{
   router.push(url)
 }
 
-type typeViewMethod = "list" | "grid";
-  
-
-
-const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid");
+const [activeViewMethod] = useState<"list">("list");
 
 
   return (
@@ -169,16 +98,16 @@ const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid")
       <div className="px-4 md:px-12 py-4 w-full">
         <div className="flex flex-col gap-6 md:gap-4">
           <TopHeader
-            Header="Favorites video"
-            Btnchild={
-              <div className="flex flex-row gap-3">
-               
-              </div>
-            }
+            Header="Favorite videos"
+            Btnchild={<span className="hidden text-sm text-muted-foreground md:block">Your saved video collection</span>}
           />
 
-          <div className=" hidden md:flex justify-end">
-            <Filters  activeViewMethod={activeViewMethod} setActiveViewMethod={setActiveViewMethod} workspaceID={workspacesData.id} parentId={null} onSucess={handleSuccess}/>
+          <div className="hidden justify-end md:flex">
+            <div className="flex items-center gap-3">
+              <DropdownFilters scope="date" label="Date" items={[{ label: "Anytime", filter: "any" }, { label: "Today", filter: "today" }, { label: "Last 7 Days", filter: "this_week" }, { label: "Last 30 Days", filter: "30_days" }]} />
+              <DropdownFilters scope="sort" label="Sort" items={[{ label: "Newest", filter: "created_desc" }, { label: "Oldest", filter: "created_asc" }, { label: "Name (A to Z)", filter: "name_asc" }]} />
+              <DropdownFilters scope="visibility" label="Visibility" items={[{ label: "All access types", filter: "all" }, { label: "Private", filter: "private" }, { label: "Public", filter: "public" }]} />
+            </div>
           </div>
 
          { <div className="max-w-7xl"> 
@@ -193,7 +122,7 @@ const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid")
               <div className="w-full py-12 flex flex-col items-center justify-center border border-dashed rounded-xl bg-muted/20 text-muted-foreground gap-2">
                 <Inbox className="size-8 opacity-40" />
                 <p className="text-sm font-medium">
-                  This workspace folder is completely empty.
+                  No favorite videos yet.
                 </p>
               </div>
             )}

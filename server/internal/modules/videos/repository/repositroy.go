@@ -239,7 +239,7 @@ func (r *postgresVideoRepository) GetByIdAndUserId(ctx context.Context, id uuid.
 
 func (r *postgresVideoRepository) GetByFolderIdPaginated(ctx context.Context, folderID *uuid.UUID, workspaceID uuid.UUID, afterID string, remaining int, filterOptions *folderdto.FilterOptions) ([]domain.Video, error) {
 
-	query := r.db.WithContext(ctx).Model(&domain.Video{}).Where("workspace_id", workspaceID)
+	query := r.db.WithContext(ctx).Model(&domain.Video{}).Where("workspace_id = ?", workspaceID)
 
 	if folderID != nil {
 		query = query.Where("folder_id = ?", folderID)
@@ -358,6 +358,7 @@ func (r *postgresVideoRepository) GetVideosPaginated(
 	}
 
 	query := r.db.WithContext(ctx).
+		Model(&domain.Video{}).
 		Where("workspace_id = ?", workspaceID)
 
 	// Apply Filter Options
@@ -380,30 +381,30 @@ func (r *postgresVideoRepository) GetVideosPaginated(
 
 		// 2. Date Filter
 		if filterOptions.Date != nil && *filterOptions.Date != "" {
-	switch *filterOptions.Date {
-	case "today":
-		query = query.Where("created_at >= NOW() - INTERVAL '24 hours'")
+			switch *filterOptions.Date {
+			case "today":
+				query = query.Where("created_at >= NOW() - INTERVAL '24 hours'")
 
-	case "this_week":
-		query = query.Where("created_at >= NOW() - INTERVAL '7 days'")
+			case "this_week":
+				query = query.Where("created_at >= NOW() - INTERVAL '7 days'")
 
-	case "30_days":
-		query = query.Where("created_at >= NOW() - INTERVAL '30 days'")
+			case "30_days":
+				query = query.Where("created_at >= NOW() - INTERVAL '30 days'")
 
-	case "this_month":
-		// Truncates created_at check to the start of the current calendar month
-		query = query.Where("created_at >= date_trunc('month', CURRENT_DATE)")
+			case "this_month":
+				// Truncates created_at check to the start of the current calendar month
+				query = query.Where("created_at >= date_trunc('month', CURRENT_DATE)")
 
-	case "any":
-		// "Anytime" selected — do not add any date filter to the query
+			case "any":
+				// "Anytime" selected — do not add any date filter to the query
 
-	default:
-		// Fallback for specific ISO date string (e.g. YYYY-MM-DD from a datepicker)
-		if parsedDate, err := time.Parse("2006-01-02", *filterOptions.Date); err == nil {
-			query = query.Where("created_at >= ? AND created_at < ?", parsedDate, parsedDate.AddDate(0, 0, 1))
+			default:
+				// Fallback for specific ISO date string (e.g. YYYY-MM-DD from a datepicker)
+				if parsedDate, err := time.Parse("2006-01-02", *filterOptions.Date); err == nil {
+					query = query.Where("created_at >= ? AND created_at < ?", parsedDate, parsedDate.AddDate(0, 0, 1))
+				}
+			}
 		}
-	}
-}
 
 		// 3. Dynamic Sorting
 		if filterOptions.Sort != nil && *filterOptions.Sort != "" {

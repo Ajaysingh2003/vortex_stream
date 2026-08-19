@@ -1,7 +1,6 @@
 // // video router
 // package router
 
-
 // import (
 // 	"time"
 
@@ -14,7 +13,7 @@
 
 // func SetupRouter(r *gin.Engine, videohandler *handler.VideoHandler,jwtMaker *utils.JwtMaker)*gin.Engine{
 // 	// r := gin.Default()
-	
+
 // 	r.Use(cors.New(cors.Config{
 // 		AllowAllOrigins:  true,
 // 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
@@ -40,11 +39,9 @@
 // 		api.POST("/workspace/:workspaceId/video/:id/end-screen", middleware.AuthMiddleware(jwtMaker),videohandler.EndScreenSave)
 
 // 	 }
-	 
+
 // 	return r
 // }
-
-
 
 // video router
 package router
@@ -82,32 +79,30 @@ func SetupRouter(r *gin.Engine, videohandler *handler.VideoHandler, jwtMaker *ut
 		video.GET("/:videoId/chapters", videohandler.GetVideoChapterByVideoID)
 		video.GET("/:videoId/cta", videohandler.GetVideoCtaByVideoID)
 	}
-	
+
 	workspaceVideos := api.Group("/workspace/:workspaceId/video")
-	
+
 	{
-		
-		workspaceVideos.DELETE("/chapter/:id", middleware.AuthMiddleware(jwtMaker) ,videohandler.DeleteChapter)
-		workspaceVideos.DELETE("/cta/:id", middleware.AuthMiddleware(jwtMaker) ,videohandler.DeleteCta)
-		workspaceVideos.GET("/video-list/",middleware.AuthMiddleware(jwtMaker) ,videohandler.ListVideoByWorkspace)
-		
-		workspaceVideos.GET("/:id/",middleware.AuthMiddleware(jwtMaker) ,videohandler.GetVideoMetaData)
 
-		workspaceVideos.PATCH("/:id/update",middleware.AuthMiddleware(jwtMaker), videohandler.UpdateVideoMetaData)
+		workspaceVideos.DELETE("/chapter/:id", middleware.AuthMiddleware(jwtMaker), videohandler.DeleteChapter)
+		workspaceVideos.DELETE("/cta/:id", middleware.AuthMiddleware(jwtMaker), videohandler.DeleteCta)
+		workspaceVideos.GET("/video-list", middleware.AuthMiddleware(jwtMaker), videohandler.ListVideoByWorkspace)
 
-		workspaceVideos.POST("/:id/end-screen", middleware.AuthMiddleware(jwtMaker) ,videohandler.EndScreenSave)
+		workspaceVideos.GET("/:id/", middleware.AuthMiddleware(jwtMaker), videohandler.GetVideoMetaData)
+
+		workspaceVideos.PATCH("/:id/update", middleware.AuthMiddleware(jwtMaker), videohandler.UpdateVideoMetaData)
+
+		workspaceVideos.POST("/:id/end-screen", middleware.AuthMiddleware(jwtMaker), videohandler.EndScreenSave)
 
 		workspaceVideos.GET("/:id/end-screen", videohandler.GetEndScreenByVideoID)
 
-		workspaceVideos.DELETE("/:id/end-screen",middleware.AuthMiddleware(jwtMaker), videohandler.DeleteEndScreen)
+		workspaceVideos.DELETE("/:id/end-screen", middleware.AuthMiddleware(jwtMaker), videohandler.DeleteEndScreen)
 
-
-		workspaceVideos.POST("/:id/subtitle",middleware.AuthMiddleware(jwtMaker), videohandler.VideoSubtitle)
-		workspaceVideos.GET("/:id/subtitle",middleware.AuthMiddleware(jwtMaker), videohandler.GetSubtitleByVideoID)
-		
-		workspaceVideos.DELETE("/:id/subtitle/:subtitleId",middleware.AuthMiddleware(jwtMaker), videohandler.DeleteSubtitle)
-		workspaceVideos.POST("/:id/chapters",middleware.AuthMiddleware(jwtMaker), videohandler.VideoChapters)
-		workspaceVideos.POST("/:id/cta",middleware.AuthMiddleware(jwtMaker), videohandler.VideoCtaUpsert)
+		workspaceVideos.POST("/:id/subtitle", middleware.AuthMiddleware(jwtMaker), videohandler.VideoSubtitle)
+		workspaceVideos.GET("/:id/subtitle", middleware.AuthMiddleware(jwtMaker), videohandler.GetSubtitleByVideoID)
+		workspaceVideos.DELETE("/:id/subtitle/:subtitleId", middleware.AuthMiddleware(jwtMaker), videohandler.DeleteSubtitle)
+		workspaceVideos.POST("/:id/chapters", middleware.AuthMiddleware(jwtMaker), videohandler.VideoChapters)
+		workspaceVideos.POST("/:id/cta", middleware.AuthMiddleware(jwtMaker), videohandler.VideoCtaUpsert)
 	}
 
 	return r

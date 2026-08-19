@@ -89,7 +89,7 @@ func main() {
 	subscriptionRepo := subscriptionRepository.NewPostgresSubscriptionRepository(database)
 	userUsageRepo := userUsageRepository.NewPostgresUsageRepository(database)
 	playerService := playerService.NewPlayerService(workspaceRepo, userRepo, playerRepo)
-	userService := services.NewUserService(userRepo, jwtToken, workspaceRepo, database, accountRepo)
+	userService := services.NewUserService(userRepo,userUsageRepo ,jwtToken, workspaceRepo, database, accountRepo)
 	folderService := folderService.NewFolderService(folderRepo, userRepo, workspaceRepo, videoRepo)
 	workspaceService := services.NewWorkspaceService(userRepo, workspaceRepo)
 	uploadService := serviceUpload.NewUploadService(userRepo)

@@ -23,19 +23,19 @@ type postgresRepository struct{ db *gorm.DB }
 func NewPostgresRepository(db *gorm.DB) FavoriteRepository { return &postgresRepository{db: db} }
 
 func (r *postgresRepository) AddVideo(ctx context.Context, favorite *domain.FavoriteVideo) error {
-	return r.db.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Create(favorite).Error
+	return r.db.WithContext(ctx).Table("favorite_videos").Clauses(clause.OnConflict{DoNothing: true}).Create(favorite).Error
 }
 func (r *postgresRepository) RemoveVideo(ctx context.Context, userID, videoID uuid.UUID) error {
-	return r.db.WithContext(ctx).Where("user_id = ? AND video_id = ?", userID, videoID).Delete(&domain.FavoriteVideo{}).Error
+	return r.db.WithContext(ctx).Table("favorite_videos").Where("user_id = ? AND video_id = ?", userID, videoID).Delete(&domain.FavoriteVideo{}).Error
 }
 func (r *postgresRepository) IsVideoFavorite(ctx context.Context, userID, videoID uuid.UUID) (bool, error) {
 	var count int64
-	err := r.db.WithContext(ctx).Model(&domain.FavoriteVideo{}).Where("user_id = ? AND video_id = ?", userID, videoID).Count(&count).Error
+	err := r.db.WithContext(ctx).Table("favorite_videos").Where("user_id = ? AND video_id = ?", userID, videoID).Count(&count).Error
 	return count > 0, err
 }
 func (r *postgresRepository) ListVideos(ctx context.Context, userID uuid.UUID) ([]domain.FavoriteVideo, error) {
 	var favorites []domain.FavoriteVideo
-	err := r.db.WithContext(ctx).Where("user_id = ?", userID).Order("created_at DESC").Find(&favorites).Error
+	err := r.db.WithContext(ctx).Table("favorite_videos").Where("user_id = ?", userID).Order("created_at DESC").Find(&favorites).Error
 	return favorites, err
 }
 
@@ -45,28 +45,28 @@ func (r *postgresRepository) ListVideosPaginated(ctx context.Context, userID, wo
 	}
 	query := r.db.WithContext(ctx).
 		Table("video").
-		Joins("JOIN favorite_video ON favorite_video.video_id = video.id AND favorite_video.user_id = ?", userID).
+		Joins("JOIN favorite_videos ON favorite_videos.video_id = video.id AND favorite_videos.user_id = ?", userID).
 		Where("video.workspace_id = ?", workspaceID)
 
 	if filters != nil {
 		if filters.Visibility != nil {
 			switch *filters.Visibility {
 			case "public":
-				query = query.Where("video.is_private = ?", false)
+				query = query.Where("videos.is_private = ?", false)
 			case "private":
-				query = query.Where("video.is_private = ?", true)
+				query = query.Where("videos.is_private = ?", true)
 			}
 		}
 		if filters.Date != nil {
 			switch *filters.Date {
 			case "today":
-				query = query.Where("video.created_at >= NOW() - INTERVAL '24 hours'")
+				query = query.Where("videos.created_at >= NOW() - INTERVAL '24 hours'")
 			case "this_week", "7_day":
-				query = query.Where("video.created_at >= NOW() - INTERVAL '7 days'")
+				query = query.Where("videos.created_at >= NOW() - INTERVAL '7 days'")
 			case "30_days":
-				query = query.Where("video.created_at >= NOW() - INTERVAL '30 days'")
+				query = query.Where("videos.created_at >= NOW() - INTERVAL '30 days'")
 			case "this_month":
-				query = query.Where("video.created_at >= date_trunc('month', CURRENT_DATE)")
+				query = query.Where("videos.created_at >= date_trunc('month', CURRENT_DATE)")
 			}
 		}
 	}
@@ -74,24 +74,24 @@ func (r *postgresRepository) ListVideosPaginated(ctx context.Context, userID, wo
 	ascending := filters != nil && filters.Sort != nil && (*filters.Sort == "asc" || *filters.Sort == "oldest" || *filters.Sort == "created_asc")
 	if cursorID != nil && *cursorID != nil {
 		if ascending {
-			query = query.Where("video.id > ?", **cursorID)
+			query = query.Where("videos.id > ?", **cursorID)
 		} else {
-			query = query.Where("video.id < ?", **cursorID)
+			query = query.Where("videos.id < ?", **cursorID)
 		}
 	}
 	if filters != nil && filters.Sort != nil {
 		switch *filters.Sort {
 		case "asc", "oldest", "created_asc":
-			query = query.Order("video.created_at ASC, video.id ASC")
+			query = query.Order("videos.created_at ASC, videos.id ASC")
 		case "name_asc":
-			query = query.Order("video.title ASC, video.id ASC")
+			query = query.Order("videos.title ASC, videos.id ASC")
 		case "name_desc":
-			query = query.Order("video.title DESC, video.id DESC")
+			query = query.Order("videos.title DESC, videos.id DESC")
 		default:
-			query = query.Order("video.created_at DESC, video.id DESC")
+			query = query.Order("videos.created_at DESC, videos.id DESC")
 		}
 	} else {
-		query = query.Order("video.created_at DESC, video.id DESC")
+		query = query.Order("videos.created_at DESC, videos.id DESC")
 	}
 
 	var videos []domain.Video

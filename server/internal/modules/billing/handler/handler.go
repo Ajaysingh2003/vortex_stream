@@ -35,7 +35,7 @@ func (*BillingHandler) BillingPlan(c *gin.Context) {
 		publicPlans[tierKey] = PublicPlanProjection{
 			Name:          internalPlan.Name,
 			Description:   internalPlan.Description,
-			BillingCycles: internalPlan.BillingCycles, // Only map over the pricing and price IDs
+			BillingCycles: internalPlan.BillingCycles,
 		}
 	}
 

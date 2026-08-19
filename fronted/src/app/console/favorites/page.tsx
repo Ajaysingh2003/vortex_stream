@@ -1,6 +1,5 @@
 import Loader from "@/components/static/Loader";
 import {loaderLibraryFilter} from "@/lib/searchParams";
-import VideosView from "@/modules/console/view/VideosView";
 import FavoritesView from "@/modules/favorite/view/FavoriteView";
 import { WorkspaceType } from "@/modules/types";
 import { getQueryClient, trpc } from "@/trpc/server";
@@ -57,7 +56,7 @@ async function page({ searchParams }: PageProps) {
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="w-full h-full">
         <Suspense key={currentCursor} fallback={<Loader />}>
-          <FavoritesView limit={currentLimit} favorite />
+          <FavoritesView limit={currentLimit} />
         </Suspense>
       </div>
     </HydrationBoundary>
