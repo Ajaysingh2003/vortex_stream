@@ -79,8 +79,8 @@ export function AppSidebar() {
       icon: TvMinimalPlay,
     },
     {
-      title: "channel",
-      href: "/console/channel",
+      title: "Channels",
+      href: "/console/channels",
       icon: TvMinimal,
     },
     {

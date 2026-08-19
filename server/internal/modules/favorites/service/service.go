@@ -37,6 +37,7 @@ func (s *Service) authorizeVideo(ctx context.Context, userID, videoID uuid.UUID)
 func (s *Service) authorizeWorkspace(ctx context.Context, userID, workspaceID uuid.UUID) error {
 	var workspace domain.Workspaces
 	err := s.db.WithContext(ctx).
+		Table("workspaces").
 		Where("id = ? AND user_id = ?", workspaceID, userID).
 		First(&workspace).Error
 	if err == gorm.ErrRecordNotFound {

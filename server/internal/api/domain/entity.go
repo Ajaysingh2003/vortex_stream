@@ -63,23 +63,27 @@ const (
 )
 
 type User struct {
-	// Changed ID back to uuid.UUID for consistency with Video and VideoResolution
 	ID        uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
 	Email     string         `gorm:"uniqueIndex;not null" json:"email"`
 	Password  string         `gorm:"not null" json:"-"`
 	Name      *string        `gorm:"type:varchar(255)" json:"name"`
 	Avatar    *string        `gorm:"type:varchar(255)" json:"avatar"`
 	Role      UserRole       `gorm:"type:varchar(20);default:'User'" json:"role"`
+	IsActive  bool           `gorm:"default:true" json:"isActive"`
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	IsActive  bool           `gorm:"default:true" json:"isActive"`
-	// Videos []Video `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"videos,omitempty"`
+
 	Workspaces []Workspaces `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"workspaces,omitempty"`
 	Accounts   []Account    `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"accounts,omitempty"`
 
-	Subscriptions *Subscription     `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"subscriptions,omitempty"`
-	UsageCounters UserUsageCounters `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"usageCounters,omitempty"`
+	Subscription *Subscription `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"subscription,omitempty"`
+
+	UsageCounters []UserUsageCounters `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"usageCounters,omitempty"`
+
+	UserStorageUsage *UserStorageUsage `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"userStorageUsage,omitempty"`
+
+	BandwidthUsageEvents []BandwidthUsageEvent `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"bandwidthUsageEvents,omitempty"`
 }
 
 type Subscription struct {
@@ -95,15 +99,39 @@ type Subscription struct {
 	UpdatedAt            time.Time `json:"updatedAt"`
 }
 
+type UserStorageUsage struct {
+	ID     uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+	UserID uuid.UUID `gorm:"type:uuid;uniqueIndex;not null" json:"user_id"`
+
+	UsedBytes int64 `gorm:"type:bigint;default:0;not null" json:"used_bytes"`
+
+	UpdatedAt time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
 type UserUsageCounters struct {
-	ID                      uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
-	UserID                  uuid.UUID      `gorm:"type:uuid;uniqueIndex;not null" json:"user_id"`
-	StorageBytesUsed        int64          `gorm:"type:bigint;default:0" json:"storage_bytes_used"`
-	PlaybackMinutesUsed     int            `gorm:"type:integer;default:0" json:"playback_minutes_used"`
-	SubtitleGenerationsUsed int            `gorm:"type:integer;default:0" json:"subtitle_generations_used"`
-	ResetAt                 time.Time      `gorm:"type:timestamptz;not null" json:"reset_at"`
-	UpdatedAt               time.Time      `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP" json:"updated_at"`
-	DeletedAt               gorm.DeletedAt `gorm:"index" json:"-"`
+	ID     uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_usage_period"`
+
+	PeriodStart time.Time `gorm:"type:timestamptz;not null;uniqueIndex:idx_user_usage_period"`
+	PeriodEnd   time.Time `gorm:"type:timestamptz;not null"`
+
+	BandwidthBytesUsed       int64 `gorm:"type:bigint;default:0;not null"`
+	SubtitleGenerationsUsed  int64 `gorm:"type:bigint;default:0;not null"`
+
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime"`
+}
+
+type BandwidthUsageEvent struct {
+	ID uuid.UUID `gorm:"type:uuid;primaryKey"`
+
+	UserID  uuid.UUID  `gorm:"type:uuid;not null;index"`
+	VideoID *uuid.UUID `gorm:"type:uuid;index"`
+
+	Bytes int64 `gorm:"type:bigint;not null"`
+
+	CreatedAt time.Time `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP;index"`
 }
 
 type Workspaces struct {
@@ -121,6 +149,9 @@ type Workspaces struct {
 	Folders        []Folder        `gorm:"foreignKey:WorkspaceID" json:"folders,omitempty"`
 	PlayerSettings *PlayerSettings `gorm:"foreignKey:WorkspaceID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"playerSettings,omitempty"`
 }
+
+// TableName keeps the application aligned with the existing production schema.
+func (Workspaces) TableName() string { return "workspaces" }
 
 type PlayerSettings struct {
 	ID uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
@@ -172,7 +203,10 @@ type Video struct {
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	BandwidthUsageEvents []BandwidthUsageEvent `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE" json:"-"`
 }
+
+func (Video) TableName() string { return "video" }
 
 // Channel is a workspace-owned collection that can be followed/favorited by a user.
 // Keeping the workspace owner on the channel lets the favorite service enforce
@@ -187,6 +221,8 @@ type Channel struct {
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+func (Channel) TableName() string { return "channels" }
+
 type ChannelVideo struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	ChannelID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_channel_video" json:"channelId"`
@@ -194,12 +230,16 @@ type ChannelVideo struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
+func (ChannelVideo) TableName() string { return "channel_videos" }
+
 type FavoriteVideo struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	UserID    uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_favorite_video_user_video" json:"userId"`
 	VideoID   uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_favorite_video_user_video;index" json:"videoId"`
 	CreatedAt time.Time `json:"createdAt"`
 }
+
+func (FavoriteVideo) TableName() string { return "favorite_videos" }
 
 type VideoResolution struct {
 	ID      uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`

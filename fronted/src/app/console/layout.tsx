@@ -4,29 +4,73 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/modules/console/component/AppSidebar";
 import { ConsoleProvider } from "@/modules/console/context/ConsoleContext";
 import BreadCumbConsole from "@/modules/console/component/BreadCumbConsole";
-// import { AppSidebar } from "../modules/console/component/AppSidebar";
+import ProfileView from "@/components/static/ProfileView";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { UserDataType, UserSubscriptionType } from "@/modules/types";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
-function layout({ children }: { children: React.ReactNode }) {
+function Layout({ children }: { children: React.ReactNode }) {
+  const trpc = useTRPC();
+  const { data: user } = useSuspenseQuery(trpc.user.profile.queryOptions());
+  const { data: planDetails } = useSuspenseQuery(
+    trpc.user.getCurrentPlan.queryOptions(),
+  );
+
+  const userData = user as UserDataType;
+  const router=useRouter()
+  const logOutMutate = useMutation(
+    trpc.user.logout.mutationOptions({
+      onSuccess: () => {
+        toast.success("User Logedout Successfully.");
+        router.push(`/`)
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      },
+    }),
+  );
+  const planDetailsType = planDetails as UserSubscriptionType;
+
+  const handleLogOut = async () => {
+    await logOutMutate.mutateAsync();
+  };
+
   return (
     <ConsoleProvider>
       <SidebarProvider>
-        <section className="flex  w-full h-full">
-          {
-            <div className=" py-8 h-full">
-              <AppSidebar />
-            </div>
-          }
+        <section className="flex w-full min-h-screen">
+          <div className="py-8 h-full">
+            <AppSidebar />
+          </div>
 
-          <div className="w-full relative ">
-            <div className="w-full bg-white py-1 px-1 md:px-2 md:py-2.5 border-stone-200 border-b flex gap-2 items-center fixed z-40">
-              <SidebarTrigger />
-              <div
-                className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-700"
-                aria-hidden="true"
-              />
-              <BreadCumbConsole />
-            </div>
-            <div className="py-10 lg:py-20 w-full h-full ">{children}</div>
+          <div className="flex-1 w-full relative">
+            {/* Header Navbar */}
+            <header className="sticky top-0 z-40 w-full bg-white px-4 py-3 border-b border-stone-200 flex items-center justify-between gap-4">
+              {/* Left Section: Trigger & Breadcrumbs */}
+              <div className="flex items-center gap-3">
+                <SidebarTrigger />
+                <div
+                  className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-700"
+                  aria-hidden="true"
+                />
+                <BreadCumbConsole />
+              </div>
+
+              {/* Right Section: User Info / Search / Badges */}
+              <div className="flex items-center gap-3">
+                <ProfileView
+                  name={userData.name}
+                  email={userData.email}
+                  plan={planDetailsType.plan}
+                  onLogout={handleLogOut}
+                />
+              </div>
+            </header>
+
+            {/* Main Content Area */}
+            <main className="p-6 w-full h-full">{children}</main>
           </div>
         </section>
       </SidebarProvider>
@@ -34,4 +78,4 @@ function layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default layout;
+export default Layout;

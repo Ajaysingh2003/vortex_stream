@@ -79,6 +79,7 @@ function VideosView({ limit, favorite = false }: VideosViewProps) {
 
 
 
+
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
@@ -156,7 +157,8 @@ type typeViewMethod = "list" | "grid";
   
 
 
-const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid");
+// The grid branch is currently disabled below, so start with the working list view.
+const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("list");
 
 
   return (
@@ -184,8 +186,7 @@ const [activeViewMethod, setActiveViewMethod] = useState<typeViewMethod>("grid")
               activeViewMethod === "list" ? (
                 <VideoDataTable name="library" columns={VideoColumn} data={items} onRowClick={handleRowClick} />
               ) : (
-                null
-                // <GridDataView items={items} />
+                <VideoDataTable name="library" columns={VideoColumn} data={items} onRowClick={handleRowClick} />
               )
             ) : (
               <div className="w-full py-12 flex flex-col items-center justify-center border border-dashed rounded-xl bg-muted/20 text-muted-foreground gap-2">

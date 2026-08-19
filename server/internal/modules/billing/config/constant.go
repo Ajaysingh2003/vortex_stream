@@ -83,7 +83,7 @@ var Plans = map[string]Plan{
 			VideoChapter:        true,
 			LeadCapture:         true,
 		},
-	}, // 🟩 FIXED: Removed the extra structural closing braces that broke your code here
+	}, 
 	TierPro: {
 		Name:        "Pro",
 		Description: "Unlocks custom branding and 22,000 monthly playback minutes.",

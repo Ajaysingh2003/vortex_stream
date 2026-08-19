@@ -50,7 +50,7 @@ func (h *Handler) List(c *gin.Context) {
 	}
 	data, err := h.Service.List(c, user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false})
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "could not load channels"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})

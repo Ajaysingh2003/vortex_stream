@@ -19,6 +19,7 @@ func SetupRouter(r *gin.Engine,userhandler *handler.UserHandler,jwtMaker *utils.
 	oAuthApi:=user.Group("/oauth")
 
 	 {
+
 		user.POST("/register",userhandler.Register)
 		user.POST("/verify-otp",userhandler.VerifyOTP)
 		user.POST("/login",userhandler.Login)
@@ -26,6 +27,8 @@ func SetupRouter(r *gin.Engine,userhandler *handler.UserHandler,jwtMaker *utils.
 		user.GET("/workspaces",middleware.AuthMiddleware(jwtMaker),userhandler.GetWorkspaces)
 		user.POST("/workspaces/create",middleware.AuthMiddleware(jwtMaker),userhandler.CreateWorkspace)
 		user.GET("/workspaces/:id", middleware.AuthMiddleware(jwtMaker),userhandler.GetWorkspace)
+		user.GET("/current-plan", middleware.AuthMiddleware(jwtMaker),userhandler.GetCurrentPlanDetails)
+	
 	 }
 	 {
 		oAuthApi.GET("/google",userhandler.GoogleLogin)

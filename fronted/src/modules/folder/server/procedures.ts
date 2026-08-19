@@ -294,7 +294,7 @@ console.log(body,"lol")
         const access_token = cookieStore.get("access_token")?.value;
         
         const res = await axios.get(
-          `${process.env.BASE_API}/v1/workspaces/${input.workspaceID}/content-library?limit=${input.limit}&cursor=${input.cursor ?? ""}&type=${input.type ?? "all"}&date=${input.date ?? "any"}&visibility=${input.visibility ?? "all"}&sort=${input.sort ?? "created_asc"}`,
+          `${process.env.BASE_API}/v1/workspaces/${input.workspaceID}/content-library/?limit=${input.limit}&cursor=${input.cursor ?? ""}&type=${input.type ?? "all"}&date=${input.date ?? "any"}&visibility=${input.visibility ?? "all"}&sort=${input.sort ?? "created_asc"}`,
           {
             withCredentials: true,
             headers: {
@@ -305,6 +305,7 @@ console.log(body,"lol")
 
 
 
+        console.log(res.data.data,"leah jaye")
         return res.data.data;
         } catch (error: any) {
         console.log(error?.response?.data, "error occurred");

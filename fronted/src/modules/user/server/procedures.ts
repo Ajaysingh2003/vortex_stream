@@ -223,8 +223,25 @@ export const userRouter = createTRPCRouter({
   });
     }
 
-  })
-  ,
+  }),
+  logout: protectedProcedure(["Admin", "User"]).mutation(async ({ ctx }) => {
+    const cookieStore = await cookies();
+
+    const cookieOptions = {
+      path: "/",
+      domain: process.env.NODE_ENV === "production" ? ".yourdomain.com" : "localhost", // Adjust to match how it was set
+      expires: new Date(0),
+      maxAge: 0,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+    };
+
+    cookieStore.set("access_token", "", cookieOptions);
+    cookieStore.set("workspace_id", "", cookieOptions);
+
+    return { success: true };
+  }),
   getWorkspaces:getUserProcedure.query(async({ctx})=>{
     try {
       const cookieStore = await cookies();
@@ -279,6 +296,47 @@ export const userRouter = createTRPCRouter({
             {
               ...input
             },
+            {
+              withCredentials: true,
+              headers:{
+                Authorization:`Bearer ${access_token}`
+              }
+            },
+        );
+        
+        return res.data.data
+    } catch (error:any) {
+      console.log(error?.response?.data, "error occurred");
+
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      let code: TRPCError["code"] = "BAD_REQUEST";
+
+      if (status === 401) code = "UNAUTHORIZED";
+      if (status === 403) code = "FORBIDDEN";
+      if (status === 404) code = "NOT_FOUND";
+
+      throw new TRPCError({
+        code: code,
+        message: error.response?.data?.message || "Operation failed",
+      });
+    }
+
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Something went wrong",
+    });
+    }
+  }),
+  getCurrentPlan:getUserProcedure.query(async()=>{
+
+     try {
+      const cookieStore = await cookies();
+
+      const access_token = cookieStore.get("access_token")?.value;
+
+        const res = await axios.get(
+            `${process.env.BASE_API}/v1/users/current-plan`,
             {
               withCredentials: true,
               headers:{

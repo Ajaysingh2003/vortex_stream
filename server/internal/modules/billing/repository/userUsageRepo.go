@@ -11,7 +11,7 @@ import (
 
 type UsageRepository interface {
 	CreateTx (ctx context.Context,tx *gorm.DB,usage *domain.UserUsageCounters) (*domain.UserUsageCounters,error)
-	UpsertTx(ctx context.Context, tx *gorm.DB, usage *domain.UserUsageCounters) (error)
+	UpsertTx (ctx context.Context, tx *gorm.DB, usage *domain.UserUsageCounters) (error)
 	GetByUserID (ctx context.Context,userID uuid.UUID) (*domain.UserUsageCounters,error)
 	Create (ctx context.Context,usage *domain.UserUsageCounters) (*domain.UserUsageCounters,error)
 	Update (ctx context.Context,usage *domain.UserUsageCounters) (*domain.UserUsageCounters,error)

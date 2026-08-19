@@ -110,12 +110,12 @@ func (r *BillingServiceRepo) ListenWebhook(ctx context.Context, event stripe.Eve
 			}
 
 			err = r.userUsageRepo.UpsertTx(ctx, tx, &domain.UserUsageCounters{
-				ID:                      uuid.New(),
-				UserID:                  userID,
-				StorageBytesUsed:        0,
-				PlaybackMinutesUsed:     0,
+				ID:     uuid.New(),
+				UserID: userID,
+				PeriodStart: startTime,
+				PeriodEnd:   time.Unix(periodEnd, 0),
+				BandwidthBytesUsed:      0,
 				SubtitleGenerationsUsed: 0,
-				ResetAt:                 time.Unix(periodEnd, 0),
 			})
 			if err != nil {
 				return err
@@ -138,12 +138,12 @@ func (r *BillingServiceRepo) ListenWebhook(ctx context.Context, event stripe.Eve
 		if invoice.BillingReason == "subscription_create" {
 			log.Printf("[Webhook] Skipping subscription_create invoice %s", invoice.ID)
 			return nil
-		}	
+		}
 		if invoice.BillingReason != "subscription_cycle" &&
-		invoice.BillingReason != "subscription_update" {
-		log.Printf("[Webhook] Skipping invoice with billing_reason=%s", invoice.BillingReason)
-		return nil
-	}
+			invoice.BillingReason != "subscription_update" {
+			log.Printf("[Webhook] Skipping invoice with billing_reason=%s", invoice.BillingReason)
+			return nil
+		}
 		subscriptionID := invoice.Parent.SubscriptionDetails.Subscription.ID
 		// Extract timestamps accurately out of the invoice payload lines
 		var periodStart, periodEnd time.Time
@@ -157,15 +157,15 @@ func (r *BillingServiceRepo) ListenWebhook(ctx context.Context, event stripe.Eve
 
 		userIDraw := invoice.Metadata["user_id"]
 
-		userID,err:= uuid.Parse(userIDraw)
+		userID, err := uuid.Parse(userIDraw)
 
 		if err != nil {
 			return err
 		}
-		
+
 		err = r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
-			subscriptionData, err := r.subscriptionRepo.GetByUserID(ctx, tx , userID)
+			subscriptionData, err := r.subscriptionRepo.GetByUserID(ctx, tx, userID)
 			if err != nil {
 
 				return fmt.Errorf("failed to look up subscription for renewal: %w", err)
@@ -189,12 +189,14 @@ func (r *BillingServiceRepo) ListenWebhook(ctx context.Context, event stripe.Eve
 
 			// Reset usage metrics back to 0 for the fresh month
 			err = r.userUsageRepo.UpsertTx(ctx, tx, &domain.UserUsageCounters{
-				ID:                      uuid.New(),
-				UserID:                  subscriptionData.UserID,
-				StorageBytesUsed:        0,
-				PlaybackMinutesUsed:     0,
+				ID:     uuid.New(),
+				UserID: subscriptionData.UserID,
+				// StorageBytesUsed:        0,
+				BandwidthBytesUsed: 0,
+				// PlaybackSecondsUsed:     0,
 				SubtitleGenerationsUsed: 0,
-				ResetAt:                 periodEnd, // Clear and set next month boundary
+				PeriodEnd:               periodStart,
+				PeriodStart:             periodEnd,
 			})
 			if err != nil {
 				return err
@@ -208,17 +210,16 @@ func (r *BillingServiceRepo) ListenWebhook(ctx context.Context, event stripe.Eve
 		}
 
 		log.Printf("[Billing Success] Subscription %s renewed successfully until %v.", subscriptionID, periodEnd)
-		
-	
+
 	case "customer.subscription.deleted":
 		var sub stripe.Subscription
 		if err := json.Unmarshal(event.Data.Raw, &sub); err != nil {
 			return fmt.Errorf("failed to parse subscription payload: %w", err)
 		}
-		
+
 		err = r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
-			subscriptionData, err := r.subscriptionRepo.GetByStripeSubscriptionID(ctx, tx , sub.ID)
+			subscriptionData, err := r.subscriptionRepo.GetByStripeSubscriptionID(ctx, tx, sub.ID)
 			if err != nil {
 
 				return fmt.Errorf("failed to look up subscription for renewal: %w", err)
@@ -238,7 +239,7 @@ func (r *BillingServiceRepo) ListenWebhook(ctx context.Context, event stripe.Eve
 			if err != nil {
 				return err
 			}
-			
+
 			// Reset usage metrics back to 0 for the fresh month
 			// err = r.userUsageRepo.UpsertTx(ctx, tx, &domain.UserUsageCounters{
 			// 	ID:                      uuid.New(),
@@ -260,9 +261,8 @@ func (r *BillingServiceRepo) ListenWebhook(ctx context.Context, event stripe.Eve
 			return fmt.Errorf("failed to log subscription renewal milestones: %w", err)
 		}
 
-		log.Printf("[Billing Success] Subscription %s canceled successfully until.", sub.ID,)
-		
-	
+		log.Printf("[Billing Success] Subscription %s canceled successfully until.", sub.ID)
+
 	default:
 		log.Printf("[Billing Info] System skipped unmapped event classification pattern: %s", event.Type)
 	}

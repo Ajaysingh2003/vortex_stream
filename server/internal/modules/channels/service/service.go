@@ -17,7 +17,7 @@ type Service struct {
 func New(db *gorm.DB, repo channelRepo.Repository) *Service { return &Service{db: db, repo: repo} }
 func (s *Service) Create(ctx context.Context, userID, workspaceID uuid.UUID, name string) (*domain.Channel, error) {
 	var count int64
-	if err := s.db.WithContext(ctx).Table("workspace").Where("id = ? AND user_id = ?", workspaceID, userID).Count(&count).Error; err != nil {
+	if err := s.db.WithContext(ctx).Table("workspaces").Where("id = ? AND user_id = ?", workspaceID, userID).Count(&count).Error; err != nil {
 		return nil, err
 	}
 	if count == 0 {

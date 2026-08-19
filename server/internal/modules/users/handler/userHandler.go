@@ -365,3 +365,39 @@ func (h *UserHandler) GetWorkspace (c *gin.Context){
 	c.JSON(http.StatusAccepted, gin.H{"data":data,"success":true})
 }
 
+
+func (h *UserHandler) GetCurrentPlanDetails(c *gin.Context) {
+
+	userIdRaw,exists:=c.Get("user_id")
+	if !exists{
+		c.JSON(http.StatusUnauthorized,gin.H{"message":"Unauthorized"})
+		return
+	}
+	
+	userId, ok := userIdRaw.(uuid.UUID)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration","success":false})
+			return
+					
+		}
+
+
+	
+		data,err:=h.UserService.GetCurrentPlanDetails(c.Request.Context() , userId)
+
+
+
+		if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			c.JSON(appErr.Code, gin.H{"message": appErr.Message,"success":false})
+			return
+		}
+		fmt.Print(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+	
+	c.JSON(http.StatusAccepted, gin.H{"data":data,"success":true})
+
+
+}
