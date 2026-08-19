@@ -34,7 +34,7 @@ function HomeView() {
 
           <div className="grid-cols-1 grid gap-2 md:gap-3 lg:gap-5  md:grid-cols-2 lg:grid-cols-3">
             <StorageCard
-              usedBytes={userData.usageCounters.storage_bytes_used}
+              usedBytes={userData.userStorageUsage.usedBytes}
               limitGb={getMaxGb(planData.plan)}
             />
             <div>2</div>

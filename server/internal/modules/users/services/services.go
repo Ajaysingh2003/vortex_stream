@@ -8,10 +8,10 @@ import (
 	"log"
 	"time"
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
+	userUsageRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/repository"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/dto"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
 	workspaceRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
-	userUsageRepo "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/repository"
 	config "github.com/ajaysingh2003/vortex-stream/internal/shared/config/redis"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/go-redis/redis/v8"
@@ -20,6 +20,7 @@ import (
 	"gorm.io/gorm"
 )
 
+
 type UserServiceInterface interface {
 	Register(ctx context.Context, user *domain.User) error
 	VerifyOTP(ctx context.Context, email string, otp string) (*domain.User, error)
@@ -27,7 +28,7 @@ type UserServiceInterface interface {
 	GetUser(ctx context.Context, id uuid.UUID) (*domain.User, error)
 	FindOrCreateGoogleUser(ctx context.Context, email string, name string, picture string, googleSub string) (*domain.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
-	GetCurrentPlanDetails(ctx context.Context, userID uuid.UUID) (*domain.Subscription,error)
+	GetCurrentPlanDetails(ctx context.Context, userID uuid.UUID) (*domain.Subscription, error)
 }
 
 type userServiceRepo struct {
@@ -39,8 +40,8 @@ type userServiceRepo struct {
 	accountRepo   repository.AccountRepository
 }
 
-func NewUserService(userRepo repository.UserRepository,userUsageRepo userUsageRepo.UsageRepository ,jwtToken *utils.JwtMaker, workspaceRepo workspaceRepo.WorkshopRepository, db *gorm.DB, accountRepo repository.AccountRepository) UserServiceInterface {
-	return &userServiceRepo{userRepo: userRepo, userUsageRepo:userUsageRepo ,jwtToken: jwtToken, workspaceRepo: workspaceRepo, db: db, accountRepo: accountRepo}
+func NewUserService(userRepo repository.UserRepository, userUsageRepo userUsageRepo.UsageRepository, jwtToken *utils.JwtMaker, workspaceRepo workspaceRepo.WorkshopRepository, db *gorm.DB, accountRepo repository.AccountRepository) UserServiceInterface {
+	return &userServiceRepo{userRepo: userRepo, userUsageRepo: userUsageRepo, jwtToken: jwtToken, workspaceRepo: workspaceRepo, db: db, accountRepo: accountRepo}
 }
 
 func (r *userServiceRepo) Register(ctx context.Context, user *domain.User) error {
@@ -271,15 +272,29 @@ func (r *userServiceRepo) FindOrCreateGoogleUser(ctx context.Context, email stri
 			return err
 		}
 
-
-		userStoragePayload:=domain.UserStorageUsage{
-			ID: uuid.New(),
-			UserID: data.ID,
+		userStoragePayload := &domain.UserStorageUsage{
+			ID:        uuid.New(),
+			UserID:    data.ID,
 			UsedBytes: 0,
 		}
-		err=r.userRepo.CreateUserUsage(ctx , tx, userStoragePayload)
 
+		err = r.userRepo.CreateUserUsage(ctx, tx, userStoragePayload)
 
+		if err != nil {
+			return err
+		}
+
+		currentPeroid := time.Now().UTC()
+		currentPeroidEnding := currentPeroid.AddDate(0, 1, 0)
+
+		_, err = r.userUsageRepo.CreateTx(ctx, tx, &domain.UserUsageCounters{
+			ID: uuid.New(),
+			UserID:                  data.ID,
+			PeriodStart:             currentPeroid,
+			PeriodEnd:               currentPeroidEnding,
+			BandwidthBytesUsed:      0,
+			SubtitleGenerationsUsed: 0,
+		})
 
 		if err != nil {
 			return err
@@ -394,19 +409,32 @@ func (r *userServiceRepo) VerifyOTP(ctx context.Context, email string, otp strin
 			return err
 		}
 
-		userStoragePayload:=domain.UserStorageUsage{
-			ID: uuid.New(),
-			UserID: data.ID,
+		userStoragePayload := domain.UserStorageUsage{
+			ID:        uuid.New(),
+			UserID:    data.ID,
 			UsedBytes: 0,
 		}
-		err=r.userRepo.CreateUserUsage(ctx , tx, userStoragePayload)
-
-
+		err = r.userRepo.CreateUserUsage(ctx, tx, &userStoragePayload)
 
 		if err != nil {
 			return err
 		}
 
+		currentPeroid := time.Now().UTC()
+		currentPeroidEnding := currentPeroid.AddDate(0, 1, 0)
+
+		_, err = r.userUsageRepo.CreateTx(ctx, tx, &domain.UserUsageCounters{
+			ID: uuid.New(),
+			UserID:                  data.ID,
+			PeriodStart:             currentPeroid,
+			PeriodEnd:               currentPeroidEnding,
+			BandwidthBytesUsed:      0,
+			SubtitleGenerationsUsed: 0,
+		})
+
+		if err != nil {
+			return err
+		}
 
 		createdUser = data
 		return nil
@@ -420,7 +448,7 @@ func (r *userServiceRepo) VerifyOTP(ctx context.Context, email string, otp strin
 	return createdUser, nil
 }
 
-func (r *userServiceRepo) GetCurrentPlanDetails(ctx context.Context, userID uuid.UUID) (*domain.Subscription,error) {
+func (r *userServiceRepo) GetCurrentPlanDetails(ctx context.Context, userID uuid.UUID) (*domain.Subscription, error) {
 
 	data, err := r.userRepo.GetByID(ctx, userID)
 
@@ -436,15 +464,12 @@ func (r *userServiceRepo) GetCurrentPlanDetails(ctx context.Context, userID uuid
 
 	}
 
-	subscription,err:=r.userRepo.GetCurrentActivePlan(ctx, userID)
-
+	subscription, err := r.userRepo.GetCurrentActivePlan(ctx, userID)
 
 	if err != nil {
 		return nil, err
 	}
 
-
-	return  subscription,nil
-
+	return subscription, nil
 
 }

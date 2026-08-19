@@ -27,11 +27,11 @@ function SidebarStorage() {
 
   const bytesToMB = (bytes: number) => (bytes / (1024 * 1024)).toFixed(2);
 
-  const mbUsed = bytesToMB(userData.usageCounters.storage_bytes_used);
+  const mbUsed = bytesToMB(userData.userStorageUsage.usedBytes);
 
   const maxLimit=getMaxGb(planDetailsType.plan)
 
-  const percent=getStorageUsagePercent(userData.usageCounters.storage_bytes_used,maxLimit)
+  const percent=getStorageUsagePercent(userData.userStorageUsage.usedBytes,maxLimit)
 
   return (
     <div className="w-full h-fit">
