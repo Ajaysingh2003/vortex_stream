@@ -18,20 +18,33 @@ import { getMaxGb, getStorageUsagePercent } from "@/lib/config";
 function SidebarStorage() {
   const trpc = useTRPC();
   const { data: user } = useSuspenseQuery(trpc.user.profile.queryOptions());
-  const { data: planDetails } = useSuspenseQuery(trpc.user.getCurrentPlan.queryOptions());
+  const { data: planDetails } = useSuspenseQuery(
+    trpc.user.getCurrentPlan.queryOptions(),
+  );
 
   const userData = user as UserDataType;
 
-  const planDetailsType=planDetails as UserSubscriptionType
+  const planDetailsType = planDetails as UserSubscriptionType;
 
+  const formatStorage = (bytes: number) => {
+    const gb = bytes / (1024 * 1024 * 1024);
 
-  const bytesToMB = (bytes: number) => (bytes / (1024 * 1024)).toFixed(2);
+    if (gb < 1) {
+      const mb = bytes / (1024 * 1024);
+      return `${mb.toFixed(2)}mb`;
+    }
 
-  const mbUsed = bytesToMB(userData.userStorageUsage.usedBytes);
+    return `${gb.toFixed(2)}gb`;
+  };
 
-  const maxLimit=getMaxGb(planDetailsType.plan)
+  const usedStorage = formatStorage(userData.userStorageUsage.usedBytes);
 
-  const percent=getStorageUsagePercent(userData.userStorageUsage.usedBytes,maxLimit)
+  const maxLimit = getMaxGb(planDetailsType.plan);
+
+  const percent = getStorageUsagePercent(
+    userData.userStorageUsage.usedBytes,
+    maxLimit,
+  );
 
   return (
     <div className="w-full h-fit">
@@ -66,7 +79,11 @@ function SidebarStorage() {
           </div>
         </div>
         <div>
-          <StorageProgressBar progress={percent} limit={`${maxLimit}gb`} used={`${mbUsed}mb`} />
+          <StorageProgressBar
+            progress={percent}
+            limit={`${maxLimit}gb`}
+            used={usedStorage}
+          />
         </div>
       </div>
     </div>

@@ -86,6 +86,7 @@ func SetupRouter(r *gin.Engine, videohandler *handler.VideoHandler, jwtMaker *ut
 
 		workspaceVideos.DELETE("/chapter/:id", middleware.AuthMiddleware(jwtMaker), videohandler.DeleteChapter)
 		workspaceVideos.DELETE("/cta/:id", middleware.AuthMiddleware(jwtMaker), videohandler.DeleteCta)
+		workspaceVideos.GET("/overview", middleware.AuthMiddleware(jwtMaker), videohandler.GetVideoOverview)
 		workspaceVideos.GET("/video-list", middleware.AuthMiddleware(jwtMaker), videohandler.ListVideoByWorkspace)
 
 		workspaceVideos.GET("/:id/", middleware.AuthMiddleware(jwtMaker), videohandler.GetVideoMetaData)

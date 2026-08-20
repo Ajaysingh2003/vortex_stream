@@ -6,16 +6,33 @@ import ImportVideos from "../upload/component/ImportVideos";
 import StorageCard from "./component/StorageCard";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
-import { UserDataType, UserSubscriptionType } from "@/modules/types";
+import { UserDataType, UserSubscriptionType, WorkspaceType } from "@/modules/types";
 import { getMaxGb } from "@/lib/config";
+import BandwidthCard from "./component/BandwidthCard";
+import TotalVideosCard from "./component/TotalVideoCount";
+import LeadSubmissionsCard from "../channel/components/LeadFormCard";
+
+type BandwidthOverview = {
+  usedBytes: number;
+  limitGb: number;
+  dailyData: { date: string; gb: number }[];
+};
 
 function HomeView() {
   const trpc = useTRPC();
   const { data: user } = useSuspenseQuery(trpc.user.profile.queryOptions());
   const { data: plan } = useSuspenseQuery(trpc.user.getCurrentPlan.queryOptions());
+  const { data: workspace } = useSuspenseQuery(
+    trpc.user.getWorkspace.queryOptions(),
+  );
+  const { data: bandwidthData } = useSuspenseQuery(
+    trpc.bandwidth.overview.queryOptions(),
+  );
+  const bandwidth = bandwidthData as BandwidthOverview;
   const userData = user as UserDataType;
   const planData = plan as UserSubscriptionType;
-
+  const workspaceData = workspace as WorkspaceType;
+  // console.log(,"fuck")
   return (
     <div className="w-full h-full min-h-screen relative bg-transparent">
       <div className="px-4 md:px-12 py-4 w-full">
@@ -37,9 +54,13 @@ function HomeView() {
               usedBytes={userData.userStorageUsage.usedBytes}
               limitGb={getMaxGb(planData.plan)}
             />
-            <div>2</div>
-            <div>3</div>
-
+            <BandwidthCard
+              usedBytes={userData.usageCounters[0].bandwidthBytesUsed}
+              limitGb={bandwidth.limitGb}
+              dailyData={bandwidth.dailyData}
+            />
+            <TotalVideosCard workspaceId={workspaceData.id} />
+            <LeadSubmissionsCard/>
           </div>
         </div>
       </div>

@@ -432,15 +432,15 @@ export interface UserDataType{
   createdAt:string;
   updatedAt:string;
   isActive:boolean;
-  usageCounters:{
+  usageCounters:[{
     id:string;
     userId:string;
-    BandwidthBytesUsed:number;
-    SubtitleGenerationsUsed:number;
-    PeriodEnd:string;
-    PeriodStart:string;
-    UpdatedAt:string;
-  };
+    bandwidthBytesUsed:number;
+    subtitleGenerationsUsed:number;
+    periodEnd:string;
+    periodStart:string;
+    updatedAt:string;
+  }];
   userStorageUsage:{
     id:string;
     userId:string;

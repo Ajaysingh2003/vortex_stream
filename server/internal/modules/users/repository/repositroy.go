@@ -42,7 +42,6 @@ func (r *postgresUserRepository) CreateTx(ctx context.Context,tx *gorm.DB,user *
     return user, nil
 }
 
-
 func (r *postgresUserRepository) Create(ctx context.Context, user *domain.User) (*domain.User, error) {
 	result := r.db.WithContext(ctx).Create(user)
 

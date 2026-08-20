@@ -22,6 +22,7 @@ type VideoInterface interface {
 	CreateVideo(ctx context.Context, video *domain.Video) (*domain.Video, error)
 	ListVideo(ctx context.Context, userID uuid.UUID) ([]domain.Video, error)
 	ListVideoByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursor string, limit int, filterOptions *dto.FilterOptions) (*dto.VideoContentsDTO, error)
+	GetVideoOverview(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID) (*dto.VideoOverviewDTO, error)
 	UpdateVideo(ctx context.Context, userID uuid.UUID, video domain.Video) error
 	ProcessVideo(ctx context.Context, videoID uuid.UUID, userID uuid.UUID) (*domain.Video, error)
 	StreamVideo(ctx context.Context, videoID uuid.UUID) (*domain.Video, error)
@@ -295,6 +296,21 @@ func (r *VideoServiceRepo) ListVideoByWorkspaceID(ctx context.Context, workspace
 	}
 
 	return payload, nil
+}
+
+func (r *VideoServiceRepo) GetVideoOverview(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID) (*dto.VideoOverviewDTO, error) {
+	workspace, err := r.workspaceRepo.GetByID(ctx, workspaceID)
+	if err != nil {
+		return nil, err
+	}
+	if workspace == nil {
+		return nil, &utils.ApiError{Code: 404, Message: "Workspace not found"}
+	}
+	if workspace.UserID != userID {
+		return nil, &utils.ApiError{Code: 403, Message: "You don't have permission for this action."}
+	}
+
+	return r.videoRepo.GetOverviewByWorkspaceID(ctx, workspaceID)
 }
 
 func (r *VideoServiceRepo) ProcessVideo(ctx context.Context, videoID uuid.UUID, userID uuid.UUID) (*domain.Video, error) {

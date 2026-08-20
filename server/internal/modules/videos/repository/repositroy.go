@@ -25,6 +25,7 @@ type VideoRepository interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 
 	GetVideosPaginated(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursorID **uuid.UUID, limit int, filterOptions *dto.FilterOptions) ([]domain.Video, error)
+	GetOverviewByWorkspaceID(ctx context.Context, workspaceID uuid.UUID) (*dto.VideoOverviewDTO, error)
 
 	GetByFolderIdPaginated(ctx context.Context, folderID *uuid.UUID, workspaceID uuid.UUID, afterID string, remaining int, filterOptions *folderdto.FilterOptions) ([]domain.Video, error)
 
@@ -444,6 +445,42 @@ func (r *postgresVideoRepository) GetVideosPaginated(
 	}
 
 	return videos, nil
+}
+
+func (r *postgresVideoRepository) GetOverviewByWorkspaceID(ctx context.Context, workspaceID uuid.UUID) (*dto.VideoOverviewDTO, error) {
+	var counts struct {
+		TotalVideos int64 `gorm:"column:total_videos"`
+		Ready       int64 `gorm:"column:ready"`
+		Processing  int64 `gorm:"column:processing"`
+		Pending     int64 `gorm:"column:pending"`
+	}
+
+	err := r.db.WithContext(ctx).
+		Model(&domain.Video{}).
+		Select(`
+			COUNT(*) AS total_videos,
+			COALESCE(SUM(CASE WHEN status = ? THEN 1 ELSE 0 END), 0) AS ready,
+			COALESCE(SUM(CASE WHEN status = ? THEN 1 ELSE 0 END), 0) AS processing,
+			COALESCE(SUM(CASE WHEN status IN (?, ?) THEN 1 ELSE 0 END), 0) AS pending`,
+			domain.StatusReady,
+			domain.StatusProcessing,
+			domain.StatusPending,
+			domain.StatusQueue,
+		).
+		Where("workspace_id = ?", workspaceID).
+		Scan(&counts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.VideoOverviewDTO{
+		TotalVideos: counts.TotalVideos,
+		StatusBreakdown: dto.VideoStatusBreakdownDTO{
+			Ready:      counts.Ready,
+			Processing: counts.Processing,
+			Pending:    counts.Pending,
+		},
+	}, nil
 }
 
 func (r *postgresVideoRepository) UpsertVideoEndScreen(ctx context.Context, endScreenData *domain.VideoEndScreen) error {

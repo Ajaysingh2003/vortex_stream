@@ -8,6 +8,7 @@ import { billingRouter } from "@/modules/billing/server/procedures";
 import { playerRouter } from "@/modules/embed/server/procedures";
 import { favoriteRouter } from "@/modules/favorite/server/procedures";
 import { channelRouter } from "@/modules/channel/server/procedures";
+import { bandwidthRouter } from "@/modules/bandwidth/server/procedures";
 export const appRouter = createTRPCRouter({
 
   upload:uploadsRouter,
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   videoPlayer:playerRouter,
   favorite: favoriteRouter,
   channel: channelRouter,
+  bandwidth: bandwidthRouter,
 });
 
 export type AppRouter = typeof appRouter;

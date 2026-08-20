@@ -50,7 +50,7 @@ export default function ProfileView({
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-60 rounded-lg" align="end" forceMount>
+      <DropdownMenuContent className="w-60 rounded-lg shadow-xl" align="end" forceMount>
         {/* User Profile Info Header */}
         <DropdownMenuLabel className="font-normal p-3">
           <div className="flex flex-col space-y-1">

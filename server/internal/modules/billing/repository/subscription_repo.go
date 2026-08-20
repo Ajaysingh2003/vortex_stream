@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/google/uuid"
@@ -19,6 +21,8 @@ type SubscriptionRepository interface {
 	GetByID(ctx context.Context, ID string) (*domain.Subscription, error)
 	GetByStripeSubscriptionID(ctx context.Context, tx *gorm.DB, stripeSubscriptionID string) (*domain.Subscription, error)
 	GetByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) (*domain.Subscription, error)
+
+	GetCurrentActivePlan(ctx context.Context,userID uuid.UUID) (*domain.Subscription,error)
 }
 
 type postgresSubscriptionRepository struct {
@@ -119,4 +123,23 @@ func (r *postgresSubscriptionRepository) GetByUserID(ctx context.Context, tx *go
 		return nil, err
 	}
 	return &subscription, nil
+}
+
+
+func (r *postgresSubscriptionRepository) GetCurrentActivePlan(ctx context.Context, userID uuid.UUID) (*domain.Subscription, error) {
+    var subscription domain.Subscription
+
+    err := r.db.WithContext(ctx).
+        Where("user_id = ? AND status IN ('active', 'trialing', 'canceled') AND period_end > ?", userID, time.Now()).
+        Order("period_end DESC").
+        First(&subscription).Error
+
+    if err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, nil 
+        }
+        return nil, err
+    }
+
+    return &subscription, nil
 }

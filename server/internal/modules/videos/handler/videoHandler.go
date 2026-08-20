@@ -202,6 +202,38 @@ func (h *VideoHandler) ListVideoByWorkspace(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
 }
 
+func (h *VideoHandler) GetVideoOverview(c *gin.Context) {
+	userIDRaw, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "Unauthorized"})
+		return
+	}
+
+	userID, ok := userIDRaw.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "Unauthorized"})
+		return
+	}
+
+	workspaceID, err := uuid.Parse(c.Param("workspaceId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid Workspace ID"})
+		return
+	}
+
+	data, err := h.VideoService.GetVideoOverview(c.Request.Context(), workspaceID, userID)
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
+}
+
 func (h *VideoHandler) Process(c *gin.Context) {
 	videoIDRaw := c.Param("videoId")
 	userId, exists := c.Get("user_id")
