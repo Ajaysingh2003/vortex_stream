@@ -7,9 +7,8 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/ajaysingh2003/vortex-stream/internal/modules/billing/config"
 	services "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/services"
+	config "github.com/ajaysingh2003/vortex-stream/internal/shared/config/billing"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

@@ -10,13 +10,12 @@ import (
 )
 
 type UsageRepository interface {
-	CreateTx (ctx context.Context,tx *gorm.DB,usage *domain.UserUsageCounters) (*domain.UserUsageCounters,error)
-	UpsertTx (ctx context.Context, tx *gorm.DB, usage *domain.UserUsageCounters) (error)
-	GetByUserID (ctx context.Context,userID uuid.UUID) (*domain.UserUsageCounters,error)
-	Create (ctx context.Context,usage *domain.UserUsageCounters) (*domain.UserUsageCounters,error)
-	Update (ctx context.Context,usage *domain.UserUsageCounters) (*domain.UserUsageCounters,error)
+	CreateTx(ctx context.Context, tx *gorm.DB, usage *domain.UserUsageCounters) (*domain.UserUsageCounters, error)
+	UpsertTx(ctx context.Context, tx *gorm.DB, usage *domain.UserUsageCounters) error
+	GetByUserID(ctx context.Context, userID uuid.UUID) (*domain.UserUsageCounters, error)
+	Create(ctx context.Context, usage *domain.UserUsageCounters) (*domain.UserUsageCounters, error)
+	Update(ctx context.Context, usage *domain.UserUsageCounters) (*domain.UserUsageCounters, error)
 }
-
 
 type postgresUsageRepository struct {
 	db *gorm.DB
@@ -26,8 +25,7 @@ func NewPostgresUsageRepository(db *gorm.DB) UsageRepository {
 	return &postgresUsageRepository{db: db}
 }
 
-
-func (r *postgresUsageRepository) CreateTx (ctx context.Context,tx *gorm.DB,usage *domain.UserUsageCounters) (*domain.UserUsageCounters,error) {
+func (r *postgresUsageRepository) CreateTx(ctx context.Context, tx *gorm.DB, usage *domain.UserUsageCounters) (*domain.UserUsageCounters, error) {
 
 	if err := tx.WithContext(ctx).Create(usage).Error; err != nil {
 		return nil, err
@@ -35,17 +33,24 @@ func (r *postgresUsageRepository) CreateTx (ctx context.Context,tx *gorm.DB,usag
 	return usage, nil
 }
 
-func (r *postgresUsageRepository) UpsertTx(ctx context.Context, tx *gorm.DB, usage *domain.UserUsageCounters) (error) {
+func (r *postgresUsageRepository) UpsertTx(ctx context.Context, tx *gorm.DB, usage *domain.UserUsageCounters) error {
 	err := tx.WithContext(ctx).
 		Clauses(clause.OnConflict{
-			Columns: []clause.Column{{Name: "user_id"}}, 
+			// Usage counters are kept per billing period. The model defines a
+			// composite unique index on (user_id, period_start), so the conflict
+			// target must match that index exactly.
+			Columns: []clause.Column{
+				{Name: "user_id"},
+				{Name: "period_start"},
+			},
 
 			DoUpdates: clause.AssignmentColumns([]string{
 				"id",
-				"storage_bytes_used",
-				"playback_minutes_used",
+				"period_start",
+				"period_end",
+				"bandwidth_bytes_used",
 				"subtitle_generations_used",
-				"reset_at",
+				"created_at",
 				"updated_at",
 			}),
 		}).
@@ -54,13 +59,11 @@ func (r *postgresUsageRepository) UpsertTx(ctx context.Context, tx *gorm.DB, usa
 	if err != nil {
 		return err
 	}
-	
 
 	return nil
 }
 
-
-func (r *postgresUsageRepository) GetByUserID (ctx context.Context,userID uuid.UUID) (*domain.UserUsageCounters,error) {
+func (r *postgresUsageRepository) GetByUserID(ctx context.Context, userID uuid.UUID) (*domain.UserUsageCounters, error) {
 
 	var usage domain.UserUsageCounters
 
@@ -72,7 +75,7 @@ func (r *postgresUsageRepository) GetByUserID (ctx context.Context,userID uuid.U
 	return &usage, nil
 }
 
-func (r *postgresUsageRepository) Create (ctx context.Context,usage *domain.UserUsageCounters) (*domain.UserUsageCounters,error) {
+func (r *postgresUsageRepository) Create(ctx context.Context, usage *domain.UserUsageCounters) (*domain.UserUsageCounters, error) {
 
 	result := r.db.WithContext(ctx).Create(usage)
 
@@ -82,7 +85,7 @@ func (r *postgresUsageRepository) Create (ctx context.Context,usage *domain.User
 	return usage, nil
 }
 
-func (r *postgresUsageRepository) Update (ctx context.Context,usage *domain.UserUsageCounters) (*domain.UserUsageCounters,error) {
+func (r *postgresUsageRepository) Update(ctx context.Context, usage *domain.UserUsageCounters) (*domain.UserUsageCounters, error) {
 
 	result := r.db.WithContext(ctx).Save(usage)
 

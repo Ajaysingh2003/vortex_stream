@@ -8,6 +8,7 @@ import (
 	"time"
 
 	billingHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/handler"
+	bandwidthHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/bandwidth/handler"
 	subscriptionRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/repository"
 	userUsageRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/repository"
 	folderHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/handler"
@@ -31,10 +32,13 @@ import (
 	channelService "github.com/ajaysingh2003/vortex-stream/internal/modules/channels/service"
 	favoriteHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/handler"
 	favoriteRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/repository"
+	bandwidthRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/bandwidth/repository"
 	favoriteRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/routes"
 	favoriteService "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/service"
 	folderRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/routes"
+	bandwidthRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/bandwidth/routes"
 	folderService "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/services"
+	bandwidthService "github.com/ajaysingh2003/vortex-stream/internal/modules/bandwidth/services"
 	formService "github.com/ajaysingh2003/vortex-stream/internal/modules/form/service"
 	playerRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/player/routes"
 	playerService "github.com/ajaysingh2003/vortex-stream/internal/modules/player/services"
@@ -86,11 +90,13 @@ func main() {
 
 	workspaceRepo := workspaceRepository.NewPostgresWorkspaceRepository(database)
 	folderRepo := folderRepository.NewFolderRepo(database)
+	bandwidthRepo := bandwidthRepository.NewBandwidthRepository(database)
 	subscriptionRepo := subscriptionRepository.NewPostgresSubscriptionRepository(database)
 	userUsageRepo := userUsageRepository.NewPostgresUsageRepository(database)
 	playerService := playerService.NewPlayerService(workspaceRepo, userRepo, playerRepo)
 	userService := services.NewUserService(userRepo,userUsageRepo ,jwtToken, workspaceRepo, database, accountRepo)
 	folderService := folderService.NewFolderService(folderRepo, userRepo, workspaceRepo, videoRepo)
+	bandwidthService := bandwidthService.NewBandwidthService(bandwidthRepo,userRepo,subscriptionRepo)
 	workspaceService := services.NewWorkspaceService(userRepo, workspaceRepo)
 	uploadService := serviceUpload.NewUploadService(userRepo)
 	videoService := videoService.NewVideoService(userRepo, videoRepo, workspaceRepo, folderRepo)
@@ -130,6 +136,10 @@ func main() {
 		// BillingService: videoService,
 		PaymentService: billingService,
 	}
+	bandwidthHandler := &bandwidthHandler.BandwidthHandler{
+		// BillingService: videoService,
+		BandwidthService: bandwidthService,
+	}
 
 	formHandler := &formHandler.FormHandler{
 		FormService: formService,
@@ -157,6 +167,7 @@ func main() {
 	formRoutes.SetupRouter(r, formHandler, jwtToken)
 	favoriteRoutes.SetupRouter(r, favoritehandler, jwtToken)
 	channelRoutes.SetupRouter(r, channelhandler, jwtToken)
+	bandwidthRoutes.SetupBandwidthRouter(r, bandwidthHandler , jwtToken)
 
 	if err := r.Run(":3000"); err != nil {
 		log.Fatal("Failed to start server:", err)

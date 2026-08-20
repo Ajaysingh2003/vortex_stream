@@ -20,7 +20,7 @@ import (
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/videos/repository"
 	config "github.com/ajaysingh2003/vortex-stream/internal/shared/config/redis"
 
-	billingConfig "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/config"
+	billingConfig  "github.com/ajaysingh2003/vortex-stream/internal/shared/config/billing"
 	"github.com/google/uuid"
 	"github.com/stripe/stripe-go/v85"
 	"gorm.io/gorm"
@@ -62,6 +62,18 @@ func (r *BillingServiceRepo) ListenWebhook(ctx context.Context, event stripe.Eve
 		log.Printf("[Webhook Warning] Duplicate event %s blocked by Redis cache.", event.ID)
 		return nil
 	}
+
+	// Do not permanently consume an event until all database work succeeds.
+	// Stripe retries failed deliveries, and those retries must be allowed to
+	// run the provisioning transaction again.
+	processedSuccessfully := false
+	defer func() {
+		if !processedSuccessfully {
+			if deleteErr := config.RedisClient.Del(ctx, redisKey).Err(); deleteErr != nil {
+				log.Printf("[Webhook Warning] Failed to release event lock %s: %v", event.ID, deleteErr)
+			}
+		}
+	}()
 
 	switch event.Type {
 
@@ -110,10 +122,10 @@ func (r *BillingServiceRepo) ListenWebhook(ctx context.Context, event stripe.Eve
 			}
 
 			err = r.userUsageRepo.UpsertTx(ctx, tx, &domain.UserUsageCounters{
-				ID:     uuid.New(),
-				UserID: userID,
-				PeriodStart: startTime,
-				PeriodEnd:   time.Unix(periodEnd, 0),
+				ID:                      uuid.New(),
+				UserID:                  userID,
+				PeriodStart:             startTime,
+				PeriodEnd:               time.Unix(periodEnd, 0),
 				BandwidthBytesUsed:      0,
 				SubtitleGenerationsUsed: 0,
 			})
@@ -189,14 +201,12 @@ func (r *BillingServiceRepo) ListenWebhook(ctx context.Context, event stripe.Eve
 
 			// Reset usage metrics back to 0 for the fresh month
 			err = r.userUsageRepo.UpsertTx(ctx, tx, &domain.UserUsageCounters{
-				ID:     uuid.New(),
-				UserID: subscriptionData.UserID,
-				// StorageBytesUsed:        0,
-				BandwidthBytesUsed: 0,
-				// PlaybackSecondsUsed:     0,
+				ID:                      uuid.New(),
+				UserID:                  subscriptionData.UserID,
+				PeriodStart:             periodStart,
+				PeriodEnd:               periodEnd,
+				BandwidthBytesUsed:      0,
 				SubtitleGenerationsUsed: 0,
-				PeriodEnd:               periodStart,
-				PeriodStart:             periodEnd,
 			})
 			if err != nil {
 				return err
@@ -264,8 +274,9 @@ func (r *BillingServiceRepo) ListenWebhook(ctx context.Context, event stripe.Eve
 		log.Printf("[Billing Success] Subscription %s canceled successfully until.", sub.ID)
 
 	default:
-		log.Printf("[Billing Info] System skipped unmapped event classification pattern: %s", event.Type)
+		log.Printf("[Billing Info] Ignoring unrelated Stripe event: %s", event.Type)
 	}
 
+	processedSuccessfully = true
 	return nil
 }
