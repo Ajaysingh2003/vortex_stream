@@ -19,9 +19,10 @@ import (
 	"gorm.io/gorm"
 )
 
-	type FormServiceInterface interface {
-	Create(ctx context.Context, data *formdto.CreateFormReq,userID uuid.UUID) error
-	GetByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.LeadForm,error)
+type FormServiceInterface interface {
+	Create(ctx context.Context, data *formdto.CreateFormReq, userID uuid.UUID) error
+	GetByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.LeadForm, error)
+	GetOverviewByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID) (*formdto.LeadFormOverviewDTO, error)
 }
 
 type formServiceRepo struct {
@@ -34,15 +35,15 @@ type formServiceRepo struct {
 	db                *gorm.DB
 }
 
-func NewFormService(userRepo repository.UserRepository, workspaceRepo workspaceRepo.WorkshopRepository, videoRepo  videoRepo.VideoRepository,leadformRepo leadformRepo.LeadFormRepository, leadformfieldRepo leadformRepo.LeadFormFieldRepository, fieldoptionRepo leadformRepo.LeadFormOptionRepository, db *gorm.DB) FormServiceInterface {
-	return &formServiceRepo{userRepo: userRepo, workspaceRepo: workspaceRepo, videoRepo: videoRepo ,leadformRepo: leadformRepo, leadformfieldRepo: leadformfieldRepo, fieldoptionRepo: fieldoptionRepo, db: db}
+func NewFormService(userRepo repository.UserRepository, workspaceRepo workspaceRepo.WorkshopRepository, videoRepo videoRepo.VideoRepository, leadformRepo leadformRepo.LeadFormRepository, leadformfieldRepo leadformRepo.LeadFormFieldRepository, fieldoptionRepo leadformRepo.LeadFormOptionRepository, db *gorm.DB) FormServiceInterface {
+	return &formServiceRepo{userRepo: userRepo, workspaceRepo: workspaceRepo, videoRepo: videoRepo, leadformRepo: leadformRepo, leadformfieldRepo: leadformfieldRepo, fieldoptionRepo: fieldoptionRepo, db: db}
 }
 
-func (r *formServiceRepo) Create(ctx context.Context, data *formdto.CreateFormReq,userID uuid.UUID) error {
+func (r *formServiceRepo) Create(ctx context.Context, data *formdto.CreateFormReq, userID uuid.UUID) error {
 
-	// guard 
+	// guard
 
-	fmt.Print(data.WorkspaceID,data.VideoID,"votehot")
+	fmt.Print(data.WorkspaceID, data.VideoID, "votehot")
 	workspaceData, err := r.workspaceRepo.GetByID(ctx, data.WorkspaceID)
 
 	if err != nil {
@@ -59,7 +60,7 @@ func (r *formServiceRepo) Create(ctx context.Context, data *formdto.CreateFormRe
 		return err
 	}
 
-	fmt.Print(videoData,"kira queen")
+	fmt.Print(videoData, "kira queen")
 
 	if videoData.WorkspaceID != workspaceData.ID {
 		return &utils.ApiError{
@@ -71,12 +72,12 @@ func (r *formServiceRepo) Create(ctx context.Context, data *formdto.CreateFormRe
 	err = r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
 		leadFormpayload := &domain.LeadForm{
-			ID:        data.ToEntity().ID,
-			VideoID:   videoData.ID,
+			ID:          data.ToEntity().ID,
+			VideoID:     videoData.ID,
 			WorkspaceID: data.WorkspaceID,
-			Placement: data.Placement,
-			ShowAt:    data.ShowAt,
-			AllowSkip: data.AllowSkip,
+			Placement:   data.Placement,
+			ShowAt:      data.ShowAt,
+			AllowSkip:   data.AllowSkip,
 		}
 
 		formdata, err := r.leadformRepo.UpsertTx(ctx, tx, leadFormpayload)
@@ -92,20 +93,18 @@ func (r *formServiceRepo) Create(ctx context.Context, data *formdto.CreateFormRe
 		if err != nil {
 			return err
 		}
-		
+
 		// optionPayload:=&domain.LeadFormFieldOption{}
 
 		optionEntities := formdto.ToOptionEntities(fieldEntities)
 
 		if len(optionEntities) > 0 {
-			_,err:=r.fieldoptionRepo.UpsertTx(ctx , tx , optionEntities)
+			_, err := r.fieldoptionRepo.UpsertTx(ctx, tx, optionEntities)
 
 			if err != nil {
 				return err
 			}
 		}
-
-		
 
 		// userData = data
 
@@ -113,34 +112,40 @@ func (r *formServiceRepo) Create(ctx context.Context, data *formdto.CreateFormRe
 
 	})
 
-
 	if err != nil {
 		return err
 	}
-	return  nil
+	return nil
 }
 
+func (r *formServiceRepo) GetByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.LeadForm, error) {
 
-func (r * formServiceRepo) GetByVideoID (ctx context.Context,videoID uuid.UUID) (*domain.LeadForm,error) {
-
-	videoData,err:=r.videoRepo.GetByID(ctx , videoID)
-
-	if err != nil {
-		return nil,err
-	}
-
-	if videoData ==nil{
-		return  nil,&utils.ApiError{
-			Code: 404,
-			Message: "Video does not exist.",
-		}
-	}
-
-	formdata,err:=r.leadformRepo.GetByVideoID(ctx , videoID )
+	videoData, err := r.videoRepo.GetByID(ctx, videoID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return formdata,nil
+	if videoData == nil {
+		return nil, &utils.ApiError{
+			Code:    404,
+			Message: "Video does not exist.",
+		}
+	}
+
+	formdata, err := r.leadformRepo.GetByVideoID(ctx, videoID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return formdata, nil
+}
+
+func (r *formServiceRepo) GetOverviewByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID) (*formdto.LeadFormOverviewDTO, error) {
+	if _, err := r.workspaceRepo.GetWorkspaceWithUserId(ctx, workspaceID, userID); err != nil {
+		return nil, err
+	}
+
+	return r.leadformRepo.GetOverviewByWorkspaceID(ctx, workspaceID, 5)
 }

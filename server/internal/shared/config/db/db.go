@@ -79,11 +79,13 @@ func InitDb() *gorm.DB {
 		&domain.LeadForm{},
 		&domain.LeadFormField{},
 		&domain.LeadFormFieldOption{},
+		&domain.LeadFormSubmission{},
+		&domain.LeadFormAnswer{},
 		&domain.VideoEndScreen{},
 		&domain.VideoSubtitle{},
 		&domain.VideoChapters{},
 		&domain.VideoCtaSetting{},
-		
+
 		&domain.UserStorageUsage{},
 		&domain.UserUsageCounters{},
 		&domain.BandwidthUsageEvent{},

@@ -60,7 +60,7 @@ function HomeView() {
               dailyData={bandwidth.dailyData}
             />
             <TotalVideosCard workspaceId={workspaceData.id} />
-            <LeadSubmissionsCard/>
+            <LeadSubmissionsCard workspaceId={workspaceData.id} />
           </div>
         </div>
       </div>

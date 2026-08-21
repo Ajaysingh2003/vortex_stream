@@ -24,12 +24,12 @@ func (h *VideoHandler) CreateVideo(c *gin.Context) {
 	var req struct {
 		Title       string             `json:"title" binding:"required"`
 		VideoKey    string             `json:"videoKey" binding:"required"`
-		Thumbnail   string             `json:"thumbnail" binding:"required"`
+		Thumbnail   string             `json:"thumbnail"`
 		FolderID    *uuid.UUID         `json:"folderId"`
-		Status      domain.VideoStatus `json:"status" binding:"required"`
+		Status      domain.VideoStatus `json:"status"`
 		WorkspaceId string             `json:"workspaceId" binding:"required"`
-		Size        int64              `json:"size" binding:"required"`
-		Duration    int                `json:"duration" binding:required"`
+		Size        int64              `json:"size" binding:"required,min=1"`
+		Duration    int                `json:"duration" binding:"omitempty,min=0"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
