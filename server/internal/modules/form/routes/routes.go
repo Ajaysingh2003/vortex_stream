@@ -16,15 +16,12 @@
 
 // 	{
 // 		workspace.POST("/:workspaceID/video/:videoID/form", middleware.AuthMiddleware(jwtMaker), formHandler.UpsertForm)
-		
+
 // 		api.GET("/video/:videoId/form", formHandler.GetByVideoID)
-		
+
 // 	}
 // 	return r
 // }
-
-
-
 
 package routes
 
@@ -39,15 +36,16 @@ func SetupRouter(r *gin.Engine, formHandler *handler.FormHandler, jwtMaker *util
 
 	api := r.Group("/api/v1")
 	workspace := api.Group("/workspace")
+	workspaceForms := api.Group("/workspace/:workspaceId/forms")
 
 	{
 
 		workspace.POST("/:workspaceId/video/:id/form", middleware.AuthMiddleware(jwtMaker), formHandler.UpsertForm)
-
+		workspaceForms.GET("/overview", middleware.AuthMiddleware(jwtMaker), formHandler.GetOverview)
 
 		api.GET("/video/:videoId/form", formHandler.GetByVideoID)
-		
+
 	}
-	
+
 	return r
 }

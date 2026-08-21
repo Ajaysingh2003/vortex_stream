@@ -28,6 +28,22 @@ export const formatDuration = (totalSeconds: number | null | undefined): string 
 };
 
 
+export function formatReadableDate(dateInput: Date | string | number): string {
+  if (!dateInput) return "";
+
+  const date = new Date(dateInput);
+
+  // Return empty string or fallback if date is invalid
+  if (isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
 
 
 

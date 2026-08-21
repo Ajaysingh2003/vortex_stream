@@ -8,6 +8,24 @@ import (
 	"github.com/google/uuid"
 )
 
+type LeadFormOverviewDTO struct {
+	TotalForms           int64                     `json:"totalForms"`
+	TotalSubmissions     int64                     `json:"totalSubmissions"`
+	CompletedSubmissions int64                     `json:"completedSubmissions"`
+	SkippedSubmissions   int64                     `json:"skippedSubmissions"`
+	ConversionRate       float64                   `json:"conversionRate"`
+	RecentSubmissions    []RecentLeadSubmissionDTO `json:"recentSubmissions"`
+}
+
+type RecentLeadSubmissionDTO struct {
+	ID             uuid.UUID `json:"id"`
+	VideoID        uuid.UUID `json:"videoId"`
+	VideoTitle     string    `json:"videoTitle"`
+	Skipped        bool      `json:"skipped"`
+	LeadIdentifier string    `json:"leadIdentifier"`
+	CreatedAt      time.Time `json:"createdAt"`
+}
+
 type CreateFormReq struct {
 	ID          uuid.UUID        `json:"id" validate:"required"`
 	VideoID     uuid.UUID        `json:"video_id" validate:"required,uuid"`
@@ -28,10 +46,8 @@ type CreateFieldReq struct {
 }
 
 type CreateOptionReq struct {
-	
-	ID          uuid.UUID        `json:"id" validate:"required"`
-	Label string `json:"label" validate:"required"`
-
+	ID    uuid.UUID `json:"id" validate:"required"`
+	Label string    `json:"label" validate:"required"`
 }
 
 func (dto *CreateFormReq) ToEntity() *domain.LeadForm {
@@ -77,9 +93,9 @@ func (dto *CreateFormReq) ToFieldEntities(formID uuid.UUID) []*domain.LeadFormFi
 		}
 
 		entities[i] = &domain.LeadFormField{
-			ID:       fieldID,
-			FormID:   formID,
-			Label:    f.Label,
+			ID:     fieldID,
+			FormID: formID,
+			Label:  f.Label,
 			// Scope:    fieldScope,
 			Type:     f.Type,
 			Position: f.Position,

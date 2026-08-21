@@ -150,7 +150,7 @@ function UploadFile({ folderId = null }: { folderId?: string | null }) {
               thumbnail: item.thumbnailKey || "",
               folderId,
               title: item.file.name,
-              duration: item.file.duration || 0, 
+              duration: item.duration || 0,
               status: "PENDING",
               userId: userDataRef.current.id,
               size: item.file.size,
@@ -257,7 +257,10 @@ function UploadFile({ folderId = null }: { folderId?: string | null }) {
                 : "Thumbnail generation failed",
             );
           }
-          const duration = await getVideoDuration(file).catch(() => 0);
+          const duration = Math.max(
+            0,
+            Math.round(await getVideoDuration(file).catch(() => 0)),
+          );
           if (!itemsRef.current.some((current) => current.id === item.id)) continue;
           if (!thumbnailUrl) throw new Error("Could not generate thumbnail");
 
@@ -290,6 +293,9 @@ function UploadFile({ folderId = null }: { folderId?: string | null }) {
           });
           if (!thumbnailUpload.ok) throw new Error("Thumbnail upload failed");
 
+          const thumbnailKey = thumbnailTicket.files[0].Key;
+          if (!thumbnailKey) throw new Error("Thumbnail key was not returned");
+
           if (!itemsRef.current.some((current) => current.id === item.id)) continue;
 
           let videoTicket;
@@ -314,13 +320,13 @@ function UploadFile({ folderId = null }: { folderId?: string | null }) {
           const preparedItem: UploadItem = {
             ...item,
             duration,
-            thumbnailKey: thumbnailTicket.files[0].Key,
+            thumbnailKey,
             thumbnailPreviewUrl: undefined,
           };
           updateItemRef.current(item.id, {
             status: "queued",
             duration,
-            thumbnailKey: thumbnailTicket.files[0].Key,
+            thumbnailKey,
             thumbnailPreviewUrl: undefined,
           });
           startUploadRef.current(

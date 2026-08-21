@@ -108,8 +108,7 @@ func (f *FormHandler) UpsertForm(c *gin.Context) {
 		Fields:      dtoFields,
 	}
 
-	err=f.FormService.Create(c.Request.Context(), createPayload,userID)
-
+	err = f.FormService.Create(c.Request.Context(), createPayload, userID)
 
 	if err != nil {
 		if appErr, ok := err.(*utils.ApiError); ok {
@@ -122,12 +121,6 @@ func (f *FormHandler) UpsertForm(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": "form Updated successfully"})
 }
-
-
-
-
-
-
 
 func (h *FormHandler) GetByVideoID(c *gin.Context) {
 	videoIDRaw := c.Param("videoId")
@@ -158,3 +151,34 @@ func (h *FormHandler) GetByVideoID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": formData})
 }
 
+func (h *FormHandler) GetOverview(c *gin.Context) {
+	userIDRaw, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "Unauthorized"})
+		return
+	}
+
+	userID, ok := userIDRaw.(uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "Unauthorized"})
+		return
+	}
+
+	workspaceID, err := uuid.Parse(c.Param("workspaceId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid Workspace ID"})
+		return
+	}
+
+	overview, err := h.FormService.GetOverviewByWorkspaceID(c.Request.Context(), workspaceID, userID)
+	if err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": overview})
+}
