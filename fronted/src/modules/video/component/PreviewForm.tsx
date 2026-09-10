@@ -102,7 +102,6 @@ function PreviewForm() {
             <div className="w-full space-y-2">
               {showContinue ? (
                 <Button
-                    
                   onClick={handleContinue}
                   className="w-full bg-white hover:bg-white/90 bg-main-btn text-slate-950 rounded-lg font-semibold h-10 transition"
                 >

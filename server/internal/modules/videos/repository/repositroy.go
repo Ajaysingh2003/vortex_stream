@@ -22,6 +22,7 @@ type VideoRepository interface {
 	GetByIdAndUserId(ctx context.Context, Id uuid.UUID, userId uuid.UUID) (*domain.Video, error)
 	AddResolution(ctx context.Context, res *domain.VideoResolution) error
 	AddAllowedDomain(ctx context.Context, dom *domain.VideoDomain) error
+	ReplaceAllowedDomains(ctx context.Context, videoID uuid.UUID, domains []string) error
 	Delete(ctx context.Context, id uuid.UUID) error
 
 	GetVideosPaginated(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID, cursorID **uuid.UUID, limit int, filterOptions *dto.FilterOptions) ([]domain.Video, error)
@@ -127,6 +128,9 @@ func (r *postgresVideoRepository) Update(ctx context.Context, video *domain.Vide
 	if video.Thumbnail != "" {
 		updateData["thumbnail"] = video.Thumbnail
 	}
+	if video.IsPrivateSet {
+		updateData["is_private"] = video.IsPrivate
+	}
 
 	// 3. For foreign keys/pointers, handle nil vs zero values explicitly
 	// If it's a pointer to a UUID, this checks if it's explicitly set
@@ -152,6 +156,27 @@ func (r *postgresVideoRepository) AddResolution(ctx context.Context, res *domain
 
 func (r *postgresVideoRepository) AddAllowedDomain(ctx context.Context, dom *domain.VideoDomain) error {
 	return r.db.WithContext(ctx).Create(dom).Error
+}
+
+func (r *postgresVideoRepository) ReplaceAllowedDomains(ctx context.Context, videoID uuid.UUID, domains []string) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("video_id = ?", videoID).Delete(&domain.VideoDomain{}).Error; err != nil {
+			return err
+		}
+		if len(domains) == 0 {
+			return nil
+		}
+
+		entries := make([]domain.VideoDomain, 0, len(domains))
+		for _, value := range domains {
+			entries = append(entries, domain.VideoDomain{
+				ID:      uuid.New(),
+				VideoID: videoID,
+				Domain:  value,
+			})
+		}
+		return tx.Create(&entries).Error
+	})
 }
 
 func (r *postgresVideoRepository) Delete(ctx context.Context, id uuid.UUID) error {

@@ -100,27 +100,27 @@ type Subscription struct {
 }
 
 type UserStorageUsage struct {
-    ID     uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
-    UserID uuid.UUID `gorm:"type:uuid;uniqueIndex;not null" json:"userId"`
+	ID     uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+	UserID uuid.UUID `gorm:"type:uuid;uniqueIndex;not null" json:"userId"`
 
-    UsedBytes int64 `gorm:"type:bigint;default:0;not null" json:"usedBytes"`
+	UsedBytes int64 `gorm:"type:bigint;default:0;not null" json:"usedBytes"`
 
-    UpdatedAt time.Time      `gorm:"autoUpdateTime" json:"updatedAt,omitempty"`
-    DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	UpdatedAt time.Time      `gorm:"autoUpdateTime" json:"updatedAt,omitempty"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 type UserUsageCounters struct {
-    ID     uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
-    UserID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_usage_period" json:"userId"`
+	ID     uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+	UserID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_usage_period" json:"userId"`
 
-    PeriodStart time.Time `gorm:"type:timestamptz;not null;uniqueIndex:idx_user_usage_period" json:"periodStart"`
-    PeriodEnd   time.Time `gorm:"type:timestamptz;not null" json:"periodEnd"`
+	PeriodStart time.Time `gorm:"type:timestamptz;not null;uniqueIndex:idx_user_usage_period" json:"periodStart"`
+	PeriodEnd   time.Time `gorm:"type:timestamptz;not null" json:"periodEnd"`
 
-    BandwidthBytesUsed      int64 `gorm:"type:bigint;default:0;not null" json:"bandwidthBytesUsed"`
-    SubtitleGenerationsUsed int64 `gorm:"type:bigint;default:0;not null" json:"subtitleGenerationsUsed"`
+	BandwidthBytesUsed      int64 `gorm:"type:bigint;default:0;not null" json:"bandwidthBytesUsed"`
+	SubtitleGenerationsUsed int64 `gorm:"type:bigint;default:0;not null" json:"subtitleGenerationsUsed"`
 
-    CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt,omitempty"`
-    UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt,omitempty"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt,omitempty"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt,omitempty"`
 }
 
 type BandwidthUsageEvent struct {
@@ -187,10 +187,11 @@ type Video struct {
 	VideoKey  string `gorm:"not null" json:"videoKey"`
 	MasterKey string `gorm:"not null" json:"masterKey"`
 
-	Size      int64  `json:"size"`
-	Thumbnail string `json:"thumbnail"`
-	Duration  int    `json:"duration"`
-	IsPrivate bool   `gorm:"default:true" json:"isPrivate"`
+	Size         int64  `json:"size"`
+	Thumbnail    string `json:"thumbnail"`
+	Duration     int    `json:"duration"`
+	IsPrivate    bool   `gorm:"default:true" json:"isPrivate"`
+	IsPrivateSet bool   `gorm:"-" json:"-"`
 
 	Status VideoStatus `gorm:"type:varchar(20);default:'PENDING'" json:"status"`
 
@@ -200,9 +201,9 @@ type Video struct {
 
 	AllowedDomains []VideoDomain `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE" json:"allowedDomains,omitempty"`
 
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt            time.Time             `json:"createdAt"`
+	UpdatedAt            time.Time             `json:"updatedAt"`
+	DeletedAt            gorm.DeletedAt        `gorm:"index" json:"-"`
 	BandwidthUsageEvents []BandwidthUsageEvent `gorm:"foreignKey:VideoID;constraint:OnDelete:CASCADE" json:"-"`
 }
 
@@ -255,9 +256,9 @@ type VideoResolution struct {
 type VideoDomain struct {
 	ID uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 
-	Domain string `gorm:"type:varchar(255);not null" json:"domain"`
+	Domain string `gorm:"type:varchar(255);not null;uniqueIndex:idx_video_domain_pair" json:"domain"`
 
-	VideoID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_video_domain" json:"videoId"`
+	VideoID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_video_domain_pair" json:"videoId"`
 
 	Video *Video `gorm:"foreignKey:VideoID;references:ID" json:"-"`
 

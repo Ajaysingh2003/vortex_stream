@@ -3,17 +3,36 @@ import React from "react";
 import { useVideoContext } from "../context/VideoContext";
 import PreviewForm from "./PreviewForm";
 import { Button } from "@/components/ui/button";
+import { useTRPC } from "@/trpc/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useParams } from "next/dist/client/components/navigation";
+import { VideoAsset, WorkspaceType } from "@/modules/types";
 
 function FormVideoSection() {
-  const thumbnail =
-    "https://pub-db02f4666efb4ae9b337950ff0610772.r2.dev/blogimages/madisonbeer%2BCHWB_w9lckT-1-1200x630.jpg";
+  const trpc = useTRPC();
+  const params = useParams();
+  const videoId = params.id;
+
+  const { data: workspace } = useSuspenseQuery(
+    trpc.user.getWorkspace.queryOptions(),
+  );
+
+  const workspaceData = workspace as WorkspaceType;
+  const { data } = useSuspenseQuery(
+    trpc.video.getVideoFromWorkspace.queryOptions({
+      videoId: videoId as string,
+      workspaceID: workspaceData?.id,
+    }),
+  );
+
+  const videoData = data as VideoAsset;
+  const thumbnail = process.env.NEXT_PUBLIC_CDN_URL! + videoData?.thumbnail || "/images/default-thumbnail.png";
 
   const { background, skipForm } = useVideoContext()!;
 
   return (
     <div className="w-full h-full min-h-screen lg:min-h-[700px]">
       <div className="w-full h-full min-h-screen lg:min-h-[700px] overflow-hidden relative rounded-2xl bg-black">
-        
         {/* 🖼️ Next.js Image layer handling the full covering aspect background */}
         <div className="absolute inset-0 w-full h-full z-0">
           <Image
@@ -21,7 +40,9 @@ function FormVideoSection() {
             className="w-full h-full object-cover rounded-2xl"
             alt="Video preview background thumbnail"
             src={thumbnail}
-            fill // 🚀 Crucial: Forces the image element to fill its direct relative parent container perfectly
+            // fill
+            height={100}
+            width={100}
             sizes="(max-width: 1200px) 100vw"
             priority
           />
@@ -46,7 +67,6 @@ function FormVideoSection() {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );

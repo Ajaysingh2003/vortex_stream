@@ -70,7 +70,7 @@ function Layout({ children }: { children: React.ReactNode }) {
             </header>
 
             {/* Main Content Area */}
-            <main className="p-6 w-full h-full">{children}</main>
+            <main className="p-4 sm:p-6 w-full h-full">{children}</main>
           </div>
         </section>
       </SidebarProvider>

@@ -53,7 +53,61 @@ export const videoRouter = createTRPCRouter({
       }
     }),
 
-  profile: protectedProcedure(["Admin,User"]).query(async ({ ctx }) => {
+  getVideoDomainRestrictions: protectedProcedure(["Admin", "User"])
+    .input(
+      z.object({
+        videoId: z.string().uuid(),
+        workspaceID: z.string().uuid(),
+      }),
+    )
+    .query(async ({ input }) => {
+      try {
+        const accessToken = (await cookies()).get("access_token")?.value;
+        const response = await axios.get(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceID}/video/${input.videoId}/domains`,
+          { headers: { Authorization: `Bearer ${accessToken}` } },
+        );
+        return response.data.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          throw new TRPCError({
+            code: error.response?.status === 404 ? "NOT_FOUND" : "BAD_REQUEST",
+            message: error.response?.data?.message || "Unable to load domain restrictions",
+          });
+        }
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Unable to load domain restrictions" });
+      }
+    }),
+
+  saveVideoDomainRestrictions: protectedProcedure(["Admin", "User"])
+    .input(
+      z.object({
+        video_id: z.string().uuid(),
+        workspaceID: z.string().uuid(),
+        domains: z.array(z.string()).max(50),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const accessToken = (await cookies()).get("access_token")?.value;
+        const response = await axios.put(
+          `${process.env.BASE_API}/v1/workspace/${input.workspaceID}/video/${input.video_id}/domains`,
+          { domains: input.domains },
+          { headers: { Authorization: `Bearer ${accessToken}` } },
+        );
+        return response.data.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          throw new TRPCError({
+            code: error.response?.status === 403 ? "FORBIDDEN" : "BAD_REQUEST",
+            message: error.response?.data?.message || "Unable to save domain restrictions",
+          });
+        }
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Unable to save domain restrictions" });
+      }
+    }),
+
+  profile: protectedProcedure(["Admin", "User"]).query(async ({ ctx }) => {
     try {
       console.log(ctx.user);
       return ctx.user;
@@ -190,6 +244,7 @@ export const videoRouter = createTRPCRouter({
         thumbnail: z.string().optional(),
         folderID: z.string().nullable().optional(),
         title: z.string().optional(),
+        isPrivate: z.boolean().optional(),
         workspaceID: z.string(),
       }),
     )

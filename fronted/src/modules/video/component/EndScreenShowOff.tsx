@@ -107,7 +107,7 @@ function CustomImage() {
       <div className="w-full h-full relative">
         {!customImagePreview ? <div className="w-full h-full flex items-center justify-center">
             <p className=" tracking-wider text-xs sm:text-sm text-white/70 capitalize    text-center">Add an image to see preview</p>
-        </div>:<Image src={`${process.env.NEXT_PUBLIC_CDN_URL}` + customImagePreview} className="w-full h-full object-contain" height={100} width={100} alt="" />}
+        </div>:<Image unoptimized src={`${process.env.NEXT_PUBLIC_CDN_URL}` + customImagePreview} className="w-full h-full object-contain" height={100} width={100} alt="" />}
     </div>
     </div>
   );
