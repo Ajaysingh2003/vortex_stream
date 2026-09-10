@@ -164,6 +164,7 @@ export interface FeatureItem {
   // icon: 'WorkIcon' | 'DatabaseIcon' | 'PlayIcon' | 'TransferIcon';
 }
 
+
 export type VideoResolutionType = {
   index: number;
   resolution: string;

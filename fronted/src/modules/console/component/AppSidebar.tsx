@@ -58,7 +58,10 @@ export function AppSidebar() {
   const { open } = useSidebar();
   const pathName = usePathname();
 
+
   // Matches /video, /video/, /video/[id], or /console/.../video/[id]
+
+  
   const isVideoRoute = /\/video(\/.*)?$/i.test(pathName);
 
   const menuItems = [
@@ -155,7 +158,7 @@ export function AppSidebar() {
     <Sidebar 
       className="max-w-64 border-r-[0.5px] border-stone-200 font-content bg-surface tracking-tight" 
       collapsible="icon"
-    >
+>
       <SidebarHeader className={cn("bg-surface transition-all", open && "pl-2.5")}>
         <ProfileMenu />
       </SidebarHeader>
