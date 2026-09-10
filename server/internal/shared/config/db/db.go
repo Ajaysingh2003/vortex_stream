@@ -94,6 +94,19 @@ func InitDb() *gorm.DB {
 	if err != nil {
 		log.Fatal("❌ Migration  failed: for db ", err)
 	}
+	// Older installations created a unique index on video_id alone, which
+	// incorrectly limited each video to one allowed domain. Replace it with the
+	// composite index declared on VideoDomain.
+	if db.Migrator().HasIndex(&domain.VideoDomain{}, "idx_video_domain") {
+		if err := db.Migrator().DropIndex(&domain.VideoDomain{}, "idx_video_domain"); err != nil {
+			log.Fatal("❌ Failed to migrate video domain index: ", err)
+		}
+	}
+	if !db.Migrator().HasIndex(&domain.VideoDomain{}, "idx_video_domain_pair") {
+		if err := db.Migrator().CreateIndex(&domain.VideoDomain{}, "idx_video_domain_pair"); err != nil {
+			log.Fatal("❌ Failed to create video domain index: ", err)
+		}
+	}
 
 	DB = db
 	fmt.Println("✅ Database connection established successfully!")

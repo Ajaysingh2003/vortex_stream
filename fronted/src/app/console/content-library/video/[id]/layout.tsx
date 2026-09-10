@@ -10,23 +10,20 @@ function layout({ children }: { children: React.ReactNode }) {
   console.log(filters.limit,987)
   return (
     <VideoProvider>
-      <div className="w-full h-screen max-h-[calc(100dvh-12rem)]">
-        <div className="p-3 md:p-8 lg:py-10 lg:px-6 min-h-full  h-full w-full">
-          <div className="rounded-md w-full  relative   h-full">
-            <div className="w-full  relative  gap-3 md:gap-6 grid grid-cols-1 h-full md:grid-cols-[300px_1fr] lg:grid-cols-[350px_1fr]">
-              {/* Sidebar */}
-              <div className="flex items-start lg:items-center     justify-start lg:justify-center  h-full relative">
-
-                <div className="bg-[#f9f9f9] rounded-lg lg:fixed overflow-y-scroll scroll-bar shadow-sm pxb-5 md:max-h-[calc(100vh-12rem)] w-full lg:w-[350px] ">
-                  <VideoSettingType type={filters.setting_scope} />
-                </div>
-
-                <div className="hidden lg:block w-full lg:w-[350px] shrink-0" />
+      <div className="w-full min-h-full">
+        <div className="w-full min-h-full gap-4 md:gap-8 grid grid-cols-1 md:grid-cols-[320px_1fr] lg:grid-cols-[360px_1fr]">
+          {/* Left Side (Sidebar) - Order 2 on mobile (below content), Order 1 on desktop (left) */}
+          <div className="w-full relative order-2 md:order-1">
+            <div className="w-full md:sticky md:top-[4.5rem] md:h-[calc(100vh-6rem)] md:flex md:items-center md:justify-center">
+              <div className="w-full max-w-[360px] mx-auto bg-[#f9f9f9] rounded-2xl overflow-y-auto scroll-bar shadow-sm p-4 sm:p-5 md:max-h-[calc(100vh-8rem)]">
+                <VideoSettingType type={filters.setting_scope} />
               </div>
-
-              {/* Main content */}
-              <div className="w-full h-full">{children}</div>
             </div>
+          </div>
+
+          {/* Right Side (Main Content) - Order 1 on mobile (on top/first), Order 2 on desktop (right) */}
+          <div className="w-full min-w-0 order-1 md:order-2">
+            {children}
           </div>
         </div>
       </div>

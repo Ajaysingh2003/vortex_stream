@@ -2,13 +2,14 @@
 
 import React from "react";
 import VideoPlayer from "../component/VideoPlayer";
+import { VideoAsset } from "@/modules/types";
 
-function EmbedView({ videoId }: { videoId: string }) {
+function EmbedView({ asset }: { asset: VideoAsset }) {
   
   return (
-    <div className="relative h-full w-full overflow-hidden bg-blacka">
+    <div className="relative h-full w-full overflow-hidden bg-transparent">
       <div className="h-full w-full">
-        <VideoPlayer videoId={videoId} />
+        <VideoPlayer asset={asset} />
       </div>
     </div>
   );

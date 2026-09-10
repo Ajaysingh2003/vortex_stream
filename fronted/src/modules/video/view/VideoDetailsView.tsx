@@ -6,6 +6,7 @@ import EndScreenControl from "../component/EndScrennControl";
 import EndScreenPreview from "../component/EndScreenPreview";
 import CtaSetting from "../component/CtaSetting";
 import CTAShow from "../component/CtaSetting";
+import VideoUpdate from "../component/VideoUpdate";
 
 function VideoDetailsView() {
   const params = useSearchParams();
@@ -13,6 +14,45 @@ function VideoDetailsView() {
 
 
   switch (scope) {
+
+    case "thumbnail":
+      return (
+        <div className="">
+          <VideoUpdate />
+        </div>
+      );
+    case "analytics":
+      return (
+        <div className="">
+          <VideoUpdate />
+        </div>
+      );
+    case "domain_restriction":
+      return (
+        <div className="">
+          <VideoUpdate />
+        </div>
+      );
+    case "controls":
+      return (
+        <div className="">
+          <VideoUpdate />
+        </div>
+      );
+    case "general":
+      return (
+        <div className="">
+          <VideoUpdate />
+        </div>
+      );
+    case "subtitle":
+      return (
+        <div className="">
+          <VideoUpdate />
+        </div>
+      );
+    
+
     case "form":
       return (
         <div className="">
@@ -21,18 +61,16 @@ function VideoDetailsView() {
       );
     case "end_screen":
       return <EndScreenPreview />;
-    case "subtitle":
-      return <EndScreenPreview />;
     case "chapter":
       return <EndScreenPreview />;
     case "cta":
       return <CTAShow isPremium={true} />;
-
-    
-
-    // <div className="min-h-140">
-
-    // </div>
+    default:
+      return (
+        <div>
+          <VideoUpdate />
+        </div>
+      );
   }
 }
 

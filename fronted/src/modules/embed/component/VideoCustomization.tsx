@@ -271,7 +271,7 @@ export default function ProductionVideoPlayer({
               poster
             }
             alt="Video Thumbnail Placeholder"
-            className="absolute inset-0 z-20 w-full h-full cursor-pointer poster-img object-contain lg:object-covezr bg-black"
+            className="absolute inset-0 z-20 w-full h-full cursor-pointer poster-img object-contain bg-transparent"
             onClick={togglePlay}
           />
         )}
@@ -280,7 +280,7 @@ export default function ProductionVideoPlayer({
           poster= {asset.thumbnail}
           ref={videoRef}
           slot="media"
-          className="h-full w-full cursor-pointer  video-ref-embed object-contain bg-black"
+          className="h-full w-full cursor-pointer video-ref-embed object-contain bg-transparent"
           playsInline
           muted={general.autoplay}
           autoPlay={general.autoplay}

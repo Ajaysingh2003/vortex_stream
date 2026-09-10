@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/users/repository"
@@ -18,6 +20,110 @@ import (
 type VideoHandler struct {
 	VideoService services.VideoInterface
 	UserRepo     repository.UserRepository
+}
+
+func currentUserID(c *gin.Context) (uuid.UUID, bool) {
+	value, exists := c.Get("user_id")
+	if !exists {
+		return uuid.Nil, false
+	}
+	userID, ok := value.(uuid.UUID)
+	return userID, ok && userID != uuid.Nil
+}
+
+func parseVideoScope(c *gin.Context) (uuid.UUID, uuid.UUID, uuid.UUID, bool) {
+	userID, ok := currentUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "Unauthorized"})
+		return uuid.Nil, uuid.Nil, uuid.Nil, false
+	}
+	workspaceID, err := uuid.Parse(c.Param("workspaceId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid Workspace ID"})
+		return uuid.Nil, uuid.Nil, uuid.Nil, false
+	}
+	videoID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid Video ID"})
+		return uuid.Nil, uuid.Nil, uuid.Nil, false
+	}
+	return userID, workspaceID, videoID, true
+}
+
+func respondVideoError(c *gin.Context, err error) {
+	if appErr, ok := err.(*utils.ApiError); ok {
+		c.JSON(appErr.Code, gin.H{"success": false, "message": appErr.Message})
+		return
+	}
+	c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Something went wrong"})
+}
+
+func requestHost(c *gin.Context) string {
+	value := c.GetHeader("Origin")
+	if value == "" {
+		value = c.GetHeader("Referer")
+	}
+	parsed, err := url.Parse(value)
+	if err != nil || parsed.Hostname() == "" {
+		return ""
+	}
+	return strings.TrimSuffix(strings.ToLower(parsed.Hostname()), ".")
+}
+
+func isAllowedEmbedHost(host string, domains []domain.VideoDomain) bool {
+	if len(domains) == 0 {
+		return true
+	}
+	if host == "" {
+		return false
+	}
+	for _, entry := range domains {
+		allowed := strings.TrimSuffix(strings.ToLower(entry.Domain), ".")
+		if strings.HasPrefix(allowed, "*.") {
+			base := strings.TrimPrefix(allowed, "*.")
+			if strings.HasSuffix(host, "."+base) {
+				return true
+			}
+			continue
+		}
+		if host == allowed {
+			return true
+		}
+	}
+	return false
+}
+
+func (h *VideoHandler) GetVideoDomains(c *gin.Context) {
+	userID, workspaceID, videoID, ok := parseVideoScope(c)
+	if !ok {
+		return
+	}
+	domains, err := h.VideoService.GetVideoDomains(c.Request.Context(), workspaceID, userID, videoID)
+	if err != nil {
+		respondVideoError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": domains})
+}
+
+func (h *VideoHandler) ReplaceVideoDomains(c *gin.Context) {
+	userID, workspaceID, videoID, ok := parseVideoScope(c)
+	if !ok {
+		return
+	}
+	var request struct {
+		Domains []string `json:"domains" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "A domains list is required"})
+		return
+	}
+	domains, err := h.VideoService.ReplaceVideoDomains(c.Request.Context(), workspaceID, userID, videoID, request.Domains)
+	if err != nil {
+		respondVideoError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": domains})
 }
 
 func (h *VideoHandler) CreateVideo(c *gin.Context) {
@@ -341,6 +447,7 @@ func (h *VideoHandler) UpdateVideoMetaData(c *gin.Context) {
 		Title     *string    `json:"title" binding:"omitempty"`
 		FolderID  *uuid.UUID `json:"folderId" binding:"omitempty"`
 		Thumbnail *string    `json:"thumbnail" binding:"omitempty"` // 🚀 Change to *string to handle partial updates cleanly
+		IsPrivate *bool      `json:"isPrivate" binding:"omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -393,6 +500,11 @@ func (h *VideoHandler) UpdateVideoMetaData(c *gin.Context) {
 
 	if req.Thumbnail != nil {
 		videoPayload.Thumbnail = *req.Thumbnail
+	}
+
+	if req.IsPrivate != nil {
+		videoPayload.IsPrivate = *req.IsPrivate
+		videoPayload.IsPrivateSet = true
 	}
 
 	// 5. Update via service layer
@@ -491,6 +603,10 @@ func (h *VideoHandler) GetByVideoID(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong", "success": false})
+		return
+	}
+	if !isAllowedEmbedHost(requestHost(c), videoData.AllowedDomains) {
+		c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "This video is not permitted on this domain"})
 		return
 	}
 

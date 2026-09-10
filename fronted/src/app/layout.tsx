@@ -6,6 +6,7 @@ import {
   DM_Sans,
   Fraunces,
   Syne,
+  Newsreader,
 } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,7 @@ const fontContent = DM_Sans({
   subsets: ["latin"],
 });
 
-const fontHeading = Syne({
+const fontHeading = Newsreader({
   variable: "--font-heading",
   // weight:["400"],
   weight: ["500", "600", "700", "800"],

@@ -14,6 +14,9 @@ import (
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
+	"net"
+	"net/url"
+	"strings"
 	"time"
 	// "gorm.io/gorm"
 )
@@ -47,6 +50,8 @@ type VideoInterface interface {
 	DeleteCta(ctx context.Context, workspaceId uuid.UUID, userID uuid.UUID, ID uuid.UUID) error
 
 	GetCtaByVideoId(ctx context.Context, videoID uuid.UUID) ([]domain.VideoCtaSetting, error)
+	GetVideoDomains(ctx context.Context, workspaceID, userID, videoID uuid.UUID) ([]domain.VideoDomain, error)
+	ReplaceVideoDomains(ctx context.Context, workspaceID, userID, videoID uuid.UUID, domains []string) ([]domain.VideoDomain, error)
 }
 
 type VideoServiceRepo struct {
@@ -58,6 +63,84 @@ type VideoServiceRepo struct {
 
 func NewVideoService(userRepo userRpo.UserRepository, videoRepo repository.VideoRepository, workspaceRepo workspaceRepo.WorkshopRepository, folderRepo folderRepo.FolderRepository) VideoInterface {
 	return &VideoServiceRepo{userRepo: userRepo, videoRepo: videoRepo, workspaceRepo: workspaceRepo, folderRepo: folderRepo}
+}
+
+func (r *VideoServiceRepo) authorizedVideo(ctx context.Context, workspaceID, userID, videoID uuid.UUID) (*domain.Video, error) {
+	workspace, err := r.workspaceRepo.GetByID(ctx, workspaceID)
+	if err != nil || workspace == nil {
+		return nil, &utils.ApiError{Code: 404, Message: "Workspace not found"}
+	}
+	if workspace.UserID != userID {
+		return nil, &utils.ApiError{Code: 403, Message: "You don't have permission for this action."}
+	}
+	video, err := r.videoRepo.GetByID(ctx, videoID)
+	if err != nil {
+		return nil, err
+	}
+	if video == nil || video.WorkspaceID != workspaceID {
+		return nil, &utils.ApiError{Code: 404, Message: "Video not found"}
+	}
+	return video, nil
+}
+
+func normalizeDomain(value string) (string, error) {
+	value = strings.TrimSpace(strings.ToLower(value))
+	value = strings.TrimPrefix(value, "http://")
+	value = strings.TrimPrefix(value, "https://")
+	value = strings.TrimSuffix(value, "/")
+	wildcard := strings.HasPrefix(value, "*.")
+	if wildcard {
+		value = strings.TrimPrefix(value, "*.")
+	}
+	parsed, err := url.Parse("https://" + value)
+	if err != nil || parsed.Hostname() == "" || parsed.Path != "" {
+		return "", fmt.Errorf("invalid domain")
+	}
+	host := strings.TrimSuffix(strings.ToLower(parsed.Hostname()), ".")
+	if host != "localhost" && net.ParseIP(host) == nil && (!strings.Contains(host, ".") || strings.ContainsAny(host, " _/@")) {
+		return "", fmt.Errorf("invalid domain")
+	}
+	if wildcard && host == "localhost" {
+		return "", fmt.Errorf("invalid wildcard domain")
+	}
+	if wildcard {
+		return "*." + host, nil
+	}
+	return host, nil
+}
+
+func (r *VideoServiceRepo) GetVideoDomains(ctx context.Context, workspaceID, userID, videoID uuid.UUID) ([]domain.VideoDomain, error) {
+	video, err := r.authorizedVideo(ctx, workspaceID, userID, videoID)
+	if err != nil {
+		return nil, err
+	}
+	return video.AllowedDomains, nil
+}
+
+func (r *VideoServiceRepo) ReplaceVideoDomains(ctx context.Context, workspaceID, userID, videoID uuid.UUID, domains []string) ([]domain.VideoDomain, error) {
+	if _, err := r.authorizedVideo(ctx, workspaceID, userID, videoID); err != nil {
+		return nil, err
+	}
+	if len(domains) > 50 {
+		return nil, &utils.ApiError{Code: 400, Message: "A video can have at most 50 allowed domains"}
+	}
+
+	unique := make(map[string]struct{}, len(domains))
+	normalized := make([]string, 0, len(domains))
+	for _, value := range domains {
+		domain, err := normalizeDomain(value)
+		if err != nil {
+			return nil, &utils.ApiError{Code: 400, Message: "Each allowed domain must be a valid hostname"}
+		}
+		if _, exists := unique[domain]; !exists {
+			unique[domain] = struct{}{}
+			normalized = append(normalized, domain)
+		}
+	}
+	if err := r.videoRepo.ReplaceAllowedDomains(ctx, videoID, normalized); err != nil {
+		return nil, err
+	}
+	return r.GetVideoDomains(ctx, workspaceID, userID, videoID)
 }
 
 func (r *VideoServiceRepo) UpdateVideo(ctx context.Context, userID uuid.UUID, video domain.Video) error {
@@ -108,7 +191,9 @@ func (r *VideoServiceRepo) UpdateVideo(ctx context.Context, userID uuid.UUID, vi
 		WorkspaceID: workspace.ID,
 		ID:          video.ID,
 		// Title:       video.Title,
-		FolderID: video.FolderID,
+		FolderID:     video.FolderID,
+		IsPrivate:    video.IsPrivate,
+		IsPrivateSet: video.IsPrivateSet,
 		// Thumbnail:   video.Thumbnail,
 	}
 

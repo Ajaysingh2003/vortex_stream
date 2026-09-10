@@ -155,7 +155,7 @@ function ColorPicker({
 }
 
 /* ─── Main Component ─── */
-function CTAShow({ isPremium }: { isPremium: boolean }) {
+function CTAShow({ isPremium }: { isPremium?: boolean }) {
   const trpc = useTRPC();
   const { data: workspace } = useSuspenseQuery(
     trpc.user.getWorkspace.queryOptions(),

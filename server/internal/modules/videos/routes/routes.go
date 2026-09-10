@@ -90,6 +90,8 @@ func SetupRouter(r *gin.Engine, videohandler *handler.VideoHandler, jwtMaker *ut
 		workspaceVideos.GET("/video-list", middleware.AuthMiddleware(jwtMaker), videohandler.ListVideoByWorkspace)
 
 		workspaceVideos.GET("/:id/", middleware.AuthMiddleware(jwtMaker), videohandler.GetVideoMetaData)
+		workspaceVideos.GET("/:id/domains", middleware.AuthMiddleware(jwtMaker), videohandler.GetVideoDomains)
+		workspaceVideos.PUT("/:id/domains", middleware.AuthMiddleware(jwtMaker), videohandler.ReplaceVideoDomains)
 
 		workspaceVideos.PATCH("/:id/update", middleware.AuthMiddleware(jwtMaker), videohandler.UpdateVideoMetaData)
 

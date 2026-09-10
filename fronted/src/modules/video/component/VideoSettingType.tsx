@@ -5,6 +5,7 @@ import EndScrennControl from './EndScrennControl';
 import SubtitleControl from './SubtitleControl';
 import Chapters from './Chapters';
 import CtaSetting from './CtaSetting';
+import DomainRestriction from './DomainRestriction';
 
 interface VideoSettingTypeProps {
   type: "general" | "thumbnail" | "controls" | "analytics" | string; // Type-safety strings
@@ -34,19 +35,33 @@ function VideoSettingType({ type }: VideoSettingTypeProps) {
     case 'chapter':
       settingContent = <Chapters/>;
       break;
+      
+    case 'domain_restriction':
+      settingContent = <DomainRestriction/>;
+      break;
+
     case 'cta':
       settingContent = <CtaSetting/>;
       break;
 
     default:
-      settingContent = <div>Select a valid setting configuration panel</div>;
+      settingContent = (
+        <div className="flex flex-col items-center justify-center text-center p-6 space-y-2">
+          <p className="font-heading text-sm font-semibold text-foreground">
+            Configuration Panel
+          </p>
+          <p className="font-subheading text-xs text-muted-foreground">
+            Select a setting option from the sidebar to manage this video.
+          </p>
+        </div>
+      );
   }
 
   return (
-    <div className='w-full h-full'>
-        {settingContent}
+    <div className="w-full h-full">
+      {settingContent}
     </div>
-  )
+  );
 }
 
 export default VideoSettingType;
