@@ -2,9 +2,7 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/player/repository"
@@ -61,9 +59,6 @@ func (r *PlayerRepo) CreatePlayer(ctx context.Context, userID uuid.UUID, setting
 		WorkspaceID:      workspace.ID,
 	}
 
-	json, err := json.MarshalIndent(playerPayload, "", " ")
-
-	fmt.Print(string(json), "custom-player-2")
 	err = r.playerRepo.Upsert(ctx, playerPayload)
 
 	if err != nil {

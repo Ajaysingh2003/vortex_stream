@@ -11,6 +11,7 @@ import { getMaxGb } from "@/lib/config";
 import BandwidthCard from "./component/BandwidthCard";
 import TotalVideosCard from "./component/TotalVideoCount";
 import LeadSubmissionsCard from "../channel/components/LeadFormCard";
+import TotalViewsCard from "./component/TotalViewsCards";
 
 type BandwidthOverview = {
   usedBytes: number;
@@ -61,6 +62,7 @@ function HomeView() {
             />
             <TotalVideosCard workspaceId={workspaceData.id} />
             <LeadSubmissionsCard workspaceId={workspaceData.id} />
+            <TotalViewsCard/>
           </div>
         </div>
       </div>

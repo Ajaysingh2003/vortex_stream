@@ -16,6 +16,10 @@ services:
         condition: service_healthy
       database:
         condition: service_healthy
+      nats:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -41,6 +45,10 @@ services:
         condition: service_healthy
       database:
         condition: service_healthy
+      nats:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
     networks:
       - app-network
   redis:
@@ -55,6 +63,45 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    networks:
+      - app-network
+
+  nats:
+    image: nats:2.12-alpine
+    container_name: nats
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:8222/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - app-network
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.8
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      CLICKHOUSE_DB: analytics
+      CLICKHOUSE_USER: analytics_user
+      CLICKHOUSE_PASSWORD: analytics_password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - clickhouse-logs:/var/log/clickhouse-server
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     networks:
       - app-network
 
@@ -91,3 +138,6 @@ volumes:
   pgdata:
   transcoder_tmp:
   redis-data:
+  nats-data:
+  clickhouse-data:
+  clickhouse-logs:

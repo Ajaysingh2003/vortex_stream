@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Save, RotateCcw } from "lucide-react";
 // import Settings from '../component/Settings'
 import Preview from "../component/Preview";
-import { Settings, useSetting } from "../component/Settings";
+import { Settings } from "../component/Settings";
 import {
   VideoPlayerMetaData,
   VideoPlayerSettings,
@@ -22,43 +22,49 @@ function PlayerSettingsView() {
     trpc.videoPlayer.getPlayerMetaDataServer.queryOptions(),
   );
 
-  const playerSettingData = player as VideoPlayerMetaData;
+  // A workspace may not have saved player settings yet. Keep the editor usable
+  // with its built-in defaults until settings are saved for the first time.
+  const playerSettingData = player as Partial<VideoPlayerMetaData> | null;
+  const generalSettings = playerSettingData?.general_settings;
+  const controlSettings = playerSettingData?.control_settings;
+  const brandingSettings = playerSettingData?.branding_settings;
+  const securitySettings = playerSettingData?.security_settings;
   const [playerSettings, setPlayerSettings] = useState<VideoPlayerSettings>({
     general: {
-      ctaEnabled: playerSettingData.general_settings.ctaEnabled ?? false,
-      autoplay: playerSettingData.general_settings.autoplay ?? false,
-      preload: playerSettingData.general_settings.preload ?? true,
-      loop: playerSettingData.general_settings.loop ?? false,
-      captions: playerSettingData.general_settings.captions ?? false,
+      ctaEnabled: generalSettings?.ctaEnabled ?? false,
+      autoplay: generalSettings?.autoplay ?? false,
+      preload: generalSettings?.preload ?? true,
+      loop: generalSettings?.loop ?? false,
+      captions: generalSettings?.captions ?? false,
     },
     controls: {
       disableSeekbar:
-      playerSettingData.control_settings.disableSeekbar ?? false,
+      controlSettings?.disableSeekbar ?? false,
       downloadButton:
-      playerSettingData.control_settings.downloadButton ?? false,
-      showControls: playerSettingData.control_settings.showControls ?? true,
-      skipForward: playerSettingData.control_settings.skipForward ?? false,
-      skipBackward: playerSettingData.control_settings.skipBackward ?? true,
-      fullScreen: playerSettingData.control_settings.fullScreen ?? true,
-      volume: playerSettingData.control_settings.volume ?? true,
+      controlSettings?.downloadButton ?? false,
+      showControls: controlSettings?.showControls ?? true,
+      skipForward: controlSettings?.skipForward ?? false,
+      skipBackward: controlSettings?.skipBackward ?? true,
+      fullScreen: controlSettings?.fullScreen ?? true,
+      volume: controlSettings?.volume ?? true,
 
-      playbackRate: playerSettingData.control_settings.playbackRate ?? false,
-      pipButton: playerSettingData.control_settings.pipButton ?? false,
-      muteButton: playerSettingData.control_settings.muteButton ?? false,
+      playbackRate: controlSettings?.playbackRate ?? false,
+      pipButton: controlSettings?.pipButton ?? false,
+      muteButton: controlSettings?.muteButton ?? false,
     },
     branding: {
-      logoUrl: playerSettingData.branding_settings.logoUrl ?? "",
-      logoPosition: playerSettingData.branding_settings.logoPosition ?? "top_right",
-      logoWidth: playerSettingData.branding_settings.logoWidth ?? 50,
-      backgroundColor: playerSettingData.branding_settings.backgroundColor ?? "#000000",
-      primaryColor: playerSettingData.branding_settings.primaryColor ?? "#000000",
-      accentColor: playerSettingData.branding_settings.accentColor ?? "#000000",
-      iconColor: playerSettingData.branding_settings.iconColor ?? "#000000",
+      logoUrl: brandingSettings?.logoUrl ?? "",
+      logoPosition: brandingSettings?.logoPosition ?? "top_right",
+      logoWidth: brandingSettings?.logoWidth ?? 50,
+      backgroundColor: brandingSettings?.backgroundColor ?? "#000000",
+      primaryColor: brandingSettings?.primaryColor ?? "#000000",
+      accentColor: brandingSettings?.accentColor ?? "#000000",
+      iconColor: brandingSettings?.iconColor ?? "#000000",
     },
     security: {
-      watermarkEnabled: playerSettingData.security_settings.watermarkEnabled ?? false,
-      watermarkTextType: playerSettingData.security_settings.watermarkTextType ?? "none",
-      watermarkImage: playerSettingData.security_settings.watermarkImage ?? "",
+      watermarkEnabled: securitySettings?.watermarkEnabled ?? false,
+      watermarkTextType: securitySettings?.watermarkTextType ?? "none",
+      watermarkImage: securitySettings?.watermarkImage ?? "",
     },
   });
 

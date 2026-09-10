@@ -52,21 +52,21 @@ func (r *postgresRepository) ListVideosPaginated(ctx context.Context, userID, wo
 		if filters.Visibility != nil {
 			switch *filters.Visibility {
 			case "public":
-				query = query.Where("videos.is_private = ?", false)
+				query = query.Where("video.is_private = ?", false)
 			case "private":
-				query = query.Where("videos.is_private = ?", true)
+				query = query.Where("video.is_private = ?", true)
 			}
 		}
 		if filters.Date != nil {
 			switch *filters.Date {
 			case "today":
-				query = query.Where("videos.created_at >= NOW() - INTERVAL '24 hours'")
+				query = query.Where("video.created_at >= NOW() - INTERVAL '24 hours'")
 			case "this_week", "7_day":
-				query = query.Where("videos.created_at >= NOW() - INTERVAL '7 days'")
+				query = query.Where("video.created_at >= NOW() - INTERVAL '7 days'")
 			case "30_days":
-				query = query.Where("videos.created_at >= NOW() - INTERVAL '30 days'")
+				query = query.Where("video.created_at >= NOW() - INTERVAL '30 days'")
 			case "this_month":
-				query = query.Where("videos.created_at >= date_trunc('month', CURRENT_DATE)")
+				query = query.Where("video.created_at >= date_trunc('month', CURRENT_DATE)")
 			}
 		}
 	}
@@ -74,24 +74,24 @@ func (r *postgresRepository) ListVideosPaginated(ctx context.Context, userID, wo
 	ascending := filters != nil && filters.Sort != nil && (*filters.Sort == "asc" || *filters.Sort == "oldest" || *filters.Sort == "created_asc")
 	if cursorID != nil && *cursorID != nil {
 		if ascending {
-			query = query.Where("videos.id > ?", **cursorID)
+			query = query.Where("video.id > ?", **cursorID)
 		} else {
-			query = query.Where("videos.id < ?", **cursorID)
+			query = query.Where("video.id < ?", **cursorID)
 		}
 	}
 	if filters != nil && filters.Sort != nil {
 		switch *filters.Sort {
 		case "asc", "oldest", "created_asc":
-			query = query.Order("videos.created_at ASC, videos.id ASC")
+			query = query.Order("video.created_at ASC, video.id ASC")
 		case "name_asc":
-			query = query.Order("videos.title ASC, videos.id ASC")
+			query = query.Order("video.title ASC, video.id ASC")
 		case "name_desc":
-			query = query.Order("videos.title DESC, videos.id DESC")
+			query = query.Order("video.title DESC, video.id DESC")
 		default:
-			query = query.Order("videos.created_at DESC, videos.id DESC")
+			query = query.Order("video.created_at DESC, video.id DESC")
 		}
 	} else {
-		query = query.Order("videos.created_at DESC, videos.id DESC")
+		query = query.Order("video.created_at DESC, video.id DESC")
 	}
 
 	var videos []domain.Video

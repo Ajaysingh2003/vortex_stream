@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
@@ -25,6 +24,7 @@ func (h *PlayerHandler) UpdatePlayer(c *gin.Context) {
 	workspaceID, err := uuid.Parse(workspaceIDRaw)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Workspace ID", "success": false})
+		return
 	}
 
 	userIDRaw, exists := c.Get("user_id")
@@ -37,7 +37,7 @@ func (h *PlayerHandler) UpdatePlayer(c *gin.Context) {
 	userID, ok := userIDRaw.(uuid.UUID)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration", "success": false})
-
+		return
 	}
 
 	var req dto.UpdatePlayerReq
@@ -60,7 +60,7 @@ func (h *PlayerHandler) UpdatePlayer(c *gin.Context) {
 
 	var controlJSON datatypes.JSON
 
-	if req.ControlSettings != nil {
+	if req.BrandingSettings != nil {
 		bytes, err := json.Marshal(req.ControlSettings)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false})
@@ -68,7 +68,7 @@ func (h *PlayerHandler) UpdatePlayer(c *gin.Context) {
 		}
 		controlJSON = datatypes.JSON(bytes)
 	}
-	
+
 	var brandingJSON datatypes.JSON
 
 	if req.ControlSettings != nil {
@@ -79,7 +79,7 @@ func (h *PlayerHandler) UpdatePlayer(c *gin.Context) {
 		}
 		brandingJSON = datatypes.JSON(bytes)
 	}
-	
+
 	var securityJSON datatypes.JSON
 
 	if req.SecuritySettings != nil {
@@ -91,14 +91,11 @@ func (h *PlayerHandler) UpdatePlayer(c *gin.Context) {
 		securityJSON = datatypes.JSON(bytes)
 	}
 
-	fmt.Print(securityJSON,"ocean")
-	
-
-	err=h.PlayerService.CreatePlayer(c.Request.Context(), userID, &domain.PlayerSettings{
-		WorkspaceID:     workspaceID,
-		GeneralSettings: generalJSON,
-		ControlSettings: controlJSON,
-		BrandingSettings:brandingJSON,
+	err = h.PlayerService.CreatePlayer(c.Request.Context(), userID, &domain.PlayerSettings{
+		WorkspaceID:      workspaceID,
+		GeneralSettings:  generalJSON,
+		ControlSettings:  controlJSON,
+		BrandingSettings: brandingJSON,
 		SecuritySettings: securityJSON,
 	})
 
@@ -111,9 +108,8 @@ func (h *PlayerHandler) UpdatePlayer(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusAccepted, gin.H{"message": "Player Settings Updated Successfully"})
 
-	c.JSON(http.StatusAccepted, gin.H{"message":"Player Settings Updated Successfully"})
-	
 }
 
 func (h *PlayerHandler) GetPlayer(c *gin.Context) {
@@ -123,13 +119,10 @@ func (h *PlayerHandler) GetPlayer(c *gin.Context) {
 	workspaceID, err := uuid.Parse(workspaceIDRaw)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Workspace ID", "success": false})
+		return
 	}
 
-	
-
-	
-
-	playerData,err:=h.PlayerService.GetPlayer(c.Request.Context(), workspaceID )
+	playerData, err := h.PlayerService.GetPlayer(c.Request.Context(), workspaceID)
 
 	if err != nil {
 		if appErr, ok := err.(*utils.ApiError); ok {
@@ -140,8 +133,6 @@ func (h *PlayerHandler) GetPlayer(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{"data": playerData, "success": true})
 
-	c.JSON(http.StatusAccepted, gin.H{"data":playerData,"success":true})
-	
 }
-

@@ -159,9 +159,9 @@ const handleSubmit= (e: React.FormEvent<HTMLFormElement>) => {
          
         </FieldGroup>
 
-        { !showPasswordField && <Button onClick={handleContinue} className="w-full cursor-pointer tracking-wide mt-5 rounded-md bg-background-btn">Continue</Button>
+        { !showPasswordField && <Button onClick={handleContinue} className="w-full bg-main-btn cursor-pointer tracking-wide mt-5 rounded-md bg-background-btnz">Continue</Button>
         }
-        { showPasswordField && <Button className="w-full cursor-pointer tracking-wide mt-5 rounded-md bg-background-btn">
+        { showPasswordField && <Button className="w-full bg-main-btn cursor-pointer tracking-wide mt-5 rounded-md bg-background-btnz">
             {mutate.isPending ? "Logging in..." : "Login"}
         </Button>
         }

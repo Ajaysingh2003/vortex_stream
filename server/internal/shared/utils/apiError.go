@@ -1,6 +1,5 @@
 package utils
 
-import "fmt"
 
 type ApiError struct {
 	Code    int
@@ -8,7 +7,7 @@ type ApiError struct {
 }
 
 func (e *ApiError) Error() string {
-	return fmt.Sprintf(e.Message)
+	return e.Message
 }
 
 

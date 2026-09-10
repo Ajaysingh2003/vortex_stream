@@ -1,14 +1,17 @@
 package main
 
 import (
-	// "context"
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
-	billingHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/handler"
+	analyticsHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/analytics/handler"
+	analyticsRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/analytics/routes"
+	analyticsService "github.com/ajaysingh2003/vortex-stream/internal/modules/analytics/services"
 	bandwidthHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/bandwidth/handler"
+	billingHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/handler"
 	subscriptionRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/repository"
 	userUsageRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/repository"
 	folderHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/handler"
@@ -24,6 +27,9 @@ import (
 
 	leadFormRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/form/repository"
 
+	bandwidthRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/bandwidth/repository"
+	bandwidthRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/bandwidth/routes"
+	bandwidthService "github.com/ajaysingh2003/vortex-stream/internal/modules/bandwidth/services"
 	billingRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/routes"
 	billingService "github.com/ajaysingh2003/vortex-stream/internal/modules/billing/services"
 	channelHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/channels/handler"
@@ -32,14 +38,13 @@ import (
 	channelService "github.com/ajaysingh2003/vortex-stream/internal/modules/channels/service"
 	favoriteHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/handler"
 	favoriteRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/repository"
-	bandwidthRepository "github.com/ajaysingh2003/vortex-stream/internal/modules/bandwidth/repository"
 	favoriteRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/routes"
 	favoriteService "github.com/ajaysingh2003/vortex-stream/internal/modules/favorites/service"
 	folderRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/routes"
-	bandwidthRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/bandwidth/routes"
 	folderService "github.com/ajaysingh2003/vortex-stream/internal/modules/folders/services"
-	bandwidthService "github.com/ajaysingh2003/vortex-stream/internal/modules/bandwidth/services"
 	formService "github.com/ajaysingh2003/vortex-stream/internal/modules/form/service"
+	healthHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/health/handler"
+	healthRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/health/routes"
 	playerRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/player/routes"
 	playerService "github.com/ajaysingh2003/vortex-stream/internal/modules/player/services"
 	uploadRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/uploader/routes"
@@ -53,8 +58,11 @@ import (
 
 	formRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/form/routes"
 
+	clickhouseConfig "github.com/ajaysingh2003/vortex-stream/internal/shared/config/clickhouse"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/config/db"
+	natsConfig "github.com/ajaysingh2003/vortex-stream/internal/shared/config/nats"
 	config "github.com/ajaysingh2003/vortex-stream/internal/shared/config/redis"
+	"github.com/ajaysingh2003/vortex-stream/internal/shared/geoip"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -71,6 +79,21 @@ func main() {
 	config.InitRedis()
 
 	sqs.InitSqs()
+	natsClient, err := natsConfig.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer natsClient.Close()
+	clickhouseClient, err := clickhouseConfig.Connect(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer clickhouseClient.Close()
+	countryResolver, err := geoip.New()
+	if err != nil {
+		log.Fatal("initialize country resolver: ", err)
+	}
+	defer countryResolver.Close()
 	secretKey := os.Getenv("JWT_SECRET_KEY")
 	fmt.Print("leah", secretKey)
 	if secretKey == "" {
@@ -94,9 +117,9 @@ func main() {
 	subscriptionRepo := subscriptionRepository.NewPostgresSubscriptionRepository(database)
 	userUsageRepo := userUsageRepository.NewPostgresUsageRepository(database)
 	playerService := playerService.NewPlayerService(workspaceRepo, userRepo, playerRepo)
-	userService := services.NewUserService(userRepo,userUsageRepo ,jwtToken, workspaceRepo, database, accountRepo)
+	userService := services.NewUserService(userRepo, userUsageRepo, jwtToken, workspaceRepo, database, accountRepo)
 	folderService := folderService.NewFolderService(folderRepo, userRepo, workspaceRepo, videoRepo)
-	bandwidthService := bandwidthService.NewBandwidthService(bandwidthRepo,userRepo,subscriptionRepo)
+	bandwidthService := bandwidthService.NewBandwidthService(bandwidthRepo, userRepo, subscriptionRepo)
 	workspaceService := services.NewWorkspaceService(userRepo, workspaceRepo)
 	uploadService := serviceUpload.NewUploadService(userRepo)
 	videoService := videoService.NewVideoService(userRepo, videoRepo, workspaceRepo, folderRepo)
@@ -144,6 +167,7 @@ func main() {
 	formHandler := &formHandler.FormHandler{
 		FormService: formService,
 	}
+	analyticshandler := &analyticsHandler.AnalyticsHandler{Service: analyticsService.New(natsClient, clickhouseClient, workspaceRepo), GeoIP: countryResolver}
 	favoritehandler := &favoriteHandler.Handler{Service: favorites}
 	channelhandler := &channelHandler.Handler{Service: channels}
 
@@ -158,6 +182,9 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	healthHandlerInstance := healthHandler.NewHealthHandler(database, config.RedisClient)
+	healthRoutes.SetupHealthRoutes(r, healthHandlerInstance)
+
 	router.SetupRouter(r, userhandler, jwtToken)
 	uploadRoutes.SetupRouter(r, uploadhandler, jwtToken)
 	videosRoutes.SetupRouter(r, videohandler, jwtToken)
@@ -167,7 +194,8 @@ func main() {
 	formRoutes.SetupRouter(r, formHandler, jwtToken)
 	favoriteRoutes.SetupRouter(r, favoritehandler, jwtToken)
 	channelRoutes.SetupRouter(r, channelhandler, jwtToken)
-	bandwidthRoutes.SetupBandwidthRouter(r, bandwidthHandler , jwtToken)
+	bandwidthRoutes.SetupBandwidthRouter(r, bandwidthHandler, jwtToken)
+	analyticsRoutes.SetupRouter(r, analyticshandler, jwtToken)
 
 	if err := r.Run(":3000"); err != nil {
 		log.Fatal("Failed to start server:", err)

@@ -71,14 +71,20 @@ func (r *postgresPlayerRepository) Upsert(ctx context.Context, settings *domain.
 	return nil
 }
 
-func (r *postgresPlayerRepository) GetByWorkspaceID(ctx context.Context, workspaceID uuid.UUID) (*domain.PlayerSettings,error) {
-
+func (r *postgresPlayerRepository) GetByWorkspaceID(ctx context.Context, workspaceID uuid.UUID) (*domain.PlayerSettings, error) {
 	var player domain.PlayerSettings
 
-	err := r.db.WithContext(ctx).Where("workspace_id = ? ", workspaceID).First(&player).Error
-
-	if err != nil {
-		return nil, err
+	// Player settings are optional for a newly created workspace. Find does not
+	// turn an empty result into gorm.ErrRecordNotFound (and a noisy error log).
+	result := r.db.WithContext(ctx).
+		Where("workspace_id = ?", workspaceID).
+		Limit(1).
+		Find(&player)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, nil
 	}
 
 	return &player, nil

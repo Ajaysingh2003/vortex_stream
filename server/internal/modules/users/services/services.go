@@ -90,7 +90,7 @@ func (r *userServiceRepo) Register(ctx context.Context, user *domain.User) error
 
 	otp, err := utils.GenerateSecureOTP(6)
 	if err != nil {
-		fmt.Sprintf("OTP generation error:", err)
+		log.Println("OTP generation error:", err)
 		return &utils.ApiError{
 			Code:    500,
 			Message: err.Error(),
@@ -124,7 +124,7 @@ func (r *userServiceRepo) Register(ctx context.Context, user *domain.User) error
 
 	err = utils.SendEmail(user.Email, userPayload.OTP)
 	if err != nil {
-		fmt.Sprintf("Email sending error:", err)
+		log.Println("Email sending error:", err)
 		return &utils.ApiError{
 			Code:    500,
 			Message: err.Error(),
