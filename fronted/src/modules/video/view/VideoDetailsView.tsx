@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import FormVideoSection from "../component/FormVideoSection";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import EndScreenControl from "../component/EndScrennControl";
 import EndScreenPreview from "../component/EndScreenPreview";
 import CtaSetting from "../component/CtaSetting";
@@ -9,9 +9,19 @@ import CTAShow from "../component/CtaSetting";
 import VideoUpdate from "../component/VideoUpdate";
 
 function VideoDetailsView() {
-  const params = useSearchParams();
-  const scope = params.get("setting_scope");
+  const searchParams = useSearchParams();
+  const scope = searchParams.get("setting_scope");
 
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!searchParams.has("setting_scope")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("setting_scope", "thumbnail");
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  }, [searchParams, pathname, router]);
 
   switch (scope) {
 
@@ -72,6 +82,7 @@ function VideoDetailsView() {
         </div>
       );
   }
+
 }
 
 export default VideoDetailsView;

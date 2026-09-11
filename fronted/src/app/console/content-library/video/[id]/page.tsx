@@ -22,6 +22,7 @@ async function page({ params }: PageProps) {
 
   const queryClient = getQueryClient();
 
+  
   const workspace = await queryClient.fetchQuery(
     trpc.user.getWorkspace.queryOptions(),
   );
