@@ -19,15 +19,19 @@ function VideoSettingType({ type }: VideoSettingTypeProps) {
     case 'form':
       settingContent = <Form/>
       break;
+      
     case 'thumbnail':
       settingContent = <ThumbnailUpdate/>
       break;
+
     case 'end_screen':
       settingContent =  <EndScrennControl/>
       break;
+
     case 'analytics':
       settingContent = <div>Video Performance Metrics and Data Charts</div>;
       break;
+
     case 'subtitle':
       settingContent = <SubtitleControl/>;
       break;
@@ -58,7 +62,7 @@ function VideoSettingType({ type }: VideoSettingTypeProps) {
   }
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full flex flex-col justify-center">
       {settingContent}
     </div>
   );

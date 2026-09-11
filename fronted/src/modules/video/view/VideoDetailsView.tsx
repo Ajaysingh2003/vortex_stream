@@ -4,9 +4,10 @@ import FormVideoSection from "../component/FormVideoSection";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import EndScreenControl from "../component/EndScrennControl";
 import EndScreenPreview from "../component/EndScreenPreview";
-import CtaSetting from "../component/CtaSetting";
-import CTAShow from "../component/CtaSetting";
+// import CtaSetting from "../component/CtaSetting";
+// import CTAShow from "../component/CtaSetting";
 import VideoUpdate from "../component/VideoUpdate";
+import CtaPriview from "../component/CtaPriview";
 
 function VideoDetailsView() {
   const searchParams = useSearchParams();
@@ -74,7 +75,7 @@ function VideoDetailsView() {
     case "chapter":
       return <EndScreenPreview />;
     case "cta":
-      return <CTAShow isPremium={true} />;
+      return <CtaPriview />;
     default:
       return (
         <div>

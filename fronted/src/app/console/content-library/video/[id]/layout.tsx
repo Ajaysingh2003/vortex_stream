@@ -15,7 +15,7 @@ function layout({ children }: { children: React.ReactNode }) {
           {/* Left Side (Sidebar) - Order 2 on mobile (below content), Order 1 on desktop (left) */}
           <div className="w-full relative order-2 md:order-1">
             <div className="w-full md:sticky md:top-[4.5rem] md:h-[calc(100vh-6rem)] md:flex md:items-center md:justify-center">
-              <div className="w-full max-w-[360px] mx-auto bg-[#f9f9f9] rounded-2xl overflow-y-auto scroll-bar shadow-sm p-4 sm:p-5 md:max-h-[calc(100vh-8rem)]">
+              <div className="w-full max-w-[360px] mx-auto bg-[#f9f9f9] rounded-2xl overflow-y-auto scroll-bar shadow-sm zp-4 zsm:p-5 md:max-h-[calc(100vh-8rem)]">
                 <VideoSettingType type={filters.setting_scope} />
               </div>
             </div>
