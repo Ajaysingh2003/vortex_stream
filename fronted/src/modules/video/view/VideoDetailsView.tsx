@@ -73,7 +73,7 @@ function VideoDetailsView() {
     case "end_screen":
       return <EndScreenPreview />;
     case "chapter":
-      return <EndScreenPreview />;
+      return <VideoUpdate />;
     case "cta":
       return <CtaPriview />;
     default:

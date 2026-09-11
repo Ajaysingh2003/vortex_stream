@@ -23,9 +23,13 @@ function CustomSpeed({
       <div className="w-full flex flex-col gap-0">
         {speed.map((e,i) => (
           <Button
-          key={i}
-            className="w-full text-sm md:text-md tracking-wider flex items-center justify-start cursor-pointer  rounded-md bg-transparent capitalize hover:bg-white/30"
-            onClick={() => handleSpeedChange(e)}
+            key={i}
+            type="button"
+            className="w-full text-sm md:text-md tracking-wider flex items-center justify-start cursor-pointer rounded-md bg-transparent capitalize hover:bg-white/30"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleSpeedChange(e);
+            }}
           >
             <span className="w-4 flex justify-center">
               {currentSpeed === e && (

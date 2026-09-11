@@ -17,14 +17,53 @@ function PopoverTrigger({
   return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
 }
 
+function PopoverPortal({
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Portal>) {
+  return <PopoverPrimitive.Portal data-slot="popover-portal" {...props} />
+}
+
 function PopoverContent({
   className,
   align = "center",
   sideOffset = 4,
+  container,
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+}: React.ComponentProps<typeof PopoverPrimitive.Content> & {
+  container?: HTMLElement | null
+}) {
+  const [fullscreenContainer, setFullscreenContainer] = React.useState<HTMLElement | null>(null)
+
+  React.useEffect(() => {
+    const updateFs = () => {
+      const fsEl = (
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement ||
+        null
+      ) as HTMLElement | null
+      setFullscreenContainer(fsEl)
+    }
+
+    updateFs()
+    document.addEventListener("fullscreenchange", updateFs)
+    document.addEventListener("webkitfullscreenchange", updateFs)
+    document.addEventListener("mozfullscreenchange", updateFs)
+    document.addEventListener("MSFullscreenChange", updateFs)
+
+    return () => {
+      document.removeEventListener("fullscreenchange", updateFs)
+      document.removeEventListener("webkitfullscreenchange", updateFs)
+      document.removeEventListener("mozfullscreenchange", updateFs)
+      document.removeEventListener("MSFullscreenChange", updateFs)
+    }
+  }, [])
+
+  const resolvedContainer = container !== undefined ? container : fullscreenContainer
+
   return (
-    <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Portal container={resolvedContainer || undefined}>
       <PopoverPrimitive.Content
         data-slot="popover-content"
         align={align}
@@ -84,6 +123,7 @@ export {
   PopoverContent,
   PopoverDescription,
   PopoverHeader,
+  PopoverPortal,
   PopoverTitle,
   PopoverTrigger,
 }

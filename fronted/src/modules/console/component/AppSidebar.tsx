@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { 
   Home, 
   Library, 
@@ -57,12 +57,18 @@ export function AppSidebar() {
   const workspaceData = workspace as WorkspaceType;
   const { open } = useSidebar();
   const pathName = usePathname();
+  const searchParams = useSearchParams();
 
+  const currentScope = searchParams.get("setting_scope") || "thumbnail";
 
   // Matches /video, /video/, /video/[id], or /console/.../video/[id]
-
-  
   const isVideoRoute = /\/video(\/.*)?$/i.test(pathName);
+
+  const createScopeUrl = (scope: string) => {
+    const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
+    params.set("setting_scope", scope);
+    return `${pathName}?${params.toString()}`;
+  };
 
   const menuItems = [
     {
@@ -166,37 +172,63 @@ export function AppSidebar() {
       <SidebarContent className="bg-surface">
 
         {isVideoRoute ? (
-          <SidebarGroup className="space-y-1">
-            {TABS.map((item) => {
-              return (
-                <SidebarMenuButton
-                  key={item.label}
-                  className={cn(
-                    "pl-4 transition-all duration-150 ease-in-out hover:bg-black/5"
-                  )}
-                >
-                  <Link href={`?setting_scope=${item.value}`} className="flex items-center gap-4">
-                    {item.icon === "hugeicons" ? (
-                      <HugeiconsIcon
-                        icon={(item as any).hugeIcon}
-                        size={18}
-                        strokeWidth={1.6}
-                        className="shrink-0 size-6"
-                      />
-                    ) : (
-                      React.createElement((item as any).lucideIcon, {
-                        size: 15,
-                        strokeWidth: 1.6,
-                        className: "shrink-0",
-                      })
-                    )}
-                    <span className="text-accent tracking-wide font-heading">
-                      {item.label}
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
-              );
-            })}
+          <SidebarGroup>
+            <SidebarGroupContent className="pt-4 md:pt-2">
+              <SidebarMenu className="space-y-1">
+                {TABS.map((item) => {
+                  const isActive = currentScope === item.value;
+
+                  return (
+                    <SidebarMenuItem key={item.value}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={item.label}
+                        className={cn(
+                          "pl-4 transition-all duration-150 ease-in-out hover:bg-black/5",
+                          isActive && "bg-black/5 font-semibold text-slate-900"
+                        )}
+                      >
+                        <Link
+                          href={createScopeUrl(item.value)}
+                          scroll={false}
+                          className="flex items-center gap-4 w-full"
+                        >
+                          {item.icon === "hugeicons" ? (
+                            <HugeiconsIcon
+                              icon={(item as any).hugeIcon}
+                              size={18}
+                              strokeWidth={1.6}
+                              className={cn(
+                                "shrink-0 size-6 text-slate-500",
+                                isActive && "text-slate-900"
+                              )}
+                            />
+                          ) : (
+                            React.createElement((item as any).lucideIcon, {
+                              size: 15,
+                              strokeWidth: 1.6,
+                              className: cn(
+                                "shrink-0 text-slate-500",
+                                isActive && "text-slate-900"
+                              ),
+                            })
+                          )}
+                          <span
+                            className={cn(
+                              "tracking-wide font-heading",
+                              isActive ? "text-slate-900 font-semibold" : "text-accent"
+                            )}
+                          >
+                            {item.label}
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
           </SidebarGroup>
         ) : (
           <SidebarGroup>

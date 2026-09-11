@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,39 +16,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { VideoAsset, VideoCta, WorkspaceType } from "@/modules/types";
 import { useTRPC } from "@/trpc/client";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { Clock, Link2, Plus, Trash2, Type } from "lucide-react";
-import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  CheckCircle2,
+  Clock,
+  Link2,
+  Plus,
+  Sparkles,
+  Trash2,
+  Type,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import Sketch from "@uiw/react-color-sketch";
 
-interface CTA {
-  id: string;
-  text: string;
-  url: string;
-  startTime: string;
-  endTime: string;
-  fontColor: string;
-  bgColor: string;
-  openIn: "new_tab" | "same_tab";
-  position:
-    | "top_left"
-    | "top_right"
-    | "bottom_left"
-    | "bottom_right"
-    | "center";
-}
+import {
+  useVideoContext,
+  CTA,
+  DEFAULT_CTA_FONT_COLOR,
+  DEFAULT_CTA_BG_COLOR,
+} from "../context/VideoContext";
 
 const makeId = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `cta-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
-const DEFAULT_FONT_COLOR = "#FFFFFF";
-const DEFAULT_BG_COLOR = "#7C3AED";
 
 function parseTimeToSeconds(raw: string): number | null {
   const cleaned = raw.trim();
@@ -110,29 +103,31 @@ function ColorPicker({
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider">
+      <Label className="text-[11px] font-subheading font-medium text-neutral-500 uppercase tracking-wider">
         {label}
       </Label>
       <Popover>
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="flex h-9 w-full items-center justify-between rounded-lg border border-neutral-200 bg-white px-3 py-1.5 shadow-xs transition-colors hover:border-neutral-300 focus:outline-hidden"
+            className="flex h-9 w-full items-center justify-between rounded-lg bg-[#f5f5f5] px-3 py-1.5 shadow-xs transition-colors hover:bg-neutral-200/80 focus:outline-hidden cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <span
-                className="h-4 w-4 rounded-full border border-neutral-200 shadow-xs"
+                className="size-4 rounded-full border border-black/10 shadow-xs"
                 style={{ backgroundColor: color }}
               />
               <span className="font-mono text-xs text-neutral-700 uppercase">
                 {color}
               </span>
             </div>
-            <span className="text-[10px] font-medium text-neutral-400">Pick</span>
+            <span className="text-[10px] font-subheading font-medium text-neutral-400">
+              Pick
+            </span>
           </button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-auto p-0 border border-neutral-200 shadow-lg rounded-xl overflow-hidden"
+          className="w-auto p-0 border border-neutral-200 shadow-xl rounded-2xl overflow-hidden"
           align="start"
         >
           <Sketch
@@ -162,65 +157,20 @@ function ColorPicker({
 
 function CTAShow({ isPremium }: { isPremium?: boolean }) {
   const trpc = useTRPC();
-  const { data: workspace } = useSuspenseQuery(
-    trpc.user.getWorkspace.queryOptions(),
-  );
-  const workspaceData = workspace as WorkspaceType;
-  const params = useParams();
-  const videoId = params.id;
+  const queryClient = useQueryClient();
+  const {
+    videoCtas,
+    setVideoCtas,
+    activeCtaId,
+    setActiveCtaId,
+    videoAssets,
+    workspaceData,
+    ctaDataArray,
+  } = useVideoContext()!;
 
-  const { data: videoData } = useSuspenseQuery(
-    trpc.video.getVideoFromWorkspace.queryOptions({
-      videoId: videoId as string,
-      workspaceID: workspaceData.id,
-    }),
-  );
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const { data: ctaData } = useSuspenseQuery(
-    trpc.video.getVideoCtas.queryOptions({
-      videoId: videoId as string,
-    }),
-  );
-
-  const ctaDataArray = ctaData as VideoCta[] | undefined;
-  const videoDataType = videoData as VideoAsset;
-  const videoDurationSeconds = videoDataType?.duration as number | undefined;
-
-  const convertCtaDataToCTA = (cta: VideoCta): CTA => ({
-    id: cta.id,
-    text: cta.title,
-    url: cta.url,
-    startTime: cta.start_time,
-    endTime: cta.end_time,
-    fontColor: cta.font_color || DEFAULT_FONT_COLOR,
-    bgColor: cta.background_color || DEFAULT_BG_COLOR,
-    openIn: cta.open_in as "new_tab" | "same_tab",
-    position: cta.position as
-      | "top_left"
-      | "top_right"
-      | "bottom_left"
-      | "bottom_right"
-      | "center",
-  });
-
-  const initialCtas = ctaDataArray?.map(convertCtaDataToCTA) ?? [];
-  const [ctas, setCtas] = useState<CTA[]>(
-    ctaDataArray && ctaDataArray.length > 0
-      ? initialCtas
-      : [
-          {
-            id: makeId(),
-            text: "",
-            url: "",
-            startTime: "00:00",
-            endTime: "00:05",
-            fontColor: DEFAULT_FONT_COLOR,
-            bgColor: DEFAULT_BG_COLOR,
-            openIn: "new_tab",
-            position: "top_right",
-          },
-        ],
-  );
+  const videoDurationSeconds = videoAssets?.duration as number | undefined;
 
   const [draftTimes, setDraftTimes] = useState<
     Record<string, { start: string; end: string }>
@@ -233,7 +183,7 @@ function CTAShow({ isPremium }: { isPremium?: boolean }) {
     setDraftTimes((prev) => {
       let changed = false;
       const next = { ...prev };
-      for (const c of ctas) {
+      for (const c of videoCtas) {
         if (!(c.id in next)) {
           next[c.id] = { start: c.startTime, end: c.endTime };
           changed = true;
@@ -241,14 +191,14 @@ function CTAShow({ isPremium }: { isPremium?: boolean }) {
       }
       return changed ? next : prev;
     });
-  }, [ctas]);
+  }, [videoCtas]);
 
   const updateField = <K extends keyof CTA>(
     id: string,
     field: K,
     value: CTA[K],
   ) => {
-    setCtas((prev) =>
+    setVideoCtas((prev) =>
       prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)),
     );
   };
@@ -294,7 +244,7 @@ function CTAShow({ isPremium }: { isPremium?: boolean }) {
       return;
     }
 
-    const cta = ctas.find((c) => c.id === id);
+    const cta = videoCtas.find((c) => c.id === id);
     if (!cta) return;
 
     const startSec =
@@ -319,7 +269,7 @@ function CTAShow({ isPremium }: { isPremium?: boolean }) {
     }
 
     const normalized = formatSeconds(seconds);
-    setCtas((prev) =>
+    setVideoCtas((prev) =>
       prev.map((c) =>
         c.id === id
           ? { ...c, [field === "start" ? "startTime" : "endTime"]: normalized }
@@ -337,45 +287,91 @@ function CTAShow({ isPremium }: { isPremium?: boolean }) {
     });
   };
 
-  const canAdd = isPremium || ctas.length < MAX_FREE_CTAS;
+  const canAdd = isPremium || videoCtas.length < MAX_FREE_CTAS;
 
   const addCTA = () => {
     if (!canAdd) return;
-    const last = ctas[ctas.length - 1];
+    const last = videoCtas[videoCtas.length - 1];
     const lastEnd = last ? (parseTimeToSeconds(last.endTime) ?? 0) : 0;
     let start = lastEnd + 1;
     let end = start + 5;
     if (videoDurationSeconds != null) {
-      if (start > videoDurationSeconds) start = videoDurationSeconds;
+      if (start > videoDurationSeconds)
+        start = Math.max(0, videoDurationSeconds - 5);
       if (end > videoDurationSeconds) end = videoDurationSeconds;
     }
     if (end <= start) end = start + 1;
-    const cta: CTA = {
+
+    const newCta: CTA = {
       id: makeId(),
       text: "",
       url: "",
       startTime: formatSeconds(start),
       endTime: formatSeconds(end),
-      fontColor: DEFAULT_FONT_COLOR,
-      bgColor: DEFAULT_BG_COLOR,
+      fontColor: DEFAULT_CTA_FONT_COLOR,
+      bgColor: DEFAULT_CTA_BG_COLOR,
       openIn: "new_tab",
       position: "top_right",
     };
-    setCtas((prev) => [...prev, cta]);
+
+    setVideoCtas((prev) => [...prev, newCta]);
+    setActiveCtaId(newCta.id);
     setDraftTimes((prev) => ({
       ...prev,
-      [cta.id]: { start: cta.startTime, end: cta.endTime },
+      [newCta.id]: { start: newCta.startTime, end: newCta.endTime },
     }));
   };
 
-  const removeCTA = (id: string) => {
-    if (ctas.length <= 1) return;
-    setCtas((prev) => prev.filter((c) => c.id !== id));
+  const mutateDelete = useMutation(
+    trpc.video.deleteVideoCta.mutationOptions({
+      onSuccess: async () => {
+        toast.success("CTA deleted successfully");
+        await queryClient.invalidateQueries(
+          trpc.video.getVideoCtas.queryOptions({ videoId: videoAssets.id }),
+        );
+      },
+      onError: (err) => {
+        toast.error(err.message ?? "Failed to delete CTA");
+      },
+    }),
+  );
+
+  const handleDeleteCTA = async (id: string) => {
+    const existsInDb =
+      ctaDataArray?.some((c) => c.id === id) ||
+      (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) &&
+        !id.startsWith("cta-"));
+
+    if (existsInDb) {
+      try {
+        setDeletingId(id);
+        await mutateDelete.mutateAsync({
+          workspaceId: workspaceData.id,
+          id,
+        });
+      } catch {
+        setDeletingId(null);
+        return;
+      }
+      setDeletingId(null);
+    } else {
+      toast.success("CTA removed");
+    }
+
+    setVideoCtas((prev) => {
+      const remaining = prev.filter((c) => c.id !== id);
+      if (activeCtaId === id) {
+        setActiveCtaId(remaining.length > 0 ? remaining[0].id : null);
+      }
+      return remaining;
+    });
+
     setDraftTimes((prev) => {
       const next = { ...prev };
       delete next[id];
       return next;
     });
+
     setTimeErrors((prev) => {
       const next = { ...prev };
       delete next[id];
@@ -385,16 +381,21 @@ function CTAShow({ isPremium }: { isPremium?: boolean }) {
 
   const mutateSave = useMutation(
     trpc.video.VideoCta.mutationOptions({
-      onSuccess: () => toast.success("CTAs saved successfully"),
+      onSuccess: async () => {
+        toast.success("CTAs saved successfully");
+        await queryClient.invalidateQueries(
+          trpc.video.getVideoCtas.queryOptions({ videoId: videoAssets.id }),
+        );
+      },
       onError: (err) => toast.error(err.message ?? "Something went wrong"),
     }),
   );
 
   const handleSubmit = async () => {
     await mutateSave.mutateAsync({
-      video_id: videoDataType.id,
+      video_id: videoAssets.id,
       workspaceID: workspaceData.id,
-      items: ctas.map((c) => ({
+      items: videoCtas.map((c) => ({
         title: c.text,
         url: c.url,
         start_time: c.startTime,
@@ -408,266 +409,333 @@ function CTAShow({ isPremium }: { isPremium?: boolean }) {
   };
 
   const hasErrors = Object.values(timeErrors).some((e) => e.start || e.end);
-  const atFreeLimit = !isPremium && ctas.length >= MAX_FREE_CTAS;
+  const atFreeLimit = !isPremium && videoCtas.length >= MAX_FREE_CTAS;
 
   return (
-    <div className="w-full rounded-2xl bg-transparent px-1 md:px-3 pt-5">
-      <div className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-4">
-        {/* Header */}
-        <div className="mb-5 flex items-center justify-between gap-3 border-b border-neutral-100 pb-4">
-          <div>
-            <h3 className="text-base font-semibold tracking-tight text-neutral-900">
+    <div className="w-full space-y-4 font-content">
+      {/* Main Container Card */}
+      <section className="rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] bg-white overflow-hidden">
+        {/* Accent Header */}
+        <div className="flex items-center justify-between gap-3 bg-[#f5f5f5] px-4 py-3.5">
+          <div className="space-y-0.5">
+            <h2 className="font-heading text-sm sm:text-base font-semibold text-foreground flex items-center gap-1.5">
+              <Sparkles className="size-4 text-foreground/70" />
               Call to Actions
-            </h3>
-            <p className="mt-0.5 text-xs text-neutral-500">
-              Trigger interactive overlay buttons at chosen moments during playback.
+            </h2>
+            <p className="font-subheading text-xs text-muted-foreground">
+              Trigger interactive overlay buttons at chosen moments.
             </p>
           </div>
           {!isPremium && (
-            <span className="shrink-0 rounded-full bg-neutral-100 px-2.5 py-1 text-[11px] font-medium text-neutral-500">
-              {ctas.length}/{MAX_FREE_CTAS} CTAs
+            <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-subheading font-medium text-neutral-600 shadow-xs">
+              {videoCtas.length}/{MAX_FREE_CTAS} Free
             </span>
           )}
         </div>
 
         {/* CTA Stack */}
-        <div className="space-y-4">
-          {ctas.map((cta, index) => (
-            <div
-              key={cta.id}
-              className="relative rounded-xl border border-neutral-200/80 bg-neutral-50/40 p-2 md:p-4 transition-all hover:border-neutral-300"
-            >
-              {/* Card Meta Bar */}
-              <div className="mb-3.5 flex items-center justify-between border-b border-neutral-200/60 pb-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-md bg-neutral-200/80 text-[11px] font-semibold text-neutral-700">
-                    {index + 1}
-                  </span>
-                  <span className="text-xs font-medium text-neutral-800">
-                    {cta.text.trim() || "Untitled CTA"}
-                  </span>
-                </div>
-
-                {ctas.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeCTA(cta.id)}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md text-neutral-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
-                    aria-label="Remove CTA"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                )}
+        <div className="p-3.5 sm:p-4 space-y-3.5">
+          {videoCtas.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-6 sm:p-8 text-center bg-[#fbfbfb] rounded-xl border border-dashed border-black/10 space-y-3">
+              <div className="size-10 rounded-full bg-black/5 flex items-center justify-center text-neutral-500">
+                <Sparkles className="size-4 text-neutral-600" />
               </div>
-
-              <div className="space-y-3.5">
-                {/* Text & URL */}
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider">
-                      Button Text
-                    </Label>
-                    <div className="relative">
-                      <Type className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
-                      <Input
-                        value={cta.text}
-                        onChange={(e) =>
-                          updateField(cta.id, "text", e.target.value)
-                        }
-                        placeholder="e.g. Schedule a Demo"
-                        className="h-9 rounded-lg border-neutral-200 bg-white pl-8 text-xs focus-visible:border-neutral-400 focus-visible:ring-0"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider">
-                      Destination URL
-                    </Label>
-                    <div className="relative">
-                      <Link2 className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
-                      <Input
-                        value={cta.url}
-                        onChange={(e) =>
-                          updateField(cta.id, "url", e.target.value)
-                        }
-                        placeholder="https://example.com"
-                        className="h-9 rounded-lg border-neutral-200 bg-white pl-8 text-xs focus-visible:border-neutral-400 focus-visible:ring-0"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Timing */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider">
-                      Show At
-                    </Label>
-                    <div className="relative">
-                      <Clock className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
-                      <Input
-                        value={draftTimes[cta.id]?.start ?? cta.startTime}
-                        onChange={(e) =>
-                          handleTimeChange(cta.id, "start", e.target.value)
-                        }
-                        onBlur={() => commitTime(cta.id, "start")}
-                        onKeyDown={(e) =>
-                          e.key === "Enter" && e.currentTarget.blur()
-                        }
-                        placeholder="00:00"
-                        inputMode="numeric"
-                        className={`h-9 rounded-lg border-neutral-200 bg-white pl-8 font-mono text-xs focus-visible:border-neutral-400 focus-visible:ring-0 ${
-                          timeErrors[cta.id]?.start
-                            ? "border-rose-400 focus-visible:border-rose-400"
-                            : ""
-                        }`}
-                      />
-                    </div>
-                    {timeErrors[cta.id]?.start && (
-                      <p className="text-[11px] text-rose-500">
-                        {timeErrors[cta.id].start}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider">
-                      Hide At
-                    </Label>
-                    <div className="relative">
-                      <Clock className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
-                      <Input
-                        value={draftTimes[cta.id]?.end ?? cta.endTime}
-                        onChange={(e) =>
-                          handleTimeChange(cta.id, "end", e.target.value)
-                        }
-                        onBlur={() => commitTime(cta.id, "end")}
-                        onKeyDown={(e) =>
-                          e.key === "Enter" && e.currentTarget.blur()
-                        }
-                        placeholder="00:05"
-                        inputMode="numeric"
-                        className={`h-9 rounded-lg border-neutral-200 bg-white pl-8 font-mono text-xs focus-visible:border-neutral-400 focus-visible:ring-0 ${
-                          timeErrors[cta.id]?.end
-                            ? "border-rose-400 focus-visible:border-rose-400"
-                            : ""
-                        }`}
-                      />
-                    </div>
-                    {timeErrors[cta.id]?.end && (
-                      <p className="text-[11px] text-rose-500">
-                        {timeErrors[cta.id].end}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Colors */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <ColorPicker
-                    label="Text Color"
-                    color={cta.fontColor}
-                    onChange={(hex) => updateField(cta.id, "fontColor", hex)}
-                  />
-                  <ColorPicker
-                    label="Background Color"
-                    color={cta.bgColor}
-                    onChange={(hex) => updateField(cta.id, "bgColor", hex)}
-                  />
-                </div>
-
-                {/* Placement & Behavior */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider">
-                      Position On Screen
-                    </Label>
-                    <Select
-                      value={cta.position}
-                      onValueChange={(val) =>
-                        updateField(cta.id, "position", val as CTA["position"])
-                      }
-                    >
-                      <SelectTrigger className="h-9 w-full rounded-lg border-neutral-200 bg-white text-xs shadow-xs">
-                        <SelectValue placeholder="Position" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-lg border-neutral-200 shadow-md">
-                        {POSITION_OPTIONS.map((opt) => (
-                          <SelectItem
-                            className="text-xs focus:bg-neutral-100"
-                            key={opt.value}
-                            value={opt.value}
-                          >
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider">
-                      Link Behavior
-                    </Label>
-                    <Select
-                      value={cta.openIn}
-                      onValueChange={(val) =>
-                        updateField(cta.id, "openIn", val as CTA["openIn"])
-                      }
-                    >
-                      <SelectTrigger className="h-9 w-full rounded-lg border-neutral-200 bg-white text-xs shadow-xs">
-                        <SelectValue placeholder="Select target" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-lg border-neutral-200 shadow-md">
-                        {OPEN_IN_OPTIONS.map((opt) => (
-                          <SelectItem
-                            className="text-xs focus:bg-neutral-100"
-                            key={opt.value}
-                            value={opt.value}
-                          >
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+              <div className="space-y-1">
+                <p className="font-heading text-sm font-semibold text-foreground">
+                  No Call to Actions
+                </p>
+                <p className="font-subheading text-xs text-muted-foreground max-w-[220px]">
+                  Add interactive button overlays to guide viewers to custom links or actions.
+                </p>
               </div>
+              <Button
+                type="button"
+                onClick={addCTA}
+                className="mt-1 h-8 px-4 rounded-lg bg-black text-white text-xs font-medium hover:bg-neutral-800 transition-colors shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <Plus className="size-3.5" />
+                Add Call to Action
+              </Button>
             </div>
-          ))}
+          ) : (
+            videoCtas.map((cta, index) => {
+              const isSelected = activeCtaId === cta.id;
+
+              return (
+                <div
+                  key={cta.id}
+                  onClick={() => setActiveCtaId(cta.id)}
+                  className={`relative rounded-xl p-3 sm:p-4 transition-all duration-200 cursor-pointer ${
+                    isSelected
+                      ? "bg-[#fbfbfb] shadow-xs ring-1 ring-black/15"
+                      : "bg-[#f5f5f5]/60 hover:bg-[#f5f5f5]"
+                  }`}
+                >
+                  {/* Card Meta Bar */}
+                  <div className="mb-3 flex items-center justify-between pb-2 border-b border-black/[0.04]">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`flex size-5 items-center justify-center rounded-md text-[11px] font-semibold transition-colors ${
+                          isSelected
+                            ? "bg-black text-white"
+                            : "bg-black/5 text-neutral-600"
+                        }`}
+                      >
+                        {index + 1}
+                      </span>
+                      <span className="font-heading text-xs font-medium text-foreground">
+                        {cta.text.trim() || `CTA #${index + 1}`}
+                      </span>
+                      {isSelected && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-subheading font-medium text-emerald-700">
+                          <CheckCircle2 className="size-2.5" />
+                          Previewing
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={deletingId === cta.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCTA(cta.id);
+                      }}
+                      className="inline-flex size-6 items-center justify-center rounded-md text-neutral-400 transition-colors hover:bg-rose-50 hover:text-rose-600 cursor-pointer disabled:opacity-50"
+                      aria-label="Delete CTA"
+                      title="Delete this CTA"
+                    >
+                      {deletingId === cta.id ? (
+                        <span className="size-3 animate-spin rounded-full border-2 border-rose-500 border-t-transparent" />
+                      ) : (
+                        <Trash2 className="size-3.5" />
+                      )}
+                    </button>
+                  </div>
+
+                  <div
+                    className="space-y-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Button Text & Destination URL */}
+                    <div className="space-y-2.5">
+                      <div className="space-y-1">
+                        <Label className="text-[11px] font-subheading font-medium text-neutral-500 uppercase tracking-wider">
+                          Button Label
+                        </Label>
+                        <div className="relative">
+                          <Type className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400" />
+                          <Input
+                            value={cta.text}
+                            onChange={(e) =>
+                              updateField(cta.id, "text", e.target.value)
+                            }
+                            placeholder="e.g. Visit our website"
+                            className="h-8.5 rounded-lg bg-white pl-8 text-xs shadow-xs focus-visible:ring-1 focus-visible:ring-black/20"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-[11px] font-subheading font-medium text-neutral-500 uppercase tracking-wider">
+                          Destination URL
+                        </Label>
+                        <div className="relative">
+                          <Link2 className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400" />
+                          <Input
+                            value={cta.url}
+                            onChange={(e) =>
+                              updateField(cta.id, "url", e.target.value)
+                            }
+                            placeholder="https://example.com"
+                            className="h-8.5 rounded-lg bg-white pl-8 text-xs shadow-xs focus-visible:ring-1 focus-visible:ring-black/20"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Timing Trigger Windows */}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="space-y-1">
+                        <Label className="text-[11px] font-subheading font-medium text-neutral-500 uppercase tracking-wider">
+                          Start Time
+                        </Label>
+                        <div className="relative">
+                          <Clock className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400" />
+                          <Input
+                            value={draftTimes[cta.id]?.start ?? cta.startTime}
+                            onChange={(e) =>
+                              handleTimeChange(cta.id, "start", e.target.value)
+                            }
+                            onBlur={() => commitTime(cta.id, "start")}
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && e.currentTarget.blur()
+                            }
+                            placeholder="00:00"
+                            inputMode="numeric"
+                            className={`h-8.5 rounded-lg bg-white pl-8 font-mono text-xs shadow-xs focus-visible:ring-1 focus-visible:ring-black/20 ${
+                              timeErrors[cta.id]?.start
+                                ? "border-rose-400 focus-visible:ring-rose-400"
+                                : ""
+                            }`}
+                          />
+                        </div>
+                        {timeErrors[cta.id]?.start && (
+                          <p className="text-[10px] text-rose-500 font-subheading">
+                            {timeErrors[cta.id].start}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-[11px] font-subheading font-medium text-neutral-500 uppercase tracking-wider">
+                          End Time
+                        </Label>
+                        <div className="relative">
+                          <Clock className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-neutral-400" />
+                          <Input
+                            value={draftTimes[cta.id]?.end ?? cta.endTime}
+                            onChange={(e) =>
+                              handleTimeChange(cta.id, "end", e.target.value)
+                            }
+                            onBlur={() => commitTime(cta.id, "end")}
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && e.currentTarget.blur()
+                            }
+                            placeholder="00:05"
+                            inputMode="numeric"
+                            className={`h-8.5 rounded-lg bg-white pl-8 font-mono text-xs shadow-xs focus-visible:ring-1 focus-visible:ring-black/20 ${
+                              timeErrors[cta.id]?.end
+                                ? "border-rose-400 focus-visible:ring-rose-400"
+                                : ""
+                            }`}
+                          />
+                        </div>
+                        {timeErrors[cta.id]?.end && (
+                          <p className="text-[10px] text-rose-500 font-subheading">
+                            {timeErrors[cta.id].end}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Colors */}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <ColorPicker
+                        label="Background"
+                        color={cta.bgColor}
+                        onChange={(hex) => updateField(cta.id, "bgColor", hex)}
+                      />
+                      <ColorPicker
+                        label="Text Color"
+                        color={cta.fontColor}
+                        onChange={(hex) => updateField(cta.id, "fontColor", hex)}
+                      />
+                    </div>
+
+                    {/* Placement & Behavior */}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="space-y-1">
+                        <Label className="text-[11px] font-subheading font-medium text-neutral-500 uppercase tracking-wider">
+                          Position
+                        </Label>
+                        <Select
+                          value={cta.position}
+                          onValueChange={(val) =>
+                            updateField(
+                              cta.id,
+                              "position",
+                              val as CTA["position"],
+                            )
+                          }
+                        >
+                          <SelectTrigger className="h-8.5 w-full rounded-lg bg-white text-xs shadow-xs">
+                            <SelectValue placeholder="Position" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl shadow-lg border-neutral-200">
+                            {POSITION_OPTIONS.map((opt) => (
+                              <SelectItem
+                                className="text-xs font-content"
+                                key={opt.value}
+                                value={opt.value}
+                              >
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-[11px] font-subheading font-medium text-neutral-500 uppercase tracking-wider">
+                          Open In
+                        </Label>
+                        <Select
+                          value={cta.openIn}
+                          onValueChange={(val) =>
+                            updateField(cta.id, "openIn", val as CTA["openIn"])
+                          }
+                        >
+                          <SelectTrigger className="h-8.5 w-full rounded-lg bg-white text-xs shadow-xs">
+                            <SelectValue placeholder="Target" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl shadow-lg border-neutral-200">
+                            {OPEN_IN_OPTIONS.map((opt) => (
+                              <SelectItem
+                                className="text-xs font-content"
+                                key={opt.value}
+                                value={opt.value}
+                              >
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
-        {/* Add Button */}
-        <button
-          type="button"
-          onClick={addCTA}
-          disabled={!canAdd}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-300 px-4 py-2.5 text-xs font-medium text-neutral-500 transition-all duration-200 hover:border-neutral-400 hover:bg-neutral-50 hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-neutral-300 disabled:hover:bg-transparent"
-        >
-          <Plus className="h-4 w-4 stroke-[2]" />
-          {atFreeLimit
-            ? `Limit of ${MAX_FREE_CTAS} CTAs reached`
-            : "Add Call to Action"}
-        </button>
+        {/* Add CTA Button */}
+        {videoCtas.length > 0 && (
+          <div className="px-3.5 sm:px-4 pb-3.5">
+            <button
+              type="button"
+              onClick={addCTA}
+              disabled={!canAdd}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#f5f5f5] hover:bg-neutral-200/80 px-4 py-2 text-xs font-subheading font-medium text-foreground transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shadow-xs"
+            >
+              <Plus className="size-3.5" />
+              {atFreeLimit
+                ? `Limit of ${MAX_FREE_CTAS} CTAs reached`
+                : "Add Call to Action"}
+            </button>
 
-        {hasErrors && (
-          <p className="mt-3 text-xs text-rose-500">
-            Fix the highlighted times before saving.
-          </p>
+            {hasErrors && (
+              <p className="mt-2 text-center text-xs text-rose-500 font-subheading">
+                Fix highlighted time errors before saving.
+              </p>
+            )}
+          </div>
         )}
-      </div>
+      </section>
 
-      {/* Action Footer */}
-      <div className="mt-2 flex justify-end px-2 py-2">
-        <Button
-          disabled={hasErrors || mutateSave.isPending}
-          onClick={handleSubmit}
-          className="h-8 rounded-full border bg-main-btn px-4 text-xs font-semibold tracking-wider text-white capitalize transition-all duration-200 cursor-pointer disabled:opacity-50"
-        >
-          {mutateSave.isPending ? "Saving..." : "Save"}
-        </Button>
-      </div>
+      {/* Action Footer with Save Button */}
+      {videoCtas.length > 0 && (
+        <div className="flex justify-end px-1">
+          <Button
+            disabled={hasErrors || mutateSave.isPending}
+            onClick={handleSubmit}
+            className="h-9 rounded-full bg-main-btn px-6 text-xs font-subheading font-semibold tracking-wider text-white capitalize transition-all duration-200 cursor-pointer disabled:opacity-50 shadow-sm hover:opacity-90"
+          >
+            {mutateSave.isPending ? "Saving..." : "Save CTAs"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

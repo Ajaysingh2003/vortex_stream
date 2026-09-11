@@ -5,6 +5,7 @@ import {
   selectType,
   UploadItem,
   VideoAsset,
+  VideoCta,
   VideoEndScreenType,
   // VideoEndScreenType,
   WorkspaceType,
@@ -14,9 +15,41 @@ import { v4 as uuidv4 } from "uuid";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { createContext, use, useContext, useState } from "react";
+import { createContext, use, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { formFieldType } from "../component/FormFields";
+
+export interface CTA {
+  id: string;
+  text: string;
+  url: string;
+  startTime: string;
+  endTime: string;
+  fontColor: string;
+  bgColor: string;
+  openIn: "new_tab" | "same_tab";
+  position:
+    | "top_left"
+    | "top_right"
+    | "bottom_left"
+    | "bottom_right"
+    | "center";
+}
+
+export const DEFAULT_CTA_FONT_COLOR = "#FFFFFF";
+export const DEFAULT_CTA_BG_COLOR = "#7C3AED";
+
+export const convertCtaDataToCTA = (cta: VideoCta): CTA => ({
+  id: cta.id,
+  text: cta.title,
+  url: cta.url,
+  startTime: cta.start_time,
+  endTime: cta.end_time,
+  fontColor: cta.font_color || DEFAULT_CTA_FONT_COLOR,
+  bgColor: cta.background_color || DEFAULT_CTA_BG_COLOR,
+  openIn: (cta.open_in as "new_tab" | "same_tab") || "new_tab",
+  position: (cta.position as CTA["position"]) || "top_right",
+});
 
 type LayoutType = "left" | "center" | "right";
 
@@ -74,6 +107,13 @@ interface VideoContextType {
 
   selectMoreVideo:VideoAsset[],
   setSelectMoreVideo:  React.Dispatch<React.SetStateAction<VideoAsset[]>>;
+
+  // Interactive timed CTAs
+  videoCtas: CTA[];
+  setVideoCtas: React.Dispatch<React.SetStateAction<CTA[]>>;
+  activeCtaId: string | null;
+  setActiveCtaId: React.Dispatch<React.SetStateAction<string | null>>;
+  ctaDataArray?: VideoCta[];
 }
 
 const videoContext = createContext<VideoContextType | null>(null);
@@ -172,9 +212,64 @@ export const VideoProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectMoreVideo,setSelectMoreVideo]=useState<VideoAsset[]>([])
   const [endScreen, setEndScreen] = useState<endScreenType>( videoEndScreen?.type ?? "empty");
 
+  const { data: ctaData } = useSuspenseQuery(
+    trpc.video.getVideoCtas.queryOptions({
+      videoId: videoId as string,
+    }),
+  );
+
+  const ctaDataArray = ctaData as VideoCta[] | undefined;
+
+  const defaultInitialCtas: CTA[] = [
+    {
+      id:
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `cta-${Date.now()}`,
+      text: "",
+      url: "",
+      startTime: "00:00",
+      endTime: "00:05",
+      fontColor: DEFAULT_CTA_FONT_COLOR,
+      bgColor: DEFAULT_CTA_BG_COLOR,
+      openIn: "new_tab",
+      position: "top_right",
+    },
+  ];
+
+  const [videoCtas, setVideoCtas] = useState<CTA[]>(() => {
+    if (ctaDataArray && ctaDataArray.length > 0) {
+      return ctaDataArray.map(convertCtaDataToCTA);
+    }
+    return [];
+  });
+
+  const [activeCtaId, setActiveCtaId] = useState<string | null>(
+    () => (ctaDataArray && ctaDataArray.length > 0 ? ctaDataArray[0].id : null),
+  );
+
+  useEffect(() => {
+    if (ctaDataArray) {
+      if (ctaDataArray.length > 0) {
+        setVideoCtas(ctaDataArray.map(convertCtaDataToCTA));
+        setActiveCtaId((prev) =>
+          prev && ctaDataArray.some((c) => c.id === prev) ? prev : ctaDataArray[0].id,
+        );
+      } else {
+        setVideoCtas([]);
+        setActiveCtaId(null);
+      }
+    }
+  }, [ctaData]);
+
   return (
     <videoContext.Provider
       value={{
+        videoCtas,
+        setVideoCtas,
+        activeCtaId,
+        setActiveCtaId,
+        ctaDataArray,
         selectMoreVideo,
 
         setSelectMoreVideo,

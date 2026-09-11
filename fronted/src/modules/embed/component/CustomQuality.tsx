@@ -36,8 +36,12 @@ function CustomQuality({
         {resolutionsData.map((e) => (
           <Button
             key={e.resolution}
+            type="button"
             className="w-full text-sm md:text-md tracking-wider flex items-center justify-start cursor-pointer rounded-md bg-transparent hover:bg-white/30"
-            onClick={() => handleQualityChange(e)}
+            onClick={(event) => {
+              event.stopPropagation();
+              handleQualityChange(e);
+            }}
           >
             <span className="w-4 flex justify-center">
               {currentResolution?.resolution === e.resolution  && (
