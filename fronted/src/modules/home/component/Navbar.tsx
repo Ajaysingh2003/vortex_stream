@@ -341,7 +341,7 @@ export default function Navbar() {
 
 function NavTrigger({ children }: { children: React.ReactNode }) {
   return (
-    <NavigationMenuTrigger className="h-9 rounded-lg bg-transparent px-3  text-md font-medium tracking-[-0.01em] text-[#64675e] shadow-none hover:bg-black/[0.035] hover:text-[#171812] focus:bg-black/[0.035] data-[state=open]:bg-black/[0.045] data-[state=open]:text-[#171812]">
+    <NavigationMenuTrigger className="h-9 rounded-lg bg-transparent px-3  lg:text-lg font-medium tracking-[-0.01em] text-[#64675e] shadow-none hover:bg-black/[0.035] hover:text-[#171812] focus:bg-black/[0.035] data-[state=open]:bg-black/[0.045] data-[state=open]:text-[#171812]">
       {children}
     </NavigationMenuTrigger>
   );

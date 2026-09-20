@@ -19,7 +19,7 @@ export default function TopHeader() {
   const reducedMotion = useReducedMotion();
 
   return (
-    <section className="relative isolate w-full overflow-hidden bg-[#faf9f5] text-[#11120e]">
+    <section className="relative  isolate w-full overflow-hidden  text-[#11120e]">
       {/* ------------------------------------------------------------------ */}
       {/* Decorative background                                              */}
       {/* ------------------------------------------------------------------ */}
@@ -49,7 +49,7 @@ export default function TopHeader() {
       {/* Main hero                                                          */}
       {/* ------------------------------------------------------------------ */}
 
-      <div className="mx-auto w-full max-w-[1280px] px-5 sm:px-7 lg:px-8">
+      <div className="mx-auto w-full  px-5 sm:px-7 lg:px-8">
         <div className="pt-16 sm:pt-20 lg:pt-[118px]">
           <div className="max-w-[930px]">
             {/* eyebrow */}

@@ -8,6 +8,11 @@ import { FeatureCardFour } from "./FeatureCardFour";
 import { FeatureCardThree } from "./FeatureCardThree";
 import { FeatureCardFive } from "./FeatureCardFive";
 import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
+import FeatureCardTitlt from "./FeatureCardTitlt";
+import FeatureCardSixth from "./FeatureCardSixth";
+import {FeatureCardNormal} from "./FeatureCardNormal";
+import FeatureCardTilt from "./FeatureCardTitlt";
 
 /* -------------------------------------------------------------------------- */
 /* Main Feature Section                                                       */
@@ -38,8 +43,10 @@ export default function FeatureSection() {
   const active = "text-[#171914] font-semibold";
 
   return (
-    <section className="relative w-full overflow-hidden px-5 py-12 sm:px-8 sm:py-16 lg:px-12 lg:py-20">
-      <div className="relative mx-auto max-w-6xl">
+    <section className="relative w-full overflow-hidden  py-12 zsm:px-8 sm:py-16 zlg:px-12 lg:py-20
+   
+    ">
+      <div className="relative mx-auto max-w-6xlz">
         {/* Header */}
         <div className="mb-8 max-w-2xl select-none sm:mb-10 lg:mb-12">
           <div className="mb-3 flex items-center gap-2">
@@ -95,19 +102,21 @@ export default function FeatureSection() {
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
-          <div className="space-y-4 sm:space-y-5">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
             <FeatureCardOne />
             <FeatureCardFour />
+            <FeatureCardSixth />
           </div>
 
-          <div className="space-y-4 sm:space-y-5">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
             <FeatureCardTwo />
             <FeatureCardThree />
+            <FeatureCardTilt/>
+            <FeatureCardNormal/>
           </div>
 
           <div className="lg:col-span-2 space-y-4">
             <FeatureCardFive />
-            {/* <FeatureCardThree /> */}
           </div>
         </div>
       </div>
@@ -128,7 +137,7 @@ export function BentoCard({
 }) {
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl sm:rounded-3xl border border-black/[0.08] bg-white shadow-md hover:shadow-[0_18px_36px_-12px_rgba(0,0,0,0.06)] hover:border-black/[0.12] transition-all duration-300 ${className}`}
+      className={`group relative overflow-hidden rounded-2xl sm:rounded-3xl border border-black/[0.08] bg-white shadow-sm hover:border-black/[0.12] transition-all duration-300 ${className}`}
     >
       {children}
     </div>
@@ -196,18 +205,19 @@ export function BentoHeader({
     </div>
   );
 }
-
-export function CardBottomFade({ height = "h-32" }: { height?: string }) {
+export function CardBottomFade({ height = "h-28" }: { height?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none absolute inset-x-0 bottom-0 ${height} z-20`}
+      className={`pointer-events-none absolute inset-x-0 bottom-0 ${height} z-30`}
       style={{
-        background: "radial-gradient(ellipse 90% 100% at 50% 100%, #ffffff 40%, rgba(255,255,255,0.7) 65%, transparent 100%)",
+        background:
+          "radial-gradient(ellipse 90% 100% at 50% 100%, #ffffff 40%, rgba(255,255,255,0.7) 65%, transparent 100%)",
       }}
     />
   );
 }
+
 // export function CardBottomFade({ height = "h-20" }: { height?: string }) {
 //   return (
 //     <div

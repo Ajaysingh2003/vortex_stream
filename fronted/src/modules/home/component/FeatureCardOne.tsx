@@ -288,7 +288,7 @@ export function FeatureCardOne() {
   };
 
   return (
-    <BentoCard className="flex flex-col overflow-hidden bg-white shadow-md">
+    <BentoCard className="flex flex-col overflow-hidden bg-white">
       <BentoHeader
         icon={Play}
         badge="Player"

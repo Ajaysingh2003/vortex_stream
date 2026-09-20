@@ -384,7 +384,7 @@ export function FeatureCardThree() {
                         className="absolute z-20 w-max -translate-x-1/2"
                       >
                         <div
-                          className={`min-w-[96px] rounded-lg border border-white/[0.08] bg-[#11120e] px-2.5 py-1.5 shadow-lg transition-transform duration-150 ${
+                          className={`min-w-[96px] rounded-lg border border-white/[0.08] bg-[#11120e] px-2.5 py-1.5 zshadow-lg transition-transform duration-150 ${
                             below ? "translate-y-3" : "-translate-y-[calc(100%+12px)]"
                           }`}
                         >
@@ -471,8 +471,7 @@ export function FeatureCardThree() {
             </div>
           </div>
         </motion.div>
-
-        <CardBottomFade />
+        <CardBottomFade height="h-28" />
       </div>
     </BentoCard>
   );
