@@ -1,37 +1,33 @@
 import type { Metadata } from "next";
 import {
-  Geist,
+  Instrument_Sans,
   Inter,
-  Figtree,
-  DM_Sans,
-  Fraunces,
-  Syne,
-  Newsreader,
 } from "next/font/google";
+
 import "./globals.css";
+
 import { cn } from "@/lib/utils";
 import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "react-hot-toast";
-import Script from "next/script";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { TooltipProvider } from "@/components/ui/tooltip";
-const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
 
-const fontContent = DM_Sans({
-  variable: "--font-dm-sans",
+const fontContent = Inter({
+  variable: "--font-content",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
-const fontHeading = Newsreader({
+const fontHeading = Instrument_Sans({
   variable: "--font-heading",
-  // weight:["400"],
-  weight: ["500", "600", "700", "800"],
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const fontSubHeading = Inter({
   variable: "--font-subheading",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -45,13 +41,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", figtree.variable)}>
-      <body
-        className={`${fontContent.variable} ${fontHeading.variable} ${fontSubHeading.variable} antialiased`}
-      >
-        <Script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" />
+    <html
+      lang="en"
+      className={cn(
+        fontContent.variable,
+        fontHeading.variable,
+        fontSubHeading.variable
+      )}
+    >
+      <body className="font-content antialiased">
         <TRPCReactProvider>
           <Toaster position="top-right" />
+
           <NuqsAdapter>
             <TooltipProvider>{children}</TooltipProvider>
           </NuqsAdapter>

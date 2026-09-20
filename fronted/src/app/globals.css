@@ -5,7 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-surface:var(--bg-surface);
+  --color-primary-link:var(--primary-link);
+  --color-primary-link-hover:var(--primary-link-hover);
+  --color-surface: var(--bg-surface);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -51,33 +53,36 @@
 
 :root {
   /* brand */
-  --brand-primary:#B499FF;
-  --brand-secondary:#EDECFF;
-  --brand-accent:#fff;
+  --brand-primary: #b499ff;
+  --brand-secondary: #edecff;
+  --brand-accent: #fff;
   /* background */
-  --bg-main:#ffff;
+  --bg-main: #ffff;
   /* --bg-surface:#ead0fd1c; */
-  --bg-surface:#f5f5f5;
-  --bg-secondary:#EDECFF;
+  --bg-surface: #f5f5f5;
+  --bg-secondary: #edecff;
   --bg-muted: #e5e7eb;
   --font-content: var(--font-dm-sans, var(--font-sans));
-/* 
+  /* 
   --text-main: #111827;           
   --text-muted: #4b5563;         
   --text-on-brand: #ffffff; */
-  
+
   --background: #ffffff;
-  --foreground: oklch(0.145 0 0);
+  --foreground: #171717;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #070000;
+  --primary: #d1ff46;
+  --primary-link: #4c7a0d;
+  
+  --primary-link-hover: #3f650b;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: #737373;
   --accent: #181818bb;
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -150,22 +155,22 @@
   }
 }
 
-.font-heading{
+.font-heading {
   font-family: var(--font-heading);
 }
-.font-subheading{
+.font-subheading {
   font-family: var(--font-subheading);
 }
 
-.font-content{
+.font-content {
   font-family: var(--font-content);
 }
 
-body{
+body {
   font-family: var(--font-content);
 }
 
-.brand-primary{
+.brand-primary {
   background: red;
 }
 
@@ -182,7 +187,11 @@ body{
 
 .bg-primary-btn-import {
   /* background-image: linear-gradient(90.48deg, rgb(250, 195, 210) 0%, #0a485f 100%); */
-  background-image: linear-gradient(110.48deg, rgba(205, 146, 245, 0.299) 0%, #350c5f 70%);
+  background-image: linear-gradient(
+    110.48deg,
+    rgba(205, 146, 245, 0.299) 0%,
+    #350c5f 70%
+  );
   font-weight: 700;
   padding: 12px 24px;
   /* border-radius: 10px; */
@@ -192,40 +201,43 @@ body{
   cursor: pointer;
 }
 
-.folder-bg-linear{
-  background: radial-gradient(circle at center, #F1AEFF 0%, #ffffff 100%);
+.folder-bg-linear {
+  background: radial-gradient(circle at center, #f1aeff 0%, #ffffff 100%);
 }
 
-.active-folder-btn{
-  background: rgba(237, 236, 255,0.7);
+.active-folder-btn {
+  background: rgba(237, 236, 255, 0.7);
   color: #151516;
 }
 
-
 .bg-progress-gradient {
-  background: linear-gradient(90.48deg,   #0c185f 0% , #92bff5f6 100%);
+  background: linear-gradient(90.48deg, #0c185f 0%, #92bff5f6 100%);
   /* background-color: red; */
 }
 
-.bg-background-card-popular{
+.bg-background-card-popular {
   background: black;
   position: relative;
-  overflow: hidden; 
+  overflow: hidden;
 }
 .bg-background-card-popular::after {
-   position: absolute;
+  position: absolute;
   content: "";
   border-radius: inherit;
-  z-index: 1; 
+  z-index: 1;
   inset: 0px;
   opacity: 1;
   pointer-events: none;
-  transition-property: background-color, background, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-property:
+    background-color, background, border-color, color, fill, stroke, opacity,
+    box-shadow, transform;
   transition-duration: 100ms;
   /* background-image: linear-gradient(rgba(255, 255, 255, 0.184) 0%, rgba(255, 255, 255, 0.058) 100%); */
-  background-image: linear-gradient(#ffffff2b 0%, rgba(255, 255, 255, 0.132) 100%);
+  background-image: linear-gradient(
+    #ffffff2b 0%,
+    rgba(255, 255, 255, 0.132) 100%
+  );
 }
-
 
 .bg-main-btn {
   /* background: rgba(213, 74, 251, 0.828); */
@@ -236,37 +248,38 @@ body{
   position: relative;
   outline: none;
   color: black;
-  overflow: hidden; 
-  filter: brightness(1.10); 
+  overflow: hidden;
+  filter: brightness(1.1);
 }
-
 
 .bg-main-btn::after {
   position: absolute;
   /* border: none; */
   content: "";
   border-radius: inherit;
-  z-index: 1; 
+  z-index: 1;
   inset: 0px;
-  opacity:1;
+  opacity: 1;
   pointer-events: none;
-  transition-property: background-color, background, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-property:
+    background-color, background, border-color, color, fill, stroke, opacity,
+    box-shadow, transform;
   transition-duration: 100ms;
   /* background-image: linear-gradient(rgba(255, 255, 255, 0.184) 0%, rgba(255, 255, 255, 0.058) 100%); */
-  background-image: linear-gradient(#ffffff25 0%, rgba(255, 255, 255, 0.453) 100%);
+  background-image: linear-gradient(
+    #ffffff25 0%,
+    rgba(255, 255, 255, 0.453) 100%
+  );
   /* background-image: linear-gradient(#ffffff25 0%, rgba(255, 255, 255, 0.539) 100%); */
-
 }
-
-
 
 .bg-main-btn:hover {
   /* 1. Micro-scale gives a tactile "pressing out" response */
-  transform: translateY(-0.5px) scale(1); 
-  
+  transform: translateY(-0.5px) scale(1);
+
   /* 2. Pop the color brightness slightly instead of replacing the background hex */
-  filter: brightness(1.06); 
-  
+  filter: brightness(1.06);
+
   /* 3. Deepen the shadow to create physical elevation depth */
   box-shadow: 0 6px 5px rgba(242, 60, 175, 0.055);
 }
@@ -275,7 +288,6 @@ body{
   /* 4. Increase sheen opacity slightly on hover to reflect light changes */
   opacity: 1;
 }
-
 
 .bg-main-btn:active {
   /* Press down effect when clicked */
@@ -292,12 +304,11 @@ body{
   outline-offset: 2px;
 }
 
-
-.hidden-overlap{
+.hidden-overlap {
   position: relative;
 }
 
-.hidden-overlap::after{
+.hidden-overlap::after {
   position: absolute;
   content: "";
   z-index: 2;
@@ -308,13 +319,12 @@ body{
   /* background-color: black; */
 }
 
-.overlap-card{
+.overlap-card {
   position: relative;
 }
 
-
-.overlap-card::after{
-   position: absolute;
+.overlap-card::after {
+  position: absolute;
   content: "";
   z-index: 2;
   width: 100%;
@@ -323,7 +333,6 @@ body{
   background: linear-gradient(transparent 20%, rgb(255, 255, 255) 98%);
 }
 
-
 .text-gradient {
   background-image: linear-gradient(110.48deg, #f23cafde 0%, #e1caec 100%);
   /* background-image: linear-gradient(110.48deg, rgba(154, 146, 245, 0.963) 0%, #350c5f 100%); */
@@ -331,20 +340,17 @@ body{
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  
+
   /* Optional: Ensures the gradient looks smooth on low-res screens */
   -webkit-print-color-adjust: exact;
 }
 
-
 /* globals.css */
 
-
-@media (max-width:400px) {
-  .volume-range{
+@media (max-width: 400px) {
+  .volume-range {
     max-width: 4px ip !important;
   }
-  
 }
 /* ==========================================================================
    🎛️ CORE VOLUME RANGE INPUT ELEMENT
@@ -368,13 +374,11 @@ body{
   margin: 0;
 }
 
-
-
 @media (max-width: 300px) {
   .video-ref-embed {
     object-fit: cover !important;
   }
-  .poster-img{
+  .poster-img {
     object-position: center;
     object-fit: cover !important;
   }
@@ -384,8 +388,6 @@ body{
     background: black;
   }
 }
-  
-
 
 media-controller {
   display: block !important;
@@ -408,9 +410,11 @@ media-controller {
   background: #ffffff;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  margin-left: -3px; 
-  
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease;
+  margin-left: -3px;
+
+  transition:
+    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.15s ease;
 }
 
 .volume-range::-webkit-slider-thumb:hover {
@@ -432,7 +436,9 @@ media-controller {
   background: #ffffff;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease;
+  transition:
+    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.15s ease;
 }
 
 .volume-range::-moz-range-thumb:hover {
@@ -445,9 +451,6 @@ media-controller {
   width: 100%;
 }
 
-
-
-
 /* Target your custom class name */
 .scroll-bar {
   /* For Firefox */
@@ -457,7 +460,7 @@ media-controller {
 
 /* Chrome, Safari, and Edge */
 .scroll-bar::-webkit-scrollbar {
-  width: 4px;  /* Micro width for vertical bars */
+  width: 4px; /* Micro width for vertical bars */
   height: 4px; /* Micro height for horizontal bars */
 }
 
@@ -466,13 +469,13 @@ media-controller {
 }
 
 .scroll-bar::-webkit-scrollbar-thumb {
-  background-color: #d4d4d8; 
+  background-color: #d4d4d8;
   border-radius: 20px;
-  
+
   /* The Secret Sauce: Adds an invisible border to shrink the visible bar thickness */
   border: 1px solid transparent;
-  background-clip: padding-box; 
-  
+  background-clip: padding-box;
+
   transition: background-color 150ms ease;
 }
 
@@ -483,41 +486,39 @@ media-controller {
   background-clip: padding-box;
 }
 
-
-
-
 .grid-pattern {
   background-image: 
     /* Vertical line at 100px from the left */
     linear-gradient(90deg, #8b8b8b12 1px, transparent 1px),
     /* Vertical line at 100px from the right */
     linear-gradient(90deg, #8b8b8b12 1px, transparent 1px),
-    /* Original grid lines */
-    linear-gradient(#8b8b8b12 1px, transparent 1px),
+    /* Original grid lines */ linear-gradient(#8b8b8b12 1px, transparent 1px),
     linear-gradient(90deg, #8b8b8b12 1px, transparent 1px);
 
-  background-position: 
-    100px 0,            /* Position for first line */
-    calc(100% - 100px) 0, /* Position for second line (from right) */
-    0 0, 0 0;           /* Position for original grid */
+  background-position:
+    100px 0,
+    /* Position for first line */ calc(100% - 100px) 0,
+    /* Position for second line (from right) */ 0 0,
+    0 0; /* Position for original grid */
 
-  background-size: 
-    1px 100%,           /* Size for first line */
-    1px 100%,           /* Size for second line */
-    664px 964px, 664px 964px; /* Size for original grid */
-  
+  background-size:
+    1px 100%,
+    /* Size for first line */ 1px 100%,
+    /* Size for second line */ 664px 964px,
+    664px 964px; /* Size for original grid */
+
   background-repeat: no-repeat, no-repeat, repeat, no-repeat;
 }
-
 
 @media (max-width: 640px) {
   .grid-pattern {
     /* Hide the 100px lines on mobile if they look crowded */
-    background-image: linear-gradient(#8b8b8b12 1px, transparent 1px), linear-gradient(90deg, #8b8b8b12 1px, transparent 1px);
+    background-image:
+      linear-gradient(#8b8b8b12 1px, transparent 1px),
+      linear-gradient(90deg, #8b8b8b12 1px, transparent 1px);
     background-position: 0 0;
   }
 }
-
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -525,87 +526,187 @@ media-controller {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
-
-
 
 .fade-middle-window {
   -webkit-mask-image: linear-gradient(
-    to right, 
-    transparent 0%, 
-    black 40%,    /* Fade in ends at 40% */
-    black 60%,    /* Fade out starts at 60% */
-    transparent 100%
+    to right,
+    transparent 0%,
+    black 40%,
+    /* Fade in ends at 40% */ black 60%,
+    /* Fade out starts at 60% */ transparent 100%
   );
   mask-image: linear-gradient(
-    to right, 
-    transparent 0%, 
-    black 40%, 
-    black 60%, 
+    to right,
+    transparent 0%,
+    black 40%,
+    black 60%,
     transparent 100%
   );
 }
 
 .fade-navigation {
   -webkit-mask-image: linear-gradient(
-    to right, 
-    transparent 0%,   /* Fully hidden at the very edge */
-    black 25%,        /* Starts fading into view at 25% */
-    black 75%,        /* Stays fully visible until 75% */
-    transparent 100%  /* Fades out to hidden at the right edge */
+    to right,
+    transparent 0%,
+    /* Fully hidden at the very edge */ black 25%,
+    /* Starts fading into view at 25% */ black 75%,
+    /* Stays fully visible until 75% */ transparent 100%
+      /* Fades out to hidden at the right edge */
   );
   mask-image: linear-gradient(
-    to right, 
-    transparent 0%, 
-    black 25%, 
-    black 75%, 
+    to right,
+    transparent 0%,
+    black 25%,
+    black 75%,
     transparent 100%
   );
+}
+
+@media (max-width: 400px) {
+  .fade-middle-window {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 20%,
+      /* Fade in ends at 40% */ black 80%,
+      /* Fade out starts at 60% */ transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 20%,
+      black 80%,
+      transparent 100%
+    );
+  }
+
+  .fade-navigation {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      /* Fully hidden at the very edge */ black 15%,
+      /* Starts fading into view at 25% */ black 85%,
+      /* Stays fully visible until 75% */ transparent 100%
+        /* Fades out to hidden at the right edge */
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 25%,
+      black 75%,
+      transparent 100%
+    );
+  }
+}
+
+.primary-btn {
+  box-shadow:
+    0px 2px 2px rgba(0, 0, 0, 0.18),
+    0px 0px 0px 1px rgba(255, 255, 255, 0.18) inset,
+    0px 1px 0px rgba(255, 255, 255, 0.45) inset;
+
+  position: relative;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease-in-out;
+  box-sizing: border-box;
+
+  /* Lime */
+  background-color: #d1ff46;
+  color: #172000;
+
+  background-image: radial-gradient(
+    120% 120% at 50% 0%,
+    rgba(255, 255, 255, 0.38) 0%,
+    rgba(255, 255, 255, 0) 65%
+  );
+
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.primary-btn:hover {
+  background-color: #bdf425;
+  box-shadow:
+    0px 3px 6px rgba(84, 110, 0, 0.22),
+    0px 0px 0px 1px rgba(255, 255, 255, 0.2) inset,
+    0px 1px 0px rgba(255, 255, 255, 0.45) inset;
+
+  transform: translateY(-1px);
+}
+
+.primary-btn:active {
+  background-color: #9dce12;
+  transform: translateY(0);
 }
 
 
 
 
-@media (max-width:400px) {
-  
 
 
-.fade-middle-window {
-  -webkit-mask-image: linear-gradient(
-    to right, 
-    transparent 0%, 
-    black 20%,    /* Fade in ends at 40% */
-    black 80%,    /* Fade out starts at 60% */
-    transparent 100%
+
+.secondary-btn {
+  box-shadow:
+    0px 2px 2px rgba(0, 0, 0, 0.08),
+    0px 0px 0px 1px rgba(0, 0, 0, 0.07),
+    0px 1px 0px rgba(255, 255, 255, 0.9) inset;
+
+  position: relative;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease-in-out;
+  box-sizing: border-box;
+
+  /* White */
+  background-color: #ffffff;
+  color: #2f312b;
+
+  background-image: radial-gradient(
+    120% 120% at 50% 0%,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(245, 245, 242, 0) 65%
   );
-  mask-image: linear-gradient(
-    to right, 
-    transparent 0%, 
-    black 20%, 
-    black 80%, 
-    transparent 100%
-  );
+
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  gap: 5px;
+  font-weight: 600;
 }
 
-.fade-navigation {
-  -webkit-mask-image: linear-gradient(
-    to right, 
-    transparent 0%,   /* Fully hidden at the very edge */
-    black 15%,        /* Starts fading into view at 25% */
-    black 85%,        /* Stays fully visible until 75% */
-    transparent 100%  /* Fades out to hidden at the right edge */
-  );
-  mask-image: linear-gradient(
-    to right, 
-    transparent 0%, 
-    black 25%, 
-    black 75%, 
-    transparent 100%
-  );
+.secondary-btn:hover {
+  background-color: #f8f8f5;
+
+  box-shadow:
+    0px 3px 6px rgba(0, 0, 0, 0.1),
+    0px 0px 0px 1px rgba(0, 0, 0, 0.1),
+    0px 1px 0px rgba(255, 255, 255, 1) inset;
+
+  transform: translateY(-1px);
 }
 
+.secondary-btn:active {
+  background-color: #f0f0ec;
 
+  box-shadow:
+    0px 1px 2px rgba(0, 0, 0, 0.08),
+    0px 0px 0px 1px rgba(0, 0, 0, 0.09),
+    0px 1px 0px rgba(255, 255, 255, 0.8) inset;
 
+  transform: translateY(0);
 }

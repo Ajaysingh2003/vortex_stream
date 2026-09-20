@@ -1,18 +1,26 @@
-import Navbar from "@/modules/home/component/Navbar";
 import React from "react";
+import Navbar from "@/modules/home/component/Navbar";
 
-function layout({ children }: { children: React.ReactNode }) {
-  return <div className="w-full min-h-screen">
-    <div className="w-full flex items-center  justify-center">
-      <div className="absolute top-0 h-full w-full inset-0 overflow-hidden">
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative bg-[#faf9f5] overflow-hidden min-h-screen w-full flex flex-col overflow-x-hidden">
+      {/* Background Pattern (covers full page, doesn't block interactions) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
         <div className="grid-pattern h-full w-full" />
       </div>
-      <Navbar/>
-    </div>
-   <section className="w-full  h-full">
-     {children}
-   </section>
-    </div>;
-}
 
-export default layout;
+      {/* Header / Navbar */}
+      <header className="sticky top-0 z-50 w-full flex items-center justify-center">
+        <Navbar />
+      </header>
+
+      {/* Main Content Area */}
+      <main className="relative z-0 flex-1 w-full">
+        {children}
+      </main>
+    </div>
+  );
+}

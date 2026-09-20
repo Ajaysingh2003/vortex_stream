@@ -1,107 +1,397 @@
+"use client";
+
 import React from "react";
-import { ChartCandlestick, Video } from "lucide-react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { ArrowRight, Check, Play, ShieldCheck, Sparkles } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+
+import IntroVideo from "./IntroVideo";
 import CtaSection from "./CtaSection";
-function TopHeader() {
+import VideoInfraIllustration from "./VideoInfraIllustration";
+import CompanyProof from "./CompanyProof";
+
+const proofItems = [
+  "Adaptive streaming",
+  "Secure playback",
+  "Realtime analytics",
+];
+
+export default function TopHeader() {
+  const reducedMotion = useReducedMotion();
+
   return (
-    <div className="w-full pb-3">
-      <div className="mx-auto max-w-[90%] md:max-w-3xl cursor-pointer flex flex-col gap-4 items-center justify-center">
-        <div className="group mx-auto flex w-fit cursor-pointer items-center gap-3 rounded-full border border-slate-200 bg-white/50 px-2 py-1 pr-4 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-all duration-300 hover:border-violet-300/50 hover:bg-white hover:shadow-violet-500/10">
-          {/* Icon Container with a subtle ring */}
-          <div className="flex items-center justify-center rounded-full bg-violet-50 p-0.5 shadow-inner ring-1 ring-black/5 transition-colors group-hover:bg-violet-100">
-            <Video className="size-3" />
-          </div>
+    <section className="relative isolate w-full overflow-hidden bg-[#faf9f5] text-[#11120e]">
+      {/* ------------------------------------------------------------------ */}
+      {/* Decorative background                                              */}
+      {/* ------------------------------------------------------------------ */}
 
-          {/* Text with clear hierarchy */}
-          <span className="font-subheading text-[8px] font-semibold uppercase tracking-wider text-slate-500 md:text-[12px]">
-            Built for <span className="text-slate-900">Video Excellence</span>
-          </span>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        {/* subtle top glow */}
+        <div className="absolute left-[18%] top-[-280px] h-[520px] w-[720px] rounded-full bg-[#B3E61D]/[0.08] blur-[130px]" />
 
-          {/* Pulse Indicator */}
-          <div className="relative flex h-2 w-2 items-center justify-center">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500"></span>
-          </div>
-        </div>
-        <h1 className="capitalize max-w-2xl font-heading font-bold leading-[1.2] text-3xl md:text-5xl tracking-normal text-center font-jakarta">
-          Unleash Your Creativity, Power Your Presence.
-          <br className="hidden md:block" />
-          <span className="text-slate-600 text-sm md:text-3xl font-semibold mt-2 block">
-            Built for{" "}
-            <span className="italic font-heading text-gradient bg-clip-text text-transparent">
-              Video Excellence.
-            </span>
-          </span>
-        </h1>
-        <p className=" text-sm md:text-md text-center tracking-wide font-content md:text-[16px]">
-          Video as an intelligence asset. We’ve built a secure, high-performance
-          streaming engine that treats every view as a data point. Fast,
-          encrypted, and designed to feed your strategy, it’s the infrastructure
-          your team has been waiting for.
-        </p>
+        {/* left curved line */}
+        <div className="absolute -left-[420px] top-[-140px] h-[760px] w-[760px] rounded-full border-[24px] border-[#ebeae5]/70" />
 
-        <div className="w-full flex items-center justify-center ">
-          {/* <Button className='capitalize px-8 rounded-md bg-main-btn font-bold  cursor-pointer text-white '>Get Started</Button> */}
-          <CtaSection />
-        </div>
+        <div className="absolute -left-[390px] top-[-110px] h-[700px] w-[700px] rounded-full border border-[#deddd7]/60" />
+
+        {/* right curved line */}
+        <div className="absolute -right-[520px] top-[390px] h-[930px] w-[930px] rounded-full border-[22px] border-[#ebeae5]/70" />
+
+        <div className="absolute -right-[470px] top-[430px] h-[840px] w-[840px] rounded-full border border-[#deddd7]/60" />
+
+        {/* fade */}
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent to-[#faf9f5]" />
       </div>
-    </div>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Main hero                                                          */}
+      {/* ------------------------------------------------------------------ */}
+
+      <div className="mx-auto w-full max-w-[1280px] px-5 sm:px-7 lg:px-8">
+        <div className="pt-16 sm:pt-20 lg:pt-[118px]">
+          <div className="max-w-[930px]">
+            {/* eyebrow */}
+            {/* <motion.div
+              initial={
+                reducedMotion
+                  ? false
+                  : {
+                      opacity: 0,
+                      y: 12,
+                    }
+              }
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.55,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className="mb-7 inline-flex items-center gap-2 rounded-full border border-black/[0.07] bg-white/70 px-3 py-1.5 shadow-sm backdrop-blur"
+            >
+              <span className="flex size-6 items-center justify-center rounded-full bg-[#B3E61D]">
+                <Sparkles className="size-3.5 text-[#172000]" />
+              </span>
+
+              <span className="text-[12px] font-medium tracking-[-0.01em] text-[#595c52]">
+                Video infrastructure for modern products
+              </span>
+            </motion.div> */}
+
+            {/* ---------------------------------------------------------- */}
+            {/* Heading                                                    */}
+            {/* ---------------------------------------------------------- */}
+
+            <motion.h1
+              initial={
+                reducedMotion
+                  ? false
+                  : {
+                      opacity: 0,
+                      y: 24,
+                      filter: "blur(10px)",
+                    }
+              }
+              animate={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)",
+              }}
+              transition={{
+                duration: 0.8,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className="
+                max-w-[940px]
+                font-heading
+                text-[43px]
+                font-medium
+                leading-[1.04]
+                tracking-[-0.052em]
+                text-[#11120e]
+                sm:text-[56px]
+                md:text-[66px]
+                lg:text-[74px]
+              "
+            >
+              The{" "}
+              <span className="relative inline-block whitespace-nowrap">
+                <span className="relative z-10">simple & scalable</span>
+
+                <motion.span
+                  initial={reducedMotion ? false : { scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{
+                    delay: 0.3,
+                    duration: 0.75,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="
+                    absolute
+                    -inset-x-2
+                    bottom-[2px]
+                    top-[4px]
+                    -z-0
+                    origin-left
+                    rounded-[5px]
+                    bg-[#e7f6b8]
+                    sm:-inset-x-3
+                  "
+                />
+              </span>
+              <br />
+              video infrastructure layer
+            </motion.h1>
+
+            {/* ---------------------------------------------------------- */}
+            {/* Description                                                */}
+            {/* ---------------------------------------------------------- */}
+
+            <motion.p
+              initial={
+                reducedMotion
+                  ? false
+                  : {
+                      opacity: 0,
+                      y: 16,
+                    }
+              }
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                delay: 0.13,
+                duration: 0.65,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className="
+                mt-7
+                max-w-[670px]
+                font-content
+                text-[16px]
+                leading-[1.65]
+                tracking-[-0.015em]
+                text-[#6d6e68]
+                sm:text-[18px]
+              "
+            >
+              Upload once, stream everywhere. Secure playback, track viewer
+              engagement, and skip the infrastructure headaches.
+            </motion.p>
+
+            {/* ---------------------------------------------------------- */}
+            {/* CTAs                                                       */}
+            {/* ---------------------------------------------------------- */}
+
+            <motion.div
+              initial={
+                reducedMotion
+                  ? false
+                  : {
+                      opacity: 0,
+                      y: 14,
+                    }
+              }
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                delay: 0.22,
+                duration: 0.65,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className="mt-7"
+            >
+              <CtaSection />
+              <CompanyProof />
+            </motion.div>
+
+            {/* <CtaSection/> */}
+            {/* <motion.div
+              initial={
+                reducedMotion
+                  ? false
+                  : {
+                      opacity: 0,
+                      y: 14,
+                    }
+              }
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                delay: 0.22,
+                duration: 0.65,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className="mt-7 flex flex-col gap-3 sm:flex-row"
+            >
+              <button
+                className="
+                  group
+                  inline-flex
+                  h-12
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-[8px]
+                  bg-[#B3E61D]
+                  px-6
+                  text-[14px]
+                  font-semibold
+                  tracking-[-0.01em]
+                  text-[#172000]
+                  shadow-[0_1px_1px_rgba(0,0,0,0.04),0_6px_18px_rgba(129,168,20,0.15)]
+                  transition
+                  hover:bg-[#aade13]
+                  sm:w-auto
+                "
+              >
+                Start building free
+
+                <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+              </button>
+
+              <button
+                className="
+                  group
+                  inline-flex
+                  h-12
+                  items-center
+                  justify-center
+                  gap-2.5
+                  rounded-[8px]
+                  border
+                  border-black/[0.07]
+                  bg-[#efeee9]
+                  px-6
+                  text-[14px]
+                  font-medium
+                  tracking-[-0.01em]
+                  text-[#55574f]
+                  transition
+                  hover:border-black/[0.11]
+                  hover:bg-[#eae9e3]
+                  hover:text-[#171812]
+                  sm:w-auto
+                "
+              >
+                View live demo
+
+                <span className="flex size-6 items-center justify-center rounded-full bg-white shadow-sm">
+                  <Play className="ml-[1px] size-3 fill-current" />
+                </span>
+              </button>
+            </motion.div> */}
+
+            {/* ---------------------------------------------------------- */}
+            {/* Proof row                                                  */}
+            {/* ---------------------------------------------------------- */}
+
+            <motion.div
+              initial={
+                reducedMotion
+                  ? false
+                  : {
+                      opacity: 0,
+                    }
+              }
+              animate={{
+                opacity: 1,
+              }}
+              transition={{
+                delay: 0.4,
+                duration: 0.8,
+              }}
+              className="
+                mt-7
+                flex
+                flex-wrap
+                items-center
+                gap-x-5
+                gap-y-2.5
+                text-[12px]
+                font-medium
+                text-[#8a8c84]
+              "
+            >
+              {proofItems.map((item) => (
+                <div key={item} className="flex text-[16px] sm:text-[16px]  items-center gap-1.5">
+                  <Check className="size-3.5 text-[#7d9c1a]" />
+                  <span>{item}</span>
+                </div>
+              ))}
+
+              <div className="hidden h-3 w-px bg-black/10 sm:block" />
+
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="size-3.5 text-[#7d9c1a]" />
+
+                <span>No credit card required</span>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* ---------------------------------------------------------------- */}
+          {/* Product preview                                                   */}
+          {/* ---------------------------------------------------------------- */}
+
+          <motion.div
+            initial={
+              reducedMotion
+                ? false
+                : {
+                    opacity: 0,
+                    y: 42,
+                    scale: 0.985,
+                  }
+            }
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+            }}
+            transition={{
+              delay: 0.35,
+              duration: 0.9,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="relative mt-14 sm:mt-6 lg:mt-[74px]"
+          >
+            {/* tiny testimonial/status line like reference */}
+            <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[14px] sm:text-[18px] text-[#50514f]">
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={i} className="text-[#8a8c83]">
+                    ★
+                  </span>
+                ))}
+              </div>
+
+              <span className="hidden text-black/15 sm:inline">•</span>
+
+              <span>
+                Built for teams that want video infrastructure without
+                infrastructure complexity.
+              </span>
+            </div>
+
+            {/* preview frame */}
+
+            {/* background shadow plate */}
+            <div className="absolute inset-x-10 -bottom-8 -z-10 h-24 rounded-full bg-black/[0.08] blur-[45px]" />
+          </motion.div>
+        </div>
+        <VideoInfraIllustration />
+      </div>
+
+      <div className="h-14 sm:h-20 lg:h-28" />
+    </section>
   );
 }
-
-export default TopHeader;
-
-// import React from "react";
-// import { ChartCandlestick, Video } from "lucide-react";
-// import Image from "next/image";
-// import { Button } from "@/components/ui/button";
-// import CtaSection from "./CtaSection";
-// function TopHeader() {
-//   return (
-//     <div className="w-full">
-//       <div className="mx-auto max-w-[90%] md:max-w-3xl cursor-pointer flex flex-col gap-5 items-center justify-center">
-//         <div className="group mx-auto flex w-fit cursor-pointer items-center gap-3 rounded-full border border-slate-200 bg-white/50 px-2 py-1 pr-4 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-all duration-300 hover:border-violet-300/50 hover:bg-white hover:shadow-violet-500/10">
-
-//   {/* Icon Container with a subtle ring */}
-//   <div className="flex items-center justify-center rounded-full bg-violet-50 p-0.5 shadow-inner ring-1 ring-black/5 transition-colors group-hover:bg-violet-100">
-//   <Video className="size-3"/>
-
-//   </div>
-
-//   {/* Text with clear hierarchy */}
-//   <span className="font-jakarta text-[11px] font-semibold uppercase tracking-wider text-slate-500 md:text-[12px]">
-//     Built for <span className="text-slate-900">Video Excellence</span>
-//   </span>
-
-//   {/* Pulse Indicator */}
-//   <div className="relative flex h-2 w-2 items-center justify-center">
-//     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-//     <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500"></span>
-//   </div>
-// </div>
-//         <h1 className="capitalize max-w-2xl font-heading font-bold leading-[1.2] text-3xl md:text-5xl tracking-normal text-center font-jakarta">
-//           Unleash Your Creativity, Power Your Presence.
-//           <br className="hidden md:block" />
-//           <span className="text-slate-600 font-semibold mt-2 block">
-//             Built for{" "}
-//             <span className="italic font-subheading text-gradient bg-clip-text text-transparent">
-//               Video Excellence.
-//             </span>
-//           </span>
-//         </h1>
-//         <p className=" text-sm md:text-md text-center tracking-wide font-content md:text-[16px]">
-//           Video as an intelligence asset. We’ve built a secure, high-performance streaming engine that treats every view as a data point. Fast, encrypted, and designed to feed your strategy, it’s the infrastructure your team has been waiting for.
-//         </p>
-
-//             <div className="w-full flex items-center justify-center ">
-//                  {/* <Button className='capitalize px-8 rounded-md bg-main-btn font-bold  cursor-pointer text-white '>Get Started</Button> */}
-//                 <CtaSection/>
-//             </div>
-
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default TopHeader;

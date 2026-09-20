@@ -195,7 +195,7 @@ function VideoUpdate() {
                     <button
                       type="button"
                       onClick={copyVideoId}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-[#f5f5f5] hover:bg-neutral-200/80 px-2 py-1 font-mono text-[11px] text-foreground transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-md bg-[#f5f5f5] hover:bg-neutral-200/80 px-2 py-1  text-[11px] text-foreground transition-colors cursor-pointer"
                     >
                       <span className="truncate max-w-[140px] sm:max-w-[220px]">
                         {video.id}
