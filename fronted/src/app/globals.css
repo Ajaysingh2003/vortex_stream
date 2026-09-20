@@ -618,7 +618,7 @@ media-controller {
   box-sizing: border-box;
 
   /* Lime */
-  background-color: #d1ff46;
+  background-color: #d1ff46 !important;
   color: #172000;
 
   background-image: radial-gradient(
@@ -636,7 +636,7 @@ media-controller {
 }
 
 .primary-btn:hover {
-  background-color: #bdf425;
+  background-color: #bdf425 !important;
   box-shadow:
     0px 3px 6px rgba(84, 110, 0, 0.22),
     0px 0px 0px 1px rgba(255, 255, 255, 0.2) inset,

@@ -247,7 +247,7 @@ export default function Navbar() {
 
           <Button
             asChild
-            className="group h-9 rounded-xl  px-4 text-xs font-bold text-[#151c04] shadow-2xs transition-all  primary-btn  hover:shadow-xs active:scale-[0.98]"
+            className="group h-9 rounded-xl  px-4 text-xs font-bold text-[#151c04] shadow-2xs transition-all  primary-btn   hover:shadow-xs active:scale-[0.98]"
           >
             <Link href="/login">
               <span>Start Building</span>
@@ -310,7 +310,7 @@ export default function Navbar() {
                       <Button
                         variant="outline"
                         asChild
-                        className="h-11 rounded-xl border-black/[0.08] text-sm font-semibold text-slate-800 hover:bg-black/[0.03]"
+                        className="h-11 rounded-xl border-black/[0.08] text-sm font-semibold   secondary-btn"
                       >
                         <Link href="/sign-in">Sign in</Link>
                       </Button>
@@ -319,7 +319,7 @@ export default function Navbar() {
                     <SheetClose asChild>
                       <Button
                         asChild
-                        className="h-11 rounded-xl bg-[#B3E61D] text-sm font-semibold text-[#141d02] shadow-xs hover:bg-[#a5db12]"
+                        className="h-11 rounded-xl  text-sm font-semibold text-[#141d02] shadow-xs  primary-btn"
                       >
                         <Link href="/sign-up">Start Building</Link>
                       </Button>

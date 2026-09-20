@@ -221,7 +221,7 @@ function VideoUpdate() {
                   { video.resolutions.map((res,i) => (
                     <span
                       key={i}
-                      className="rounded-md bg-[#f5f5f5] px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                      className="rounded-md bg-[#f5f5f5] px-1.5 py-0.5  text-[10px] text-muted-foreground"
                     >
                       {res.resolution}
                     </span>

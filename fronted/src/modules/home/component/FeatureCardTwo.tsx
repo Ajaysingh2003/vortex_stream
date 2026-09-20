@@ -105,7 +105,7 @@ export function FeatureCardTwo() {
       <div className="relative mt-auto h-[255px] overflow-hidden sm:h-[280px]">
         <LiveCDNGlobe />
 
-        <CardBottomFade height="h-8" />
+        <CardBottomFade height="h-16" />
       </div>
     </BentoCard>
   );

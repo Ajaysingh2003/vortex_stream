@@ -899,8 +899,9 @@ export function FeatureCardFour() {
             </AnimatePresence>
           </motion.div>
         </div>
+        <CardBottomFade height="h-20" />
+        
 
-        <CardBottomFade />
       </div>
     </BentoCard>
   );

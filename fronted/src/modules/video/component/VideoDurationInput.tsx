@@ -51,7 +51,7 @@ export default function VideoDurationInput({
             step={1}
             value={value}
             onChange={handleInputChange}
-            className="pr-12 text-center font-mono rounded-lg h-9 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="pr-12 text-center  rounded-lg h-9 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           
           {/* <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-neutral-400 bg-white pl-1 pointer-events-none">
@@ -60,7 +60,7 @@ export default function VideoDurationInput({
 
         </div>
       </div>
-      <span className="text-[11px] font-medium text-neutral-400 font-mono">
+      <span className="text-[11px] font-medium text-neutral-400 ">
         Overlay will appear at:{" "}
         <strong className="text-neutral-700">
           {formatSecondsToTimestamp(value)}

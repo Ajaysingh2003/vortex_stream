@@ -95,15 +95,15 @@ export default function VideoInfraDashboard() {
           <div className="flex items-center gap-2.5">
             <button
               type="button"
-              className="font-subheading inline-flex items-center gap-1.5 rounded-xl border border-black/[0.08] bg-white px-3.5 py-1.5 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 active:scale-95 transition-all cursor-pointer"
+              className="font-subheading inline-flex items-center gap-1.5  border border-black/[0.08] bg-white px-3.5 py-1.5 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 !min-h-8 active:scale-95 transition-all cursor-pointer secondary-btn rounded-md"
             >
               <span>Import Asset</span>
             </button>
             <button
               type="button"
-              className="font-heading inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-neutral-800 active:scale-95 transition-all cursor-pointer"
+              className="font-heading rounded-lg inline-flex items-center gap-1.5  bg-neutral-900 px-4 py-1.5z text-xs !min-h-8 font-semibold text-white shadow-xs hover:bg-neutral-800 active:scale-95 transition-all cursor-pointer primary-btn"
             >
-              <Upload className="size-3.5 text-[#B3E61D]" />
+              <Upload className="size-3.5" />
               <span>Upload Video</span>
             </button>
           </div>
@@ -527,7 +527,7 @@ function SidebarItem({
     <div
       className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 transition-all cursor-pointer ${
         active
-          ? "bg-[#B3E61D] font-heading font-bold text-neutral-950 shadow-2xs"
+          ? "secondary-btn !min-h-7 rounded-md w-full font-heading font-bold text-neutral-950 shadow-2xs"
           : "text-neutral-600 hover:bg-black/[0.04] hover:text-neutral-900"
       }`}
     >

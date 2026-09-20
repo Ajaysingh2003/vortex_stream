@@ -197,11 +197,22 @@ export function BentoHeader({
   );
 }
 
-export function CardBottomFade({ height = "h-20" }: { height?: string }) {
+export function CardBottomFade({ height = "h-32" }: { height?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none absolute inset-x-0 bottom-0 ${height} bg-gradient-to-t from-white via-white/80 to-transparent z-20`}
+      className={`pointer-events-none absolute inset-x-0 bottom-0 ${height} z-20`}
+      style={{
+        background: "radial-gradient(ellipse 90% 100% at 50% 100%, #ffffff 40%, rgba(255,255,255,0.7) 65%, transparent 100%)",
+      }}
     />
   );
 }
+// export function CardBottomFade({ height = "h-20" }: { height?: string }) {
+//   return (
+//     <div
+//       aria-hidden="true"
+//       className={`pointer-events-none absolute inset-x-0 bottom-0 ${height} bg-gradient-to-t from-white via-white/80 to-transparent z-20`}
+//     />
+//   );
+// }
