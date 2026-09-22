@@ -139,7 +139,7 @@ func (r *postgresLeadFormRepository) GetOverviewByWorkspaceID(ctx context.Contex
 				WHEN s.skipped = TRUE OR primary_answer.value IS NULL THEN 'Skipped'
 				ELSE primary_answer.value
 			END AS lead_identifier,
-			f.created_at`).
+			s.created_at`).
 		Joins("JOIN lead_form AS f ON f.id = s.form_id").
 		Joins("LEFT JOIN video AS v ON v.id = f.video_id").
 		Joins(`LEFT JOIN LATERAL (
@@ -161,7 +161,7 @@ func (r *postgresLeadFormRepository) GetOverviewByWorkspaceID(ctx context.Contex
 			LIMIT 1
 		) AS primary_answer ON TRUE`).
 		Where("f.workspace_id = ?", workspaceID).
-		Order("f.created_at DESC").
+		Order("s.created_at DESC").
 		Limit(recentLimit).
 		Scan(&recent).Error; err != nil {
 		return nil, err

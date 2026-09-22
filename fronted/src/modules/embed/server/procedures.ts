@@ -8,7 +8,7 @@ import { cookies } from "next/headers";
 import { title } from "process";
 import axiosRetry from "axios-retry";
 import { z } from "zod";
-import { access } from "fs";
+import type { LeadForm, VideoChapter, VideoCta, VideoEndScreenType, VideoSubtitle } from "@/modules/types";
 import { Readable } from "stream";
 
 axiosRetry(axios, {
@@ -18,6 +18,37 @@ axiosRetry(axios, {
     axiosRetry.isNetworkError(error) || (error.response?.status ?? 0) >= 500,
 });
 export const playerRouter = createTRPCRouter({
+  getExperience: baseProcedure.input(z.object({ videoId: z.string().uuid(), workspaceId: z.string().uuid() })).query(async ({ input }) => {
+    async function read<T>(path: string, fallback: T): Promise<T> {
+      try {
+        const response = await axios.get(`${process.env.BASE_API}/v1/${path}`, { timeout: 10000 });
+        return response.data.data ?? fallback;
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 404) return fallback;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Unable to load video interactions. Please try again." });
+      }
+    }
+    const [form, chapters, ctas, subtitles, endScreen] = await Promise.all([
+      read<LeadForm | null>(`video/${input.videoId}/form`, null),
+      read<VideoChapter[]>(`video/${input.videoId}/chapters`, []),
+      read<VideoCta[]>(`video/${input.videoId}/cta`, []),
+      read<VideoSubtitle[]>(`video/${input.videoId}/subtitles`, []),
+      read<VideoEndScreenType | null>(`workspace/${input.workspaceId}/video/${input.videoId}/end-screen`, null),
+    ]);
+    return { form, chapters, ctas, subtitles, endScreen };
+  }),
+  submitLead: baseProcedure.input(z.object({
+    videoId: z.string().uuid(), id: z.string().uuid(), formId: z.string().uuid(), sessionId: z.string().uuid(),
+    skipped: z.boolean(), answers: z.record(z.string().uuid(), z.string().max(4000)),
+  })).mutation(async ({ input }) => {
+    try {
+      const { videoId, ...body } = input;
+      const response = await axios.post(`${process.env.BASE_API}/v1/video/${videoId}/form/submissions`, body, { timeout: 15000 });
+      return response.data.data as { id: string };
+    } catch (error) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: axios.isAxiosError(error) ? error.response?.data?.message || "Unable to save your details. Please try again." : "Unable to save your details. Please try again." });
+    }
+  }),
   getPlayerMetaData: baseProcedure.input(z.object({
     workspaceID:z.string()
   })).query(async ({input}) => {

@@ -222,6 +222,9 @@ func (h *VideoHandler) ListVideo(c *gin.Context) {
 func (h *VideoHandler) GetSubtitleByVideoID(c *gin.Context) {
 
 	videoIDRaw := c.Param("id")
+	if videoIDRaw == "" {
+		videoIDRaw = c.Param("videoId")
+	}
 	videoID, err := uuid.Parse(videoIDRaw)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid video uuid format", "success": false})

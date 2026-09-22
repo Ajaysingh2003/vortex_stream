@@ -104,6 +104,7 @@ func (f *FormHandler) UpsertForm(c *gin.Context) {
 		VideoID:     videoID,
 		WorkspaceID: workspaceID,
 		Placement:   req.Placement,
+		ShowAt:      req.ShowAt,
 		AllowSkip:   req.AllowSkip,
 		Fields:      dtoFields,
 	}
@@ -181,4 +182,28 @@ func (h *FormHandler) GetOverview(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": overview})
+}
+
+// Submit records viewer answers independently of the owner's authenticated editor.
+func (h *FormHandler) Submit(c *gin.Context) {
+	videoID, err := uuid.Parse(c.Param("videoId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid video ID"})
+		return
+	}
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 64<<10)
+	var req dto.SubmitFormReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid form submission"})
+		return
+	}
+	if err := h.FormService.Submit(c.Request.Context(), videoID, &req); err != nil {
+		if appErr, ok := err.(*utils.ApiError); ok {
+			c.JSON(appErr.Code, gin.H{"message": appErr.Message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unable to save your details. Please try again."})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": gin.H{"id": req.ID}})
 }

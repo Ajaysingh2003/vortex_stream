@@ -53,6 +53,9 @@ export const getUserProcedure = baseProcedure.use(async ({ ctx, next }) => {
 
 export const protectedProcedure = (requiredPermissions: string[]) =>
   getUserProcedure.use(async ({ ctx, next }) => {
+    if (!ctx.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "Please sign in to continue" });
+    }
     if (!requiredPermissions.includes(ctx.user.role)) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
     }

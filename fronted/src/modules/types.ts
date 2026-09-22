@@ -180,7 +180,7 @@ export interface VideoAsset {
   status: string;
   thumbnail: string;
   masterKey: string;
-  resolutions: VideoResolutionType[];
+  resolutions: { resolution: string; playlistPath?: string; url?: string; key?: string; label?: string; quality?: string }[];
   folderId: string | null;
   WorkspaceId: string;
   createdAt: string;
@@ -379,7 +379,7 @@ type typeCustomTextType = {
 export interface VideoEndScreenType {
   id: string;
   video_id: string;
-  type: endScreenType;
+  type: endScreenType | "more_videos";
   payload:any 
   // ctaForEndScreen | moreVideo  | typeCustomTextType | imageEndScreenType |shareEndScreenType;
 }
@@ -390,6 +390,7 @@ export interface VideoEndScreenType {
 
 
 export interface VideoSubtitle{
+  subtitle_url: string;
   id:string;
   video_id:string;
   file_name:string;

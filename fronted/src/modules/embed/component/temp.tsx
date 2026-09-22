@@ -36,18 +36,8 @@ export function buildSources(
     : [];
       
   for (const item of asset.resolutions || []) {
-    if (typeof item === "string") {
-      const src = joinCdnUrl(cdnBaseUrl, item);
-      sources.push({
-        label: item.match(/(\d{3,4}p)/)?.[1] || "MP4",
-        src,
-        type: parseSourceType(src),
-      });
-      continue;
-    }
-
-    if (item?.url || item?.key) {
-      const src = joinCdnUrl(cdnBaseUrl, item.url || item.key);
+    if (item?.playlistPath || item?.url || item?.key) {
+      const src = joinCdnUrl(cdnBaseUrl, item.playlistPath || item.url || item.key || "");
       sources.push({
         label: item.label || item.quality || item.resolution || "MP4",
         src,
@@ -73,6 +63,7 @@ import Hls from "hls.js";
 
 // Assuming PlayerSource is defined somewhere in your types
 export type PlayerSource = {
+  label?: string;
   src: string;
   type: string;
 };

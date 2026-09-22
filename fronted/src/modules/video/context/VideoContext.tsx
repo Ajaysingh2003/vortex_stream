@@ -210,7 +210,7 @@ export const VideoProvider = ({ children }: { children: React.ReactNode }) => {
   const [customTitle, setCustomTitle] = useState<string>(videoEndScreen?.payload.custom_title ??"");
   const [customDescription, setCustomDescription] = useState<string>(videoEndScreen?.payload?.custom_description ?? "");
   const [selectMoreVideo,setSelectMoreVideo]=useState<VideoAsset[]>([])
-  const [endScreen, setEndScreen] = useState<endScreenType>( videoEndScreen?.type ?? "empty");
+  const [endScreen, setEndScreen] = useState<endScreenType>(videoEndScreen?.type === "more_videos" ? "more_video" : videoEndScreen?.type ?? "empty");
 
   const { data: ctaData } = useSuspenseQuery(
     trpc.video.getVideoCtas.queryOptions({

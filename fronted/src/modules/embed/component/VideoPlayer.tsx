@@ -1,7 +1,7 @@
 import React from "react";
 
 import { useTRPC } from "@/trpc/client";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { VideoAsset, VideoPlayerMetaData } from "@/modules/types";
 import ProductionVideoPlayer from "./VideoCustomization";
 
@@ -24,6 +24,8 @@ function VideoPlayer({ asset }: { asset: VideoAsset }) {
     }),
   );
 
+  const experience = useQuery(trpc.videoPlayer.getExperience.queryOptions({ videoId: asset.id, workspaceId: asset.WorkspaceId }));
+
   const playerMetaData = {
     ...defaultPlayer,
     ...(player as Partial<VideoPlayerMetaData> | null),
@@ -33,12 +35,17 @@ function VideoPlayer({ asset }: { asset: VideoAsset }) {
     security_settings: { ...defaultPlayer.security_settings, ...(player as Partial<VideoPlayerMetaData> | null)?.security_settings },
   };
   
+  if (experience.isPending) return <div role="status" className="grid h-full place-items-center bg-black text-sm text-white/70">Loading video…</div>;
+  if (experience.isError) return <div role="alert" className="flex h-full flex-col items-center justify-center gap-3 bg-black p-6 text-center text-sm text-white"><p>Unable to load this video’s settings.</p><button className="rounded-lg bg-primary px-4 py-2 text-neutral-950" onClick={() => void experience.refetch()}>Try again</button></div>;
+
   return (
     <div className="h-full w-full">
       <ProductionVideoPlayer
+        key={asset.id}
         asset={asset}
+        experience={experience.data}
         player={playerMetaData}
-        cdnBaseUrl={process.env.NEXT_PUBLIC_CDN_URL!}
+        cdnBaseUrl={process.env.NEXT_PUBLIC_CDN_URL || ""}
       />
     </div>
   );

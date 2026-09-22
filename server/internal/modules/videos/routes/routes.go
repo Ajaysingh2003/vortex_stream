@@ -78,6 +78,7 @@ func SetupRouter(r *gin.Engine, videohandler *handler.VideoHandler, jwtMaker *ut
 		video.PATCH("/:id/update/name", middleware.AuthMiddleware(jwtMaker), videohandler.UpdateVideo)
 		video.GET("/:videoId/chapters", videohandler.GetVideoChapterByVideoID)
 		video.GET("/:videoId/cta", videohandler.GetVideoCtaByVideoID)
+		video.GET("/:videoId/subtitles", videohandler.GetSubtitleByVideoID)
 	}
 
 	workspaceVideos := api.Group("/workspace/:workspaceId/video")

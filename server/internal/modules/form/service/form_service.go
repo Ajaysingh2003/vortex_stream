@@ -20,6 +20,7 @@ import (
 )
 
 type FormServiceInterface interface {
+	Submit(ctx context.Context, videoID uuid.UUID, req *formdto.SubmitFormReq) error
 	Create(ctx context.Context, data *formdto.CreateFormReq, userID uuid.UUID) error
 	GetByVideoID(ctx context.Context, videoID uuid.UUID) (*domain.LeadForm, error)
 	GetOverviewByWorkspaceID(ctx context.Context, workspaceID uuid.UUID, userID uuid.UUID) (*formdto.LeadFormOverviewDTO, error)
