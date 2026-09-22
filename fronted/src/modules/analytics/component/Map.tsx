@@ -12,6 +12,9 @@ interface MapProps {
     end: { lat: number; lng: number; label?: string };
   }>;
   lineColor?: string;
+  dotColor?: string;
+  backgroundColor?: string;
+  className?: string;
   showLabels?: boolean;
   labelClassName?: string;
   animationDuration?: number;
@@ -21,8 +24,11 @@ interface MapProps {
 export function WorldMap({ 
   dots = [], 
   lineColor = "#0ea5e9",
+  dotColor = "#00000040",
+  backgroundColor = "white",
+  className = "",
   showLabels = true,
-  labelClassName = "text-sm",
+  labelClassName = "",
   animationDuration = 2,
   loop = true
 }: MapProps) {
@@ -38,11 +44,11 @@ export function WorldMap({
   const svgMap = useMemo(
     () => map.getSVG({
       radius: 0.22,
-      color: "#00000040",
+      color: dotColor,
       shape: "circle",
-      backgroundColor: "white",
+      backgroundColor: backgroundColor,
     }),
-    [map]
+    [map, dotColor, backgroundColor]
   );
 
   const projectPoint = (lat: number, lng: number) => {
@@ -67,7 +73,7 @@ export function WorldMap({
   const fullCycleDuration = totalAnimationTime + pauseTime;
 
   return (
-    <div className="w-full aspect-[2/1] md:aspect-[2.5/1] lg:aspect-[2/1] dark:bg-black bg-white rounded-lg relative font-sans overflow-hidden">
+    <div className={`w-full aspect-[2/1] md:aspect-[2.5/1] lg:aspect-[2/1] relative font-sans overflow-hidden ${className ? className : "dark:bg-black  rounded-lg"}`}>
       <Image
         src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
         className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none object-cover"
@@ -225,7 +231,7 @@ export function WorldMap({
                       className="block"
                     >
                       <div className="flex items-center justify-center h-full">
-                        <span className="text-sm font-medium px-2 py-0.5 rounded-md bg-white/95 dark:bg-black/95 text-black dark:text-white border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-md shadow-sm ${labelClassName || "bg-white/95 dark:bg-black/95 text-black dark:text-white border border-gray-200 dark:border-gray-700"}`}>
                           {dot.start.label}
                         </span>
                       </div>
@@ -292,7 +298,7 @@ export function WorldMap({
                       className="block"
                     >
                       <div className="flex items-center justify-center h-full">
-                        <span className="text-sm font-medium px-2 py-0.5 rounded-md bg-white/95 dark:bg-black/95 text-black dark:text-white border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-md shadow-sm ${labelClassName || "bg-white/95 dark:bg-black/95 text-black dark:text-white border border-gray-200 dark:border-gray-700"}`}>
                           {dot.end.label}
                         </span>
                       </div>

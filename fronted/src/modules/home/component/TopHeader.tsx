@@ -49,38 +49,9 @@ export default function TopHeader() {
       {/* Main hero                                                          */}
       {/* ------------------------------------------------------------------ */}
 
-      <div className="mx-auto w-full  px-5 sm:px-7 lg:px-8">
+      <div className="mx-auto w-full">
         <div className="pt-16 sm:pt-20 lg:pt-[118px]">
           <div className="max-w-[930px]">
-            {/* eyebrow */}
-            {/* <motion.div
-              initial={
-                reducedMotion
-                  ? false
-                  : {
-                      opacity: 0,
-                      y: 12,
-                    }
-              }
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                duration: 0.55,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="mb-7 inline-flex items-center gap-2 rounded-full border border-black/[0.07] bg-white/70 px-3 py-1.5 shadow-sm backdrop-blur"
-            >
-              <span className="flex size-6 items-center justify-center rounded-full bg-[#B3E61D]">
-                <Sparkles className="size-3.5 text-[#172000]" />
-              </span>
-
-              <span className="text-[12px] font-medium tracking-[-0.01em] text-[#595c52]">
-                Video infrastructure for modern products
-              </span>
-            </motion.div> */}
-
             {/* ---------------------------------------------------------- */}
             {/* Heading                                                    */}
             {/* ---------------------------------------------------------- */}
@@ -105,19 +76,19 @@ export default function TopHeader() {
                 ease: [0.16, 1, 0.3, 1],
               }}
               className="
-                max-w-[940px]
-                font-heading
-                text-[43px]
-                font-medium
-                leading-[1.04]
-                tracking-[-0.052em]
-                text-[#11120e]
-                sm:text-[56px]
-                md:text-[66px]
-                lg:text-[74px]
-              "
+    max-w-[940px]
+    font-heading
+    text-[36px]
+    font-medium
+    leading-[1.04]
+    tracking-[-0.052em]
+    text-[#11120e]
+    sm:text-[50px]
+    md:text-[58px]
+    lg:text-[64px]
+  "
             >
-              The{" "}
+              <span className="mr-3 sm:mr-4">The</span>{" "}
               <span className="relative inline-block whitespace-nowrap">
                 <span className="relative z-10">simple & scalable</span>
 
@@ -130,16 +101,16 @@ export default function TopHeader() {
                     ease: [0.16, 1, 0.3, 1],
                   }}
                   className="
-                    absolute
-                    -inset-x-2
-                    bottom-[2px]
-                    top-[4px]
-                    -z-0
-                    origin-left
-                    rounded-[5px]
-                    bg-[#e7f6b8]
-                    sm:-inset-x-3
-                  "
+        absolute
+        -inset-x-2
+        bottom-[2px]
+        top-[4px]
+        -z-0
+        origin-left
+        rounded-[5px]
+        bg-[#e7f6b8]
+        sm:-inset-x-3
+      "
                 />
               </span>
               <br />
@@ -322,7 +293,10 @@ export default function TopHeader() {
               "
             >
               {proofItems.map((item) => (
-                <div key={item} className="flex text-[16px] sm:text-[16px]  items-center gap-1.5">
+                <div
+                  key={item}
+                  className="flex text-[16px] sm:text-[16px]  items-center gap-1.5"
+                >
                   <Check className="size-3.5 text-[#7d9c1a]" />
                   <span>{item}</span>
                 </div>

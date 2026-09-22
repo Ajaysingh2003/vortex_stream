@@ -49,10 +49,11 @@ export default function VideoInfraDashboard() {
     return () => observer.disconnect();
   }, []);
 
+
   return (
     <div
       ref={containerRef}
-      className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-black/[0.08] bg-white shadow-[0_24px_70px_-20px_rgba(0,0,0,0.12)] select-none"
+      className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-black/[0.08] bg-white shadow-[25px_0_20px_-20px_#00000040,-25px_0_20px_-20px_rgba(0,0,0,0.25)]   select-none"
       style={{
         // Locks proportionate height only when scaled down on smaller screens
         height: isScaled ? `${VIRTUAL_HEIGHT * scale}px` : "auto",
@@ -64,7 +65,7 @@ export default function VideoInfraDashboard() {
         2. 100% fluid responsive width on desktop screens (>1024px).
       */}
       <div
-        className="origin-top-left transition-transform duration-75 ease-out"
+        className="origin-top-left  transition-transform duration-75 ease-out"
         style={{
           transform: isScaled ? `scale(${scale})` : "none",
           width: isScaled ? `${VIRTUAL_WIDTH}px` : "100%",
@@ -110,7 +111,7 @@ export default function VideoInfraDashboard() {
         </div>
 
         {/* ── Dashboard Body Canvas ── */}
-        <div className="flex min-h-[calc(680px-52px)] w-full bg-[#fbfbf9] text-neutral-800">
+        <div className="flex min-h-[calc(680px-52px)] w-full  text-neutral-800">
           {/* Left Console Navigation Sidebar */}
           <aside className="flex w-[215px] shrink-0 flex-col justify-between border-r border-black/[0.06] bg-[#f8f8f5] p-3.5">
             <div className="space-y-4">

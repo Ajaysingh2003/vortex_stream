@@ -24,12 +24,12 @@ function PlanCard({
   return (
     <div
       className={cn(
-        "rounded-2xl border shadow-sm flex flex-col  border-zinc-200 p-1 overflow-hidden",
+        "rounded-xl border shadow-sm flex flex-col  border-zinc-200 p-1 overflow-hidden bg-whitee/50",
         popular && "bg-background-card-popular",
       )}
     >
       <PlanCardHeader popular={popular} timeLine={timeLine} plan={plan} />
-      <div className="px-5 mt-4 pb-2 flex flex-col flex-1 justify-between">
+      <div className={cn("px-5 mt-4 pb-2 flex flex-col flex-1 justify-between",!popular && "")}>
         <ul className="flex flex-col  gap-3">
           {feature?.map((e, i) => (
             <li key={i} className="flex items-center gap-3 font-medium ">
@@ -57,7 +57,7 @@ function PlanCard({
           }}
           onMouseLeave={() => sethoverSeeAll(false)}
           variant={"outline"}
-          className={`rounded-xl text-xs md:text-[13px] capitalizez md:text-md font-semibold  cursor-pointer border px-3 py-1.5  transition-all duration-200 ${
+          className={`rounded-xl text-xs md:text-[13px] mt-4 capitalizez md:text-md font-semibold  cursor-pointer border px-3 py-1.5  transition-all duration-200 ${
             !popular
               ? "bg-white/90 text-accent shadow-sm  hover:bg-white/60  hover:border-zinc-200 hover:text-accent"
               : "border-zinc-800 hover:bg-transparent bg-transparent  text-stone-300 duration-300 transition-all  hover:text-stone-300   hover:shadow-2xs"
@@ -121,7 +121,7 @@ function PlanCardHeader({
   return (
     <div
       className={cn(
-        "w-full px-5 py-6 flex flex-col gap-2 bg-[#fbfbfb] rounded-xl border border-zinc-200 shadow-2xs",
+        "w-full px-5 py-6 flex flex-col gap-2 bg-[#fbfbfbz] bg-white rounded-xl border border-zinc-200 shadow-2xs",
         popular && "bg-transparent border-zinc-800 ",
       )}
     >
@@ -170,10 +170,10 @@ function PlanCardHeader({
             }
           }}
           variant={"outline"}
-          className={`rounded-md w-full capitalize font-semibold  cursor-pointer border px-3 py-1.5 md:py-2 text-xs md:text-sm transition-all duration-200 ${
+          className={`rounded-md   w-full capitalize font-semibold  cursor-pointer border px-3 py-1.5 md:py-2 text-xs md:text-sm transition-all duration-200 ${
             popular
-              ? "bg-white/90 text-black  shadow-2xs  hover:bg-white/90  hover:border-zinc-200 hover:text-zinc-800"
-              : "bg-white/90z bg-main-btn text-accent  shadow-2xs  hover:bg-white/60  hover:border-zinc-200 hover:text-accent"
+              ? "bg-white/90 text-black secondary-btn  shadow-2xs  hover:bg-white/90  hover:border-zinc-200 hover:text-zinc-800"
+              : "bg-white/90z primary-btn text-accent  shadow-2xs  hover:bg-white/60  hover:border-zinc-200 hover:text-accent"
           }
              relative
             `}

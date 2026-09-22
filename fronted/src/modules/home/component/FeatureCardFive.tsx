@@ -70,9 +70,9 @@ export function FeatureCardFive() {
         </div>
 
         {/* Right Column: Ingest Pipeline & Library Table */}
-        <div className="relative space-y-4 border-t border-black/[0.06] p-6 sm:p-8 lg:col-span-7 lg:border-t-0">
+        <div className="relative space-y-4 border-t border-black/[0.06] p-3 sm:p-8 lg:col-span-7 lg:border-t-0">
           {/* 4-Step Animated Pipeline Bar */}
-          <div className="flex items-center justify-between rounded-xl border border-black/[0.06] bg-neutral-50 p-3 text-xs">
+          <div className="flex items-center justify-between rounded-xl border border-black/[0.06] bg-neutral-50 p-3 gap-0.5 text-xs">
             <PipelineStep
               icon={CloudUpload}
               label="Upload"
