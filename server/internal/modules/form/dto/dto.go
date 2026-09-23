@@ -126,9 +126,10 @@ func ToOptionEntities(fieldEntities []*domain.LeadFormField) []*domain.LeadFormF
 
 // ID is generated once per attempt so network retries cannot duplicate a lead.
 type SubmitFormReq struct {
-	ID        uuid.UUID         `json:"id" binding:"required"`
-	FormID    uuid.UUID         `json:"formId" binding:"required"`
-	SessionID uuid.UUID         `json:"sessionId" binding:"required"`
-	Skipped   bool              `json:"skipped"`
-	Answers   map[string]string `json:"answers"`
+	FormVersion int               `json:"formVersion"`
+	ID          uuid.UUID         `json:"id" binding:"required"`
+	FormID      uuid.UUID         `json:"formId" binding:"required"`
+	SessionID   uuid.UUID         `json:"sessionId" binding:"required"`
+	Skipped     bool              `json:"skipped"`
+	Answers     map[string]string `json:"answers"`
 }

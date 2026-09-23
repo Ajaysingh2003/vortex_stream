@@ -6,6 +6,7 @@ import (
 	"log"
 	"os/signal"
 	"syscall"
+	"time"
 
 	clickhouseConfig "github.com/ajaysingh2003/vortex-stream/internal/shared/config/clickhouse"
 	natsConfig "github.com/ajaysingh2003/vortex-stream/internal/shared/config/nats"
@@ -15,7 +16,7 @@ func main() {
 	fmt.Println("analytics worker booting")
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
-	
+
 	fmt.Println("analytics worker connecting to NATS")
 	natsClient, err := natsConfig.Connect()
 	if err != nil {
@@ -32,7 +33,14 @@ func main() {
 	defer clickhouseClient.Close()
 
 	fmt.Println("analytics worker started; consuming analytics.events")
-	if err := runAnalyticsConsumer(ctx, natsClient, clickhouseClient); err != nil && ctx.Err() == nil {
-		log.Fatal(err)
+	for ctx.Err() == nil {
+		if err := runAnalyticsConsumer(ctx, natsClient, clickhouseClient); err != nil && ctx.Err() == nil {
+			log.Print("analytics consumer disconnected; reconnecting")
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(5 * time.Second):
+		}
 	}
 }

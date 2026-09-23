@@ -81,6 +81,9 @@ func InitDb() *gorm.DB {
 		&domain.LeadFormFieldOption{},
 		&domain.LeadFormSubmission{},
 		&domain.LeadFormAnswer{},
+		&domain.LeadIntegration{},
+		&domain.LeadDelivery{},
+		&domain.LeadDeliveryAttempt{},
 		&domain.VideoEndScreen{},
 		&domain.VideoSubtitle{},
 		&domain.VideoChapters{},
@@ -108,6 +111,11 @@ func InitDb() *gorm.DB {
 		}
 	}
 
+	// Backfill only legacy answers; future snapshots are immutable.
+	if err := db.Exec(`UPDATE lead_form_answer a SET label = f.label, type = f.type, position = f.position
+   FROM lead_form_field f WHERE a.field_id = f.id AND (a.label IS NULL OR a.label = '')`).Error; err != nil {
+		log.Fatal("Failed to backfill lead answer snapshots: ", err)
+	}
 	DB = db
 	fmt.Println("✅ Database connection established successfully!")
 

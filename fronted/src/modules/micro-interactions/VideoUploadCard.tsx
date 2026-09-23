@@ -17,7 +17,7 @@ export default function VideoUploadCard() {
   };
 
   return (
-    <div className="w-full text-left select-none p-0.5">
+    <div className="w-full text-left select-none border rounded-md shadow-sm p-0.5">
       <li className="group relative flex flex-col gap-3 px-3 py-2 rounded-xl transition-all duration-200 list-none">
         <div className="flex items-start gap-3">
           <div className="flex items-center justify-center size-10 bg-slate-100 border border-slate-200/30 text-violet-500 rounded-lg">
@@ -33,7 +33,7 @@ export default function VideoUploadCard() {
 
           {/* File Meta Core Descriptors */}
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-medium font-subheading text-slate-700 tracking-wide truncate leading-tight">
+            <p className="text-[12px] font-medium font-subheading text-slate-700 tracking-wide truncate leading-tight">
               everything_i_wanted_1080p.mp4
             </p>
 

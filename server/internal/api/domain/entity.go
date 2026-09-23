@@ -177,10 +177,11 @@ type Account struct {
 }
 
 type Video struct {
-	ID          uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
-	Title       string     `gorm:"type:varchar(255);not null" json:"title"`
-	FolderID    *uuid.UUID `gorm:"type:uuid;index" json:"folderId"`
-	WorkspaceID uuid.UUID  `gorm:"type:uuid;index" json:"WorkspaceId"`
+	AnalyticsToken string     `gorm:"-" json:"analyticsToken,omitempty"`
+	ID             uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
+	Title          string     `gorm:"type:varchar(255);not null" json:"title"`
+	FolderID       *uuid.UUID `gorm:"type:uuid;index" json:"folderId"`
+	WorkspaceID    uuid.UUID  `gorm:"type:uuid;index" json:"WorkspaceId"`
 
 	Workspace *Workspaces `gorm:"foreignKey:WorkspaceID;references:ID" json:"workspace,omitempty"`
 	// Paths in S3/MinIO
@@ -266,6 +267,7 @@ type VideoDomain struct {
 }
 
 type LeadForm struct {
+	Version     int       `gorm:"not null;default:1" json:"version"`
 	ID          uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
 	VideoID     uuid.UUID `gorm:"not null;uniqueIndex;type:uuid" json:"videoId"`
 	WorkspaceID uuid.UUID `gorm:"not null;index;type:uuid" json:"workspaceId"`
@@ -279,9 +281,10 @@ type LeadForm struct {
 }
 
 type LeadFormField struct {
-	ID     uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
-	FormID uuid.UUID `gorm:"not null;index;type:uuid" json:"formId"`
-	Label  string    `gorm:"not null" json:"label"`
+	Archived bool      `gorm:"not null;default:false;index" json:"archived"`
+	ID       uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+	FormID   uuid.UUID `gorm:"not null;index;type:uuid" json:"formId"`
+	Label    string    `gorm:"not null" json:"label"`
 	// Scope    string `gorm:"not null"`
 	Type     string `gorm:"not null" json:"type"`
 	Position int    `gorm:"not null" json:"position"`
@@ -296,16 +299,21 @@ type LeadFormFieldOption struct {
 }
 
 type LeadFormSubmission struct {
-	ID        uuid.UUID        `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
-	FormID    uuid.UUID        `gorm:"not null;index;type:uuid" json:"formId"`
-	VideoID   uuid.UUID        `gorm:"not null;index;type:uuid" json:"videoId"`
-	SessionID uuid.UUID        `gorm:"not null" json:"sessionId"`
-	Skipped   bool             `gorm:"default:false" json:"skipped"`
-	CreatedAt time.Time        `json:"createdAt"`
-	Answers   []LeadFormAnswer `gorm:"foreignKey:SubmissionID;constraint:OnDelete:CASCADE" json:"answers"`
+	FormVersion int              `gorm:"not null;default:1" json:"formVersion"`
+	Placement   string           `json:"placement"`
+	ID          uuid.UUID        `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+	FormID      uuid.UUID        `gorm:"not null;index;type:uuid" json:"formId"`
+	VideoID     uuid.UUID        `gorm:"not null;index;type:uuid" json:"videoId"`
+	SessionID   uuid.UUID        `gorm:"not null" json:"sessionId"`
+	Skipped     bool             `gorm:"default:false" json:"skipped"`
+	CreatedAt   time.Time        `json:"createdAt"`
+	Answers     []LeadFormAnswer `gorm:"foreignKey:SubmissionID;constraint:OnDelete:CASCADE" json:"answers"`
 }
 
 type LeadFormAnswer struct {
+	Label        string    `json:"label"`
+	Type         string    `json:"type"`
+	Position     int       `json:"position"`
 	ID           uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
 	SubmissionID uuid.UUID `gorm:"not null;index;type:uuid" json:"submissionId"`
 	FieldID      uuid.UUID `gorm:"not null;type:uuid" json:"fieldId"`

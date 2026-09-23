@@ -1,9 +1,9 @@
-import React from 'react'
-
-function page() {
-  return (
-    <div>page</div>
-  )
+import LeadsView from "@/modules/leads/components/LeadsView";
+export default async function LeadsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  return <LeadsView videoId={id} />;
 }
-
-export default page

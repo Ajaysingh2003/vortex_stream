@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import VideoDurationInput from "./VideoDurationInput";
 import { useTRPC } from "@/trpc/client";
 import { useParams } from "next/navigation";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import {
   LeadForm,
   selectType,
@@ -29,6 +29,7 @@ import { useVideoContext } from "../context/VideoContext";
 
 function CaptureLeads() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const {
     select,
     setSelect,
@@ -44,8 +45,11 @@ function CaptureLeads() {
  
   const videoUpsertMutate = useMutation(
     trpc.video.createLeadForm.mutationOptions({
-      onSuccess: () => {
-        toast.success("form updated Successfully");
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(trpc.video.getLeadForm.queryFilter({ videoId: videoAssets.id }));
+        const saved = await queryClient.fetchQuery(trpc.video.getLeadForm.queryOptions({ videoId: videoAssets.id })) as LeadForm;
+        setFields(saved.fields);
+        toast.success("Form updated. Existing responses are preserved.");
       },
       onError: (err) => {
         toast.error(err.message || "Something went wrong");

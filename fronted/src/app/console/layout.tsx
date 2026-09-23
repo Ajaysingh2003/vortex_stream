@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import ConsoleLayout from "@/modules/console/component/ConsoleLayout";
+import ConsoleLayout from "@/modules/console/component/ConsoleClientEntry";
 
 // Console queries depend on the viewer's session and cannot run at build time.
 export const dynamic = "force-dynamic";

@@ -81,7 +81,7 @@ func (r *postgresLeadFormRepository) GetByVideoID(ctx context.Context, videoID u
 
 	err := r.db.WithContext(ctx).
 		Preload("Fields", func(db *gorm.DB) *gorm.DB {
-			return db.Order("position ASC")
+			return db.Where("archived = ?", false).Order("position ASC")
 		}).
 		Preload("Fields.Options").
 		First(&leadForm, "video_id = ?", videoID).
@@ -136,7 +136,8 @@ func (r *postgresLeadFormRepository) GetOverviewByWorkspaceID(ctx context.Contex
 			COALESCE(v.title, 'Unknown video') AS video_title,
 			s.skipped,
 			CASE
-				WHEN s.skipped = TRUE OR primary_answer.value IS NULL THEN 'Skipped'
+				WHEN s.skipped = TRUE THEN 'Skipped'
+                WHEN primary_answer.value IS NULL THEN 'Completed response'
 				ELSE primary_answer.value
 			END AS lead_identifier,
 			s.created_at`).
@@ -145,18 +146,18 @@ func (r *postgresLeadFormRepository) GetOverviewByWorkspaceID(ctx context.Contex
 		Joins(`LEFT JOIN LATERAL (
 			SELECT NULLIF(BTRIM(a.value), '') AS value
 			FROM lead_form_answer AS a
-			JOIN lead_form_field AS field ON field.id = a.field_id
+			LEFT JOIN lead_form_field AS field ON field.id = a.field_id
 			WHERE a.submission_id = s.id
 			  AND NULLIF(BTRIM(a.value), '') IS NOT NULL
 			ORDER BY
 				CASE
-					WHEN field.label ILIKE '%email%' THEN 0
-					WHEN field.label ILIKE '%name%' THEN 1
-					WHEN field.label ILIKE '%phone%' THEN 2
-					WHEN field.label ILIKE '%contact%' THEN 3
+					WHEN COALESCE(NULLIF(a.label, ''), field.label) ILIKE '%email%' THEN 0
+					WHEN COALESCE(NULLIF(a.label, ''), field.label) ILIKE '%name%' THEN 1
+					WHEN COALESCE(NULLIF(a.label, ''), field.label) ILIKE '%phone%' THEN 2
+					WHEN COALESCE(NULLIF(a.label, ''), field.label) ILIKE '%contact%' THEN 3
 					ELSE 4
 				END,
-				field.position ASC,
+				COALESCE(a.position, field.position) ASC,
 				field.id ASC
 			LIMIT 1
 		) AS primary_answer ON TRUE`).
@@ -190,37 +191,11 @@ func (r *postgresLeadFormRepository) Delete(ctx context.Context, id uuid.UUID) e
 	return r.db.WithContext(ctx).Delete(&domain.LeadForm{}, "id = ?", id).Error
 }
 
+// UpsertTx must participate in the caller's transaction and must never delete historical fields.
 func (r *postgresLeadFormRepository) UpsertTx(ctx context.Context, tx *gorm.DB, form *domain.LeadForm) (*domain.LeadForm, error) {
-	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-
-		err := tx.Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "video_id"}},
-			DoUpdates: clause.AssignmentColumns([]string{"placement", "show_at", "allow_skip", "updated_at"}),
-		}).Create(form).Error
-
-		if err != nil {
-			return err
-		}
-
-		if err := tx.Where("form_id = ?", form.ID).Delete(&domain.LeadFormField{}).Error; err != nil {
-			return err
-		}
-
-		// 3. Re-save the incoming fields list along with their nested option slices.
-		// Because we're passing the pre-populated child entities attached to the form struct,
-		// GORM natively iterates down the tree arrays and writes them out cleanly.
-		if len(form.Fields) > 0 {
-			if err := tx.Create(&form.Fields).Error; err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return form, nil
+	err := tx.WithContext(ctx).Omit("Fields").Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "video_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"placement", "show_at", "allow_skip", "updated_at"}),
+	}).Create(form).Error
+	return form, err
 }

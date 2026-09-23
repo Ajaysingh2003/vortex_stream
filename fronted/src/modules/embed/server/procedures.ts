@@ -39,7 +39,7 @@ export const playerRouter = createTRPCRouter({
   }),
   submitLead: baseProcedure.input(z.object({
     videoId: z.string().uuid(), id: z.string().uuid(), formId: z.string().uuid(), sessionId: z.string().uuid(),
-    skipped: z.boolean(), answers: z.record(z.string().uuid(), z.string().max(4000)),
+    formVersion: z.number().int().positive().optional(), skipped: z.boolean(), answers: z.record(z.string().uuid(), z.string().max(4000)),
   })).mutation(async ({ input }) => {
     try {
       const { videoId, ...body } = input;

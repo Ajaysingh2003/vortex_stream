@@ -199,7 +199,7 @@ func (h *UserHandler) Login (c *gin.Context){
 	Id:    data.ID,
 	Email: data.Email,
 	Role:  data.Role,
-	Duration:   24 * 90,
+	Duration:   90 * time.Minute,
 	}
 
 	access_token,access_claims,err:=h.JwtToken.GenerateJwt(payload)

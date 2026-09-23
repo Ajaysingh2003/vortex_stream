@@ -22,5 +22,11 @@ func SetupRouter(r *gin.Engine, h *analyticsHandler.AnalyticsHandler, jwtMaker *
 	video.GET("/retention", h.VideoRetention)
 	video.GET("/technical", h.VideoTechnical)
 	video.GET("/funnel", h.VideoFunnel)
+	for _, group := range []*gin.RouterGroup{authenticated, video} {
+		for _, kind := range []string{"summary", "series", "breakdown", "live", "concurrency", "engagement"} {
+			group.GET("/"+kind, h.Dashboard(kind))
+		}
+	}
+	authenticated.GET("/videos", h.Dashboard("video"))
 	return r
 }

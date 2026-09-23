@@ -1,16 +1,20 @@
 package handler
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	analyticsDomain "github.com/ajaysingh2003/vortex-stream/internal/modules/analytics/domain"
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/analytics/services"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/geoip"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 )
 
 type AnalyticsHandler struct {
 	Service *services.AnalyticsService
+	Limiter *redis.Client
 	GeoIP   *geoip.Resolver
 }
 
@@ -27,6 +31,9 @@ func (h *AnalyticsHandler) Ingest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "events must contain between 1 and 100 events"})
 		return
 	}
+	if !h.allow(c, len(batch.Events)) {
+		return
+	}
 	country := ""
 	if h.GeoIP != nil {
 		country = h.GeoIP.Country(c.Request)
@@ -36,8 +43,14 @@ func (h *AnalyticsHandler) Ingest(c *gin.Context) {
 		batch.Events[index].Country = country
 	}
 
-	if err := h.Service.PublishBatch(c.Request.Context(), batch.Events); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+	if err := h.Service.PrepareViewerBatch(ctx, batch.Events); err != nil {
+		writeAnalyticsResult(c, nil, err)
+		return
+	}
+	if err := h.Service.PublishBatch(ctx, batch.Events); err != nil {
+		writeAnalyticsResult(c, nil, err)
 		return
 	}
 	c.Status(http.StatusAccepted)

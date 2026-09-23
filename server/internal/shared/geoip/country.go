@@ -37,7 +37,7 @@ func New() (*Resolver, error) {
 func (r *Resolver) Country(request *http.Request) string {
 	// Cloudflare sets this at the edge and it is safer than trusting arbitrary
 	// X-Forwarded-For values. Only enable this when the API is behind Cloudflare.
-	if country := normalizeCountry(request.Header.Get("CF-IPCountry")); country != "" {
+	if country := normalizeCountry(request.Header.Get("CF-IPCountry")); r != nil && r.trustForwardedHeaders && country != "" {
 		return country
 	}
 
@@ -77,7 +77,7 @@ func (r *Resolver) Close() error {
 
 func normalizeCountry(value string) string {
 	value = strings.ToUpper(strings.TrimSpace(value))
-	if value == "XX" || len(value) != 2 || value[0] < 'A' || value[0] > 'Z' || value[1] < 'A' || value[1] > 'Z' {
+	if value == "T1" || value == "XX" || len(value) != 2 || value[0] < 'A' || value[0] > 'Z' || value[1] < 'A' || value[1] > 'Z' {
 		return ""
 	}
 	return value

@@ -17,8 +17,6 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(input, "input");
-        // console.log();
         const res = await axios.post(
           `${process.env.BASE_API}/v1/users/login`,
           {
@@ -47,10 +45,7 @@ export const userRouter = createTRPCRouter({
         });
 
         return res.data;
-        console.log(res.data, "res");
       } catch (error: any) {
-        console.log(error.response)
-        console.log(error?.response?.data, "error occurred");
 
   if (axios.isAxiosError(error)) {
     throw new TRPCError({
@@ -76,8 +71,6 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(input, "input");
-        // console.log();
         const res = await axios.post(
           `${process.env.BASE_API}/v1/users/register`,
           {
@@ -106,10 +99,7 @@ export const userRouter = createTRPCRouter({
         });
 
         return res.data;
-        console.log(res.data, "res");
       } catch (error: any) {
-        console.log(error.response)
-        console.log(error?.response?.data, "error occurred");
 
   if (axios.isAxiosError(error)) {
     throw new TRPCError({
@@ -134,8 +124,6 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(input, "input");
-        // console.log();
         const res = await axios.post(
           `${process.env.BASE_API}/v1/users/verify-otp`,
           {
@@ -170,8 +158,6 @@ export const userRouter = createTRPCRouter({
         return sendData;
         
       } catch (error: any) {
-        console.log(error.response)
-        console.log(error?.response?.data, "error occurred");
 
   if (axios.isAxiosError(error)) {
     throw new TRPCError({
@@ -194,20 +180,16 @@ export const userRouter = createTRPCRouter({
       // return url
       
       const res = await axios.get(url);
-      console.log(res, "check-03");
 
       return res.data;
     } catch (error) {
-      console.log(error, "vickysingh");
     }
   }),
   profile:protectedProcedure(["Admin","User"]).query(async({ctx})=>{
     try {
-      console.log(ctx.user,"lol")
       return ctx.user
     } 
     catch (error:any) {
-        console.log(error?.response?.data, "error occurred");
 
   if (axios.isAxiosError(error)) {
     throw new TRPCError({
@@ -260,7 +242,6 @@ export const userRouter = createTRPCRouter({
 
           return res.data.data
     } catch (error:any) {
-      console.log(error?.response?.data, "error occurred");
 
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
@@ -306,7 +287,6 @@ export const userRouter = createTRPCRouter({
         
         return res.data.data
     } catch (error:any) {
-      console.log(error?.response?.data, "error occurred");
 
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
@@ -347,7 +327,6 @@ export const userRouter = createTRPCRouter({
         
         return res.data.data
     } catch (error:any) {
-      console.log(error?.response?.data, "error occurred");
 
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
@@ -386,7 +365,7 @@ export const userRouter = createTRPCRouter({
 
         return {success:true}
     } catch (error) {
-      console.error("Failed to set workspace cookie:", error);
+      console.error("Failed to set workspace cookie.");
       throw new Error("Could not switch workspace. Please try again.");
     }
   }),
@@ -400,7 +379,6 @@ export const userRouter = createTRPCRouter({
 
       const access_token = cookieStore.get("access_token")?.value;
 
-      console.log(access_token,workspace_id,"leah goti")
       
       const res = await axios.get(`${process.env.BASE_API}/v1/users/workspaces/${workspace_id}`, {
         headers: {
@@ -412,7 +390,7 @@ export const userRouter = createTRPCRouter({
     return res.data.data
 
     } catch (error) {
-      console.error("Cookie retrieval error:", error);
+      console.error("Unable to retrieve workspace.");
       return { workspaceId: null};
     }
   })

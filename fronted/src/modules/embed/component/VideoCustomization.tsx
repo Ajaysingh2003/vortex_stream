@@ -1,4 +1,5 @@
 "use client";
+import { PlayerAnalyticsContext, usePlayerAnalytics } from "@/modules/analytics/player/usePlayerAnalytics";
 
 import React, {
   useCallback,
@@ -73,6 +74,7 @@ export default function ProductionVideoPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const experienceState = usePlayerExperience(videoRef, experience);
+  const analytics = usePlayerAnalytics(videoRef, asset.id, asset.analyticsToken);
   const progressTickRef = useRef(0);
 
   const [hasStarted, setHasStarted] = useState(false);
@@ -386,7 +388,7 @@ export default function ProductionVideoPlayer({
   };
 
   return (
-    <div
+    <PlayerAnalyticsContext.Provider value={analytics}><div
       className={cx(
         `
         relative
@@ -1131,6 +1133,6 @@ export default function ProductionVideoPlayer({
           </div>
         </section>
       </MediaController>
-    </div>
+    </div></PlayerAnalyticsContext.Provider>
   );
 }

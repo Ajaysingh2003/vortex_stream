@@ -24,12 +24,11 @@ function LoginView() {
     },
   });
 };
-console.log("test")
   return (
     <div className='w-full  min-h-screen flex flex-col'>
         <div className='flex flex-1 w-full h-full items-center justify-center'>
             <div className='flex gap-1  flex-col items-center justify-center'>
-                <h2 className='text-xl md:text-3xl font-medium leading-relaxed tracking-wider font-heading'>Welcome back 👏  </h2>
+                <h2 className='text-xl  md:text-3xl font-medium leading-relaxed tracking-widez font-heading'>Welcome back 👏  </h2>
 
                 <div className='w-full mt-2'>
                     <Button variant={"outline"} className='w-full shadow-xs rounded-sm capitalize flex bg-transparent leading cursor-pointer hover:text-accent hover:bg-black/2 text-accent items-center gap-3' onClick={handleGoogleSignIn}>

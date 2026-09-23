@@ -1,440 +1,47 @@
-# Analytics
+# Video analytics: implementation plan and metric contract
 
-This document describes the analytics backend currently added to Vortex Stream and the plan for continuing the work.
+Updated: 2026-09-23. Scope: backend analytics plus automatic collection on the public video page and embed player. Dashboard UI is intentionally left to the product owner. Reference screenshots guide the metric coverage, not third-party instructions.
 
-The analytics scope is intentionally limited to:
+## Implementation sequence
 
-1. Video playback and viewer engagement
-2. Sales and lead-conversion funnels
+1. Audit the existing NATS JetStream → ClickHouse event pipeline and shared player (completed before this plan).
+2. Harden public ingestion: bounded validated batches, resolve workspace from the video record, reject unsupported/untrusted events, derive country on the server, remove personal/query-string data, and protect against duplicate event delivery.
+3. Add a shared browser collector and instrument the actual HTML media element used by both playback routes. Capture impressions, initial play, heartbeats, playing time, pause/resume/end, seek, replay, buffer/error, controls, CTA, chapters, captions, end screens and lead-form interactions. Never transmit form answers into analytics.
+4. Add workspace-wide and per-video reporting APIs for overview/comparison, time series, country/referrer/device breakdowns, top videos, live viewers, concurrency, retention, quality and conversion metrics. Count saved forms from PostgreSQL as the authoritative source; browser form-success events are observational only.
+5. Exercise validation, watch-time accounting, duplicate handling, authorization and report queries with unit/integration tests, run the frontend build, then publish full request/response examples in `docs/analytics-api.md`.
 
-Product-wide analytics, infrastructure telemetry, and unrelated feature analytics are out of scope for now.
+## Architecture
 
-## Current architecture
+Browser collector → public Go ingestion → durable NATS JetStream → analytics worker → ClickHouse. Reporting endpoints require the workspace owner's bearer token. PostgreSQL supplies video ownership and authoritative lead counts. The existing storage is reused; no third-party analytics vendor or dashboard is required.
 
-```text
-Video player / frontend
-        |
-        | POST /api/v1/analytics/events
-        v
-Go analytics ingestion API
-        |
-        | NATS JetStream: analytics.events
-        v
-Analytics worker
-        |
-        | bulk insert
-        v
-ClickHouse: analytics_events
-```
+Reports are eventually consistent with worker delivery. Live means playback sessions with a recent visible-playing heartbeat (a bounded freshness window), not a guaranteed count of people staring at a screen. The API must return freshness semantics. Analytics must never block playback or lead submission when storage/network is unavailable.
 
-The browser does not connect directly to NATS or ClickHouse. It sends a validated batch to the Go API. The API publishes that batch to NATS, and the worker stores it in ClickHouse.
+## Definitions
 
-## Country detection
+- **Impressions:** distinct playback sessions whose player is visible, once per player mount.
+- **Views:** distinct playback sessions that actually begin playing. Pausing/resuming and replaying within the same mounted player do not add another view; replay has its own count.
+- **Unique viewers:** approximate distinct anonymous browser IDs among plays, scoped to the report range and workspace. Not identified people; private mode, blocked storage and different embedding origins affect identity.
+- **Playback time:** incremental wall-clock milliseconds spent playing, excluding paused, buffering and seeking intervals. A seek jump is never watch time. Interval deltas are bounded and carry stable event IDs for retries.
+- **Completions:** viewed sessions with an ended event. Completion rate uses viewed sessions in the selected range as its denominator and remains 0–100%. Timeline milestones describe position reached, not proof that every preceding second was watched.
+- **Engagement/retention:** viewed-session progress buckets and maximum reached position, with seek behavior documented.
+- **Live viewers:** visible, playing playback sessions with a recent heartbeat; unique browser count is reported separately. Pause/end/hidden/unload makes a session inactive; stale sessions expire naturally.
+- **Concurrent viewers:** distinct active playback sessions observed in each time bucket. This is sampled concurrency, not a historical subsecond peak.
+- **Forms:** saved completed submissions and skipped forms come from PostgreSQL, so failed requests, retries and blocked browser telemetry cannot inflate conversion counts. Form impressions/starts/failures are browser events and can be undercounted.
+- **CTA:** display and click events plus distinct exposed/clicking sessions. Rate uses exposed sessions, not raw repeated clicks.
+- **Country:** ISO alpha-2 country resolved from trusted edge headers or a local GeoIP database; `Unknown` when unavailable. Never trust a browser-supplied country or store raw IPs in event records.
+- **Attribution:** sanitized page/referrer origins, UTM source/medium/campaign and embed vs watch-page placement. No URL query strings, fragments, credentials, form answers or contact details in analytics.
+- **Quality:** startup delay, buffering count/time, error counts and dimensions for browser, OS, device and selected resolution when observable.
 
-Country is derived by the backend and is never trusted from the browser payload.
+## Reliability and boundaries
 
-The resolver uses this order:
+Use browser-generated immutable event IDs and retries. ClickHouse reports read deduplicated events. Queues are bounded; unload delivery is best-effort. Collection is approximate and can be blocked or forged by public clients, so it is unsuitable as a billing ledger. Existing CDN bandwidth accounting remains separate.
 
-1. `CF-IPCountry` when the API is behind Cloudflare
-2. An optional local MaxMind GeoLite2 Country database
-3. Empty country when neither source is available
+Resolve video/workspace ownership at ingestion rather than trusting workspace IDs. Restrict report dimensions and SQL expressions to allowlists. Bound report date ranges and result sizes. Private-network IP/country lookup must respect explicitly trusted proxies; localhost correctly produces Unknown without a GeoIP source. No country data is invented.
 
-To use the local database, set:
+Keep raw event retention at the existing 365 days; report date/time conventions and UTC boundaries explicitly. API errors must distinguish malformed requests, unauthorized/not-owned resources and temporarily unavailable infrastructure. Deployment configuration, limits, endpoint examples and rollout verification belong in `docs/analytics-api.md`.
 
-```text
-GEOIP_COUNTRY_DB_PATH=/app/data/GeoLite2-Country.mmdb
-TRUST_PROXY_HEADERS=true
-```
+## Delivery status
 
-`TRUST_PROXY_HEADERS` should only be enabled when the API is behind a trusted reverse proxy. The backend stores only an ISO 3166-1 alpha-2 code such as `IN` or `US`; it does not store the raw IP address.
+The shared collector, validated/token-scoped ingestion, new workspace and video reporting routes, database regression tests, and dashboard integration reference are implemented. See [the complete API guide](docs/analytics-api.md) for concrete endpoints, response fields, metric limitations, country configuration and deployment checks.
 
-## Public visitors and identity
-
-Visitors watching an embedded video usually do not have an account, so `user_id` is optional and should normally be `NULL` for public playback events. Analytics must not require authentication.
-
-The frontend should generate and persist an anonymous browser identifier:
-
-```text
-anonymous_id       browser-level anonymous identifier
-session_id         one visit/session in the browser
-playback_session_id one viewing session for one video
-```
-
-Use these identifiers for visitor analytics:
-
-- `anonymous_id` measures approximate unique browsers
-- `session_id` groups activity during one visit
-- `playback_session_id` groups one video-watching session
-- `video_id` identifies the watched video
-- `workspace_id` identifies the video owner/workspace
-- `user_id` is only populated when the viewer is authenticated
-
-An anonymous identifier is not a guaranteed real-world identity. It can change when the visitor clears storage, changes browsers, uses private browsing, or blocks storage. Reports should call this metric `unique anonymous viewers` rather than `unique people`.
-
-For public embeds, the client may send `user_id: null` and should not invent a user ID. The backend should validate that the video is playable and that the event's video/workspace relationship is valid. For private videos, use the existing access-control or signed-playback flow before accepting playback analytics.
-
-## What has been added
-
-### Analytics event module
-
-Location:
-
-```text
-server/internal/modules/analytics/
-```
-
-It contains:
-
-- Event envelope and event-name validation
-- Batch payload validation
-- Analytics ingestion handler
-- NATS publishing service
-- Analytics route registration
-
-### Ingestion endpoint
-
-```text
-POST /api/v1/analytics/events
-```
-
-This endpoint is public because embedded videos can be watched by visitors who are not logged in.
-
-The endpoint accepts 1–100 events per request and limits the request body to 1 MiB.
-
-Example request:
-
-```json
-{
-  "events": [
-    {
-      "event_id": "01900000-0000-7000-8000-000000000001",
-      "event_name": "play_started",
-      "event_version": 1,
-      "occurred_at": "2026-08-21T13:00:00Z",
-      "anonymous_id": "anonymous-123",
-      "session_id": "session-123",
-      "playback_session_id": "playback-123",
-      "workspace_id": "workspace-uuid",
-      "video_id": "video-uuid",
-      "page_url": "https://customer.example.com/demo",
-      "referrer": "https://google.com",
-      "device_type": "desktop",
-      "browser": "Chrome",
-      "os": "macOS",
-      "properties": {
-        "quality": "1080p",
-        "muted": false,
-        "playback_rate": 1
-      }
-    }
-  ]
-}
-```
-
-`event_id`, `event_version`, and `occurred_at` are normalized by the backend when they are missing. Unknown event names and invalid JSON properties are rejected. `user_id`, `workspace_id`, and `video_id` remain nullable because public visitors are not authenticated.
-
-## NATS JetStream
-
-Location:
-
-```text
-server/internal/shared/config/nats/
-```
-
-NATS is used as the durable event transport.
-
-Current configuration:
-
-```text
-Subject:  analytics.events
-Stream:   ANALYTICS_EVENTS
-Consumer: analytics-clickhouse
-Retention: 30 days
-Storage: file-backed JetStream storage
-```
-
-The worker uses a durable pull consumer. It acknowledges a message only after the events have been inserted successfully into ClickHouse. If ClickHouse fails, the message is negatively acknowledged and can be retried.
-
-## ClickHouse
-
-Location:
-
-```text
-server/internal/shared/config/clickhouse/
-```
-
-The worker creates this table automatically:
-
-```text
-analytics_events
-```
-
-The table stores:
-
-- Event identity and version
-- Event time and ingestion time
-- Anonymous, session, and playback-session IDs
-- User, workspace, and video IDs when available
-- Page URL, referrer, and UTM campaign data
-- Device, browser, operating system, and country
-- Playback position and video duration
-- Event-specific JSON properties
-
-The table uses `ReplacingMergeTree` with a 365-day event TTL. The `event_id` must remain stable when an event is retried so duplicate events can be collapsed by ClickHouse during merges. Reports should use `FINAL` or an equivalent deduplication strategy when exact results are required.
-
-## Docker services
-
-The development Compose file now includes:
-
-```text
-nats        ports 4222 and 8222
-clickhouse  ports 8123 and 9000
-```
-
-The worker waits for PostgreSQL, Redis, NATS, and ClickHouse to become healthy before starting.
-
-Relevant environment variables are in:
-
-```text
-server/internal/shared/config/.env
-```
-
-```text
-NATS_URL=nats://nats:4222
-NATS_SUBJECT=analytics.events
-NATS_STREAM=ANALYTICS_EVENTS
-NATS_CONSUMER=analytics-clickhouse
-
-CLICKHOUSE_ADDR=clickhouse:9000
-CLICKHOUSE_DATABASE=analytics
-CLICKHOUSE_USERNAME=analytics_user
-CLICKHOUSE_PASSWORD=analytics_password
-```
-
-## Analytics worker
-
-Location:
-
-```text
-server/cmd/worker/
-```
-
-The worker currently:
-
-1. Connects to NATS
-2. Connects to ClickHouse
-3. Creates the ClickHouse table if it does not exist
-4. Reads analytics batches from JetStream
-5. Inserts events in bulk
-6. Acknowledges successfully processed messages
-
-The worker does not yet calculate reporting summaries. It currently stores the raw event layer, which gives us a reliable source for building reports later.
-
-## Event categories
-
-### Video events
-
-Use these for viewer engagement and playback quality:
-
-```text
-player_loaded
-video_load_started
-video_load_completed
-first_frame_rendered
-play_started
-play_resumed
-play_paused
-video_progress
-video_25_percent
-video_50_percent
-video_75_percent
-video_90_percent
-video_completed
-video_replayed
-video_abandoned
-seek_forward
-seek_backward
-quality_changed
-playback_speed_changed
-mute_enabled
-mute_disabled
-fullscreen_entered
-fullscreen_exited
-pip_entered
-captions_enabled
-captions_disabled
-buffer_started
-buffer_ended
-video_error
-quality_switch_failed
-cdn_error
-chapter_clicked
-```
-
-Do not send a request for every native `timeupdate` event. The frontend should batch events and send progress heartbeats at a controlled interval, such as every 10–15 seconds while playback is active.
-
-### Sales-funnel events
-
-Use these for video-to-lead and video-to-sale conversion:
-
-```text
-cta_displayed
-cta_clicked
-cta_dismissed
-lead_form_opened
-lead_form_started
-lead_form_submitted
-lead_form_failed
-end_screen_displayed
-end_screen_clicked
-share_clicked
-download_clicked
-subscription_started
-subscription_cancelled
-subscription_upgraded
-subscription_downgraded
-```
-
-These events should include the video ID, workspace ID, CTA/form ID where applicable, playback position, and playback session ID. That allows reports such as:
-
-- CTA conversion by video
-- Form submissions by video timestamp
-- Lead conversion by referrer and UTM campaign
-- Conversion rate by device and browser
-- Sales conversion for viewers who watched 25%, 50%, or 75%
-
-## Next implementation steps
-
-### 1. Add a frontend analytics client
-
-Create:
-
-```text
-fronted/src/modules/analytics/
-```
-
-The client should manage anonymous IDs, sessions, batching, retries, and `navigator.sendBeacon()` when the page closes.
-
-### 2. Connect the video player
-
-Instrument:
-
-```text
-fronted/src/modules/embed/component/VideoCustomization.tsx
-```
-
-Use the existing HTML video events and the current CTA/end-screen interactions. Do not place analytics network calls directly throughout the component; use the shared analytics client.
-
-### 3. Add funnel instrumentation
-
-Connect CTA, lead-form, and end-screen actions to the same analytics client. Keep video and sales events in the same event envelope so they can be joined by `video_id`, `workspace_id`, and `playback_session_id`.
-
-### 4. Add reporting APIs
-
-The backend now exposes authenticated workspace-scoped reporting endpoints:
-
-```text
-GET /api/v1/workspaces/:workspaceId/analytics/overview
-GET /api/v1/workspaces/:workspaceId/analytics/funnel
-GET /api/v1/workspaces/:workspaceId/analytics/funnel/timeseries
-
-GET /api/v1/workspaces/:workspaceId/videos/:videoId/analytics/overview
-GET /api/v1/workspaces/:workspaceId/videos/:videoId/analytics/timeseries
-GET /api/v1/workspaces/:workspaceId/videos/:videoId/analytics/retention
-GET /api/v1/workspaces/:workspaceId/videos/:videoId/analytics/technical
-GET /api/v1/workspaces/:workspaceId/videos/:videoId/analytics/funnel
-```
-
-All report endpoints require the normal Bearer token. The backend verifies that the authenticated user owns the requested workspace before querying ClickHouse. The frontend must never connect directly to ClickHouse.
-
-Supported query parameters:
-
-```text
-from=2026-08-01                 optional; defaults to 30 days ago
-to=2026-08-22                   optional; defaults to now
-```
-
-Dates may also be RFC3339 timestamps. Date ranges are limited to 366 days.
-
-The technical report additionally supports:
-
-```text
-dimension=country              default
-dimension=device
-dimension=browser
-dimension=os
-```
-
-The workspace funnel timeseries optionally supports:
-
-```text
-videoId=<uuid>                 restrict the funnel to one video
-```
-
-All responses use the standard envelope:
-
-```json
-{
-  "success": true,
-  "data": {}
-}
-```
-
-The reporting layer currently provides:
-
-- Overview totals and rates
-- Daily video timeseries
-- Retention milestones
-- Technical breakdown by country/device/browser/OS
-- Workspace sales funnel
-- Video-specific sales funnel
-- Daily conversion timeseries
-
-Queries use ClickHouse `FINAL` for the raw event table so retried events can be deduplicated.
-
-### 5. Add aggregate tables
-
-For faster dashboard queries, create derived tables such as:
-
-```text
-video_daily_metrics
-video_retention_buckets
-video_playback_quality_daily
-video_conversion_daily
-workspace_funnel_daily
-```
-
-Raw events remain the source of truth. Aggregates can be rebuilt if metric definitions change.
-
-## Metric definitions
-
-Define metrics before building dashboard cards. Initial definitions should include:
-
-```text
-Qualified play:
-  Playback started and at least 10 seconds were watched,
-  or at least 25% of a short video was watched.
-
-Completion rate:
-  Completed playback sessions / qualified playback sessions.
-
-Average watch percentage:
-  Watched video time / video duration.
-
-CTA conversion rate:
-  CTA clicks / CTA displays.
-
-Lead conversion rate:
-  Form submissions / qualified plays.
-```
-
-Metric definitions must stay documented and versioned. Changing a formula later should create a new metric version instead of silently changing historical numbers.
-
-## Important boundaries
-
-- Do not store raw email addresses or raw IP addresses in viewer events.
-- Do not trust client-provided user IDs for authenticated reports; derive them from the authorization token when available.
-- Do not expose ClickHouse publicly in production.
-- Do not use a simple view counter as the source of truth.
-- Keep raw events append-only.
-- Treat NATS delivery as at-least-once and make processing idempotent.
+Verified locally: full Go test suite, database-backed PostgreSQL → NATS → ClickHouse ingestion/report tests (including duplicate delivery and authorization), frontend collector tests, scoped lint, TypeScript through a successful production build, and actual browser playback/form submission on the full-page and iframe players. Temporary browser fixtures were removed. Production country accuracy requires the trusted edge/GeoIP setup in the API guide.

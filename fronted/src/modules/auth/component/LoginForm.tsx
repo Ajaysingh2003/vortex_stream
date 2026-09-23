@@ -110,7 +110,7 @@ const handleSubmit= (e: React.FormEvent<HTMLFormElement>) => {
                   </FieldLabel>
                   <Input
                     {...field}
-                    className="rounded-sm bg-transparent text-accent font-medium"
+                    className="rounded-sm py-1 bg-transparent text-accent font-medium"
                     id="form-rhf-demo-email"
                     aria-invalid={fieldState.invalid}
                     placeholder="Enter your email address"
@@ -142,7 +142,7 @@ const handleSubmit= (e: React.FormEvent<HTMLFormElement>) => {
                     <Input
                     {...field}
                     type={showPassword ? "text" : "password"}
-                    className="rounded-sm bg-transparent text-accent font-medium"
+                    className="rounded-sm bg-transparent py-1 text-accent font-medium"
                     aria-invalid={fieldState.invalid}
                     placeholder="••••••••"
                     autoComplete="off"
@@ -159,9 +159,9 @@ const handleSubmit= (e: React.FormEvent<HTMLFormElement>) => {
          
         </FieldGroup>
 
-        { !showPasswordField && <Button onClick={handleContinue} className="w-full bg-main-btn cursor-pointer tracking-wide mt-5 rounded-md bg-background-btnz">Continue</Button>
+        { !showPasswordField && <Button onClick={handleContinue} className="w-full primary-btn cursor-pointer tracking-wide mt-5 rounded-md bg-background-btnz">Continue</Button>
         }
-        { showPasswordField && <Button className="w-full bg-main-btn cursor-pointer tracking-wide mt-5 rounded-md bg-background-btnz">
+        { showPasswordField && <Button className="w-full bg-main-btnz cursor-pointer primary-btn tracking-wide mt-5 rounded-md bg-background-btnz">
             {mutate.isPending ? "Logging in..." : "Login"}
         </Button>
         }

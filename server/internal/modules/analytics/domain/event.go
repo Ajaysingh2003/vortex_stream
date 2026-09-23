@@ -16,7 +16,7 @@ const (
 )
 
 var allowedEventNames = map[string]struct{}{
-	"player_loaded": {}, "play_started": {}, "play_resumed": {}, "play_paused": {},
+	"playback_heartbeat": {}, "lead_form_skipped": {}, "pip_exited": {}, "player_loaded": {}, "play_started": {}, "play_resumed": {}, "play_paused": {},
 	"video_progress": {}, "video_25_percent": {}, "video_50_percent": {},
 	"video_75_percent": {}, "video_90_percent": {}, "video_completed": {},
 	"video_replayed": {}, "video_abandoned": {}, "seek_forward": {},
@@ -42,6 +42,7 @@ var allowedEventNames = map[string]struct{}{
 // Properties intentionally remain JSON so new event-specific fields do not require
 // a database migration.
 type Event struct {
+	PlaybackToken     string          `json:"playback_token,omitempty"`
 	EventID           uuid.UUID       `json:"event_id"`
 	EventName         string          `json:"event_name"`
 	EventVersion      int             `json:"event_version"`

@@ -10,6 +10,7 @@ import (
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
 	formdto "github.com/ajaysingh2003/vortex-stream/internal/modules/form/dto"
+	leads "github.com/ajaysingh2003/vortex-stream/internal/modules/leads/service"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -18,7 +19,7 @@ import (
 
 func validateSubmission(form *domain.LeadForm, req *formdto.SubmitFormReq) error {
 	invalid := func(message string) error { return &utils.ApiError{Code: 400, Message: message} }
-	if req.ID == uuid.Nil || req.SessionID == uuid.Nil || req.FormID != form.ID {
+	if req.ID == uuid.Nil || req.SessionID == uuid.Nil || req.FormID != form.ID || (req.FormVersion != 0 && req.FormVersion != form.Version) {
 		return invalid("This form has changed. Please reload the video.")
 	}
 	if req.Skipped {
@@ -76,7 +77,7 @@ func (r *formServiceRepo) Submit(ctx context.Context, videoID uuid.UUID, req *fo
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var form domain.LeadForm
 		// Serialise retries for the same form, and bind every answer to its saved schema.
-		err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Preload("Fields.Options").Where("video_id = ?", videoID).First(&form).Error
+		err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Preload("Fields", "archived = ?", false).Preload("Fields.Options").Where("video_id = ?", videoID).First(&form).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &utils.ApiError{Code: 404, Message: "Form not found."}
 		}
@@ -97,12 +98,18 @@ func (r *formServiceRepo) Submit(ctx context.Context, videoID uuid.UUID, req *fo
 		if err := validateSubmission(&form, req); err != nil {
 			return err
 		}
-		submission := domain.LeadFormSubmission{ID: req.ID, FormID: form.ID, VideoID: videoID, SessionID: req.SessionID, Skipped: req.Skipped}
+		submission := domain.LeadFormSubmission{ID: req.ID, FormID: form.ID, VideoID: videoID, SessionID: req.SessionID, Skipped: req.Skipped, FormVersion: form.Version, Placement: form.Placement}
 		if !req.Skipped {
 			for _, field := range form.Fields {
-				submission.Answers = append(submission.Answers, domain.LeadFormAnswer{ID: uuid.New(), SubmissionID: req.ID, FieldID: field.ID, Value: strings.TrimSpace(req.Answers[field.ID.String()])})
+				submission.Answers = append(submission.Answers, domain.LeadFormAnswer{ID: uuid.New(), SubmissionID: req.ID, FieldID: field.ID, Label: field.Label, Type: field.Type, Position: field.Position, Value: strings.TrimSpace(req.Answers[field.ID.String()])})
 			}
 		}
-		return tx.Create(&submission).Error
+		if err := tx.Create(&submission).Error; err != nil {
+			return err
+		}
+		if submission.Skipped {
+			return nil
+		}
+		return leads.Enqueue(tx, &submission)
 	})
 }

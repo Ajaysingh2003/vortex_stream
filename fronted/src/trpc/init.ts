@@ -25,14 +25,14 @@ export const getUserProcedure = baseProcedure.use(async ({ ctx, next }) => {
 
     const access_token = cookieStore.get("access_token")?.value;
 
-    console.log(access_token)
+
     const res = await axios.get(`${process.env.BASE_API}/v1/users/profile`, {
       headers: {
         Authorization: `Bearer ${access_token}`,
       },
     });
 
-    console.log(res.data, "checking");
+
 
     return next({
       ctx: {
@@ -41,7 +41,7 @@ export const getUserProcedure = baseProcedure.use(async ({ ctx, next }) => {
       },
     });
   } catch (error) {
-    console.log(error);
+
     return next({
       ctx: {
         ...ctx,

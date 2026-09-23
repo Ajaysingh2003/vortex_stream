@@ -37,12 +37,12 @@ function SidebarStorage() {
     return `${gb.toFixed(2)}gb`;
   };
 
-  const usedStorage = formatStorage(userData.userStorageUsage.usedBytes);
+  const usedStorage = formatStorage((userData.userStorageUsage?.usedBytes ?? 0));
 
   const maxLimit = getMaxGb(planDetailsType.plan);
 
   const percent = getStorageUsagePercent(
-    userData.userStorageUsage.usedBytes,
+    (userData.userStorageUsage?.usedBytes ?? 0),
     maxLimit,
   );
 

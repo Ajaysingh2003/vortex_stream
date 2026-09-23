@@ -92,6 +92,7 @@ func (c *Client) InsertEvents(ctx context.Context, events []analyticsDomain.Even
 		return fmt.Errorf("prepare ClickHouse batch: %w", err)
 	}
 
+	defer batch.Abort()
 	for _, event := range events {
 		if err := batch.Append(
 			event.EventID, event.EventName, event.EventVersion, event.OccurredAt,

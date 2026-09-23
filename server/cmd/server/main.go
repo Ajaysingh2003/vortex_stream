@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
+	leadsHandler "github.com/ajaysingh2003/vortex-stream/internal/modules/leads/handler"
+	leadsRoutes "github.com/ajaysingh2003/vortex-stream/internal/modules/leads/routes"
+	leadsService "github.com/ajaysingh2003/vortex-stream/internal/modules/leads/service"
 	"log"
 	"os"
 	"time"
@@ -76,6 +78,10 @@ import (
 func main() {
 	_ = godotenv.Load("")
 	database := db.InitDb()
+	leads := leadsService.New(database)
+	deliveryContext, stopDeliveries := context.WithCancel(context.Background())
+	defer stopDeliveries()
+	go leads.Run(deliveryContext)
 	config.InitRedis()
 
 	sqs.InitSqs()
@@ -95,7 +101,7 @@ func main() {
 	}
 	defer countryResolver.Close()
 	secretKey := os.Getenv("JWT_SECRET_KEY")
-	fmt.Print("leah", secretKey)
+
 	if secretKey == "" {
 		log.Fatal("JWT_SECRET_KEY is missing")
 	}
@@ -167,7 +173,7 @@ func main() {
 	formHandler := &formHandler.FormHandler{
 		FormService: formService,
 	}
-	analyticshandler := &analyticsHandler.AnalyticsHandler{Service: analyticsService.New(natsClient, clickhouseClient, workspaceRepo), GeoIP: countryResolver}
+	analyticshandler := &analyticsHandler.AnalyticsHandler{Service: analyticsService.New(natsClient, clickhouseClient, workspaceRepo, database), GeoIP: countryResolver, Limiter: config.RedisClient}
 	favoritehandler := &favoriteHandler.Handler{Service: favorites}
 	channelhandler := &channelHandler.Handler{Service: channels}
 
@@ -192,6 +198,7 @@ func main() {
 	billingRoutes.SetupRouter(r, *billingHandler, jwtToken)
 	playerRoutes.SetupRouter(r, playerdhandler, jwtToken)
 	formRoutes.SetupRouter(r, formHandler, jwtToken)
+	leadsRoutes.SetupRouter(r, &leadsHandler.Handler{Service: leads}, jwtToken)
 	favoriteRoutes.SetupRouter(r, favoritehandler, jwtToken)
 	channelRoutes.SetupRouter(r, channelhandler, jwtToken)
 	bandwidthRoutes.SetupBandwidthRouter(r, bandwidthHandler, jwtToken)

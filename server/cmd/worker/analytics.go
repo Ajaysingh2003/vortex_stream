@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	analyticsDomain "github.com/ajaysingh2003/vortex-stream/internal/modules/analytics/domain"
@@ -19,6 +20,7 @@ func runAnalyticsConsumer(ctx context.Context, natsClient *natsConfig.Client, cl
 		return err
 	}
 
+	defer sub.Unsubscribe()
 	for {
 		if err := ctx.Err(); err != nil {
 			return err
@@ -38,8 +40,9 @@ func runAnalyticsConsumer(ctx context.Context, natsClient *natsConfig.Client, cl
 				continue
 			}
 			if err := clickhouseClient.InsertEvents(ctx, batch.Events); err != nil {
-				_ = message.Nak()
-				return err
+				_ = message.NakWithDelay(5 * time.Second)
+				log.Print("analytics storage unavailable; delivery will retry")
+				continue
 			}
 			if err := message.Ack(); err != nil {
 				return fmt.Errorf("ack analytics message: %w", err)

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Home } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { FolderDataType, WorkspaceType } from "@/modules/types";
 
@@ -34,13 +34,12 @@ function BreadCumbConsole() {
 
   const workspaceData = workspace as WorkspaceType;
 
-  const { data: breadcumbs } = useSuspenseQuery(
-    trpc.folder.getFolderBreadCumb.queryOptions({
-      workspaceID: workspaceData.id,
-      folderID,
-    }),
-  );
-  const breadcumb = breadcumbs as FolderDataType[];
+  const isFolder = pathName.includes("/content-library/folder/");
+  const { data: breadcumbs } = useQuery({
+    ...trpc.folder.getFolderBreadCumb.queryOptions({ workspaceID: workspaceData.id, folderID }),
+    enabled: isFolder && !!folderID,
+  });
+  const breadcumb = (breadcumbs || []) as FolderDataType[];
 
   const shouldTruncate = breadcumb.length > MAX_VISIBLE_BREADCRUMBS;
 

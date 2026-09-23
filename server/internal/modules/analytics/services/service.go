@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/nats-io/nats.go"
+	"gorm.io/gorm"
 
 	analyticsDomain "github.com/ajaysingh2003/vortex-stream/internal/modules/analytics/domain"
 	analyticsDTO "github.com/ajaysingh2003/vortex-stream/internal/modules/analytics/dto"
@@ -15,13 +17,14 @@ import (
 )
 
 type AnalyticsService struct {
+	DB            *gorm.DB
 	nats          *natsConfig.Client
 	clickhouse    *clickhouseConfig.Client
 	workspaceRepo workspaceRepository.WorkshopRepository
 }
 
-func New(natsClient *natsConfig.Client, clickhouseClient *clickhouseConfig.Client, workspaceRepo workspaceRepository.WorkshopRepository) *AnalyticsService {
-	return &AnalyticsService{nats: natsClient, clickhouse: clickhouseClient, workspaceRepo: workspaceRepo}
+func New(natsClient *natsConfig.Client, clickhouseClient *clickhouseConfig.Client, workspaceRepo workspaceRepository.WorkshopRepository, db *gorm.DB) *AnalyticsService {
+	return &AnalyticsService{DB: db, nats: natsClient, clickhouse: clickhouseClient, workspaceRepo: workspaceRepo}
 }
 
 func (s *AnalyticsService) PublishBatch(ctx context.Context, events []analyticsDomain.Event) error {
@@ -37,8 +40,11 @@ func (s *AnalyticsService) PublishBatch(ctx context.Context, events []analyticsD
 	if err != nil {
 		return fmt.Errorf("marshal analytics batch: %w", err)
 	}
-	if _, err := s.nats.JS.Publish(s.nats.Subject, payload); err != nil {
-		return fmt.Errorf("publish analytics batch: %w", err)
+	if s.nats == nil {
+		return &utils.ApiError{Code: 503, Message: "Analytics ingestion is temporarily unavailable"}
+	}
+	if _, err := s.nats.JS.Publish(s.nats.Subject, payload, nats.Context(ctx)); err != nil {
+		return &utils.ApiError{Code: 503, Message: "Analytics ingestion is temporarily unavailable"}
 	}
 	return nil
 }

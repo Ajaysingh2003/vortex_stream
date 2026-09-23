@@ -45,7 +45,7 @@ function ConsoleLayout({ children }: { children: React.ReactNode }) {
             <AppSidebar />
           </div>
 
-          <div className="flex-1 w-full relative">
+          <div className="flex-1 min-w-0 w-full relative">
             {/* Header Navbar */}
             <header className="sticky top-0 z-40 w-full bg-white px-4 py-3 border-b border-stone-200 flex items-center justify-between gap-4">
               {/* Left Section: Trigger & Breadcrumbs */}

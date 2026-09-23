@@ -44,11 +44,13 @@ func (f *FormHandler) UpsertForm(c *gin.Context) {
 	workspaceID, err := uuid.Parse(workspaceIDRaw)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Workspace ID", "success": false})
+		return
 	}
 
 	videoID, err := uuid.Parse(videoIDRaw)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Workspace ID", "success": false})
+		return
 	}
 
 	userIDRaw, exists := c.Get("user_id")
@@ -61,6 +63,7 @@ func (f *FormHandler) UpsertForm(c *gin.Context) {
 	userID, ok := userIDRaw.(uuid.UUID)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to type asseration", "success": false})
+		return
 
 	}
 

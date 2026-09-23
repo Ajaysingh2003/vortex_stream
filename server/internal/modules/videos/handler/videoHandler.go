@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ajaysingh2003/vortex-stream/internal/shared/analyticsauth"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -580,6 +581,7 @@ func (h *VideoHandler) GetVideoMetaData(c *gin.Context) {
 		return
 	}
 
+	videoData.AnalyticsToken, _ = analyticsauth.Issue(videoData.ID, videoData.WorkspaceID)
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": videoData})
 }
 
@@ -613,6 +615,7 @@ func (h *VideoHandler) GetByVideoID(c *gin.Context) {
 		return
 	}
 
+	videoData.AnalyticsToken, _ = analyticsauth.Issue(videoData.ID, videoData.WorkspaceID)
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": videoData})
 }
 

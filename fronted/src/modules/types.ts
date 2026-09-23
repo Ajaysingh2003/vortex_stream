@@ -171,6 +171,7 @@ export type VideoResolutionType = {
 };
 
 export interface VideoAsset {
+  analyticsToken?: string;
   id: string;
   title: string;
   videoKey: string;
@@ -319,6 +320,7 @@ export interface LeadFormField {
 }
 
 export interface LeadForm {
+  version?: number;
   id: string;
   videoId: string;
   workspaceId: string;
