@@ -92,6 +92,13 @@ func InitDb() *gorm.DB {
 		&domain.UserStorageUsage{},
 		&domain.UserUsageCounters{},
 		&domain.BandwidthUsageEvent{},
+
+		// Part 2 analytics models
+		&domain.LeadSubmissionAttribution{},
+		&domain.AnalyticsOutbox{},
+		&domain.AnalyticsExport{},
+		&domain.VideoMediaRevision{},
+		&domain.VideoExperienceRevision{},
 	)
 
 	if err != nil {

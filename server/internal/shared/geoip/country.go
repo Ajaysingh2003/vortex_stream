@@ -35,10 +35,21 @@ func New() (*Resolver, error) {
 }
 
 func (r *Resolver) Country(request *http.Request) string {
-	// Cloudflare sets this at the edge and it is safer than trusting arbitrary
-	// X-Forwarded-For values. Only enable this when the API is behind Cloudflare.
-	if country := normalizeCountry(request.Header.Get("CF-IPCountry")); r != nil && r.trustForwardedHeaders && country != "" {
-		return country
+	// 1. Check edge and proxy headers (Cloudflare, Vercel, CloudFront, or client/proxy header)
+	if r != nil && r.trustForwardedHeaders {
+		for _, header := range []string{
+			"CF-IPCountry",
+			"X-Vercel-IP-Country",
+			"CloudFront-Viewer-Country",
+			"X-Country-Code",
+			"X-Forwarded-Country",
+		} {
+			if val := request.Header.Get(header); val != "" {
+				if country := NormalizeCountry(val); country != "" {
+					return country
+				}
+			}
+		}
 	}
 
 	if r == nil || r.database == nil {
@@ -65,7 +76,7 @@ func (r *Resolver) Country(request *http.Request) string {
 	if err != nil {
 		return ""
 	}
-	return normalizeCountry(record.Country.IsoCode)
+	return NormalizeCountry(record.Country.IsoCode)
 }
 
 func (r *Resolver) Close() error {
@@ -75,10 +86,14 @@ func (r *Resolver) Close() error {
 	return r.database.Close()
 }
 
-func normalizeCountry(value string) string {
+func NormalizeCountry(value string) string {
 	value = strings.ToUpper(strings.TrimSpace(value))
 	if value == "T1" || value == "XX" || len(value) != 2 || value[0] < 'A' || value[0] > 'Z' || value[1] < 'A' || value[1] > 'Z' {
 		return ""
 	}
 	return value
+}
+
+func normalizeCountry(value string) string {
+	return NormalizeCountry(value)
 }

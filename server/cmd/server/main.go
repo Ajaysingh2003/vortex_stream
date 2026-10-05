@@ -172,8 +172,20 @@ func main() {
 
 	formHandler := &formHandler.FormHandler{
 		FormService: formService,
+		GeoIP:       countryResolver,
 	}
-	analyticshandler := &analyticsHandler.AnalyticsHandler{Service: analyticsService.New(natsClient, clickhouseClient, workspaceRepo, database), GeoIP: countryResolver, Limiter: config.RedisClient}
+	analyticsSvc := analyticsService.New(natsClient, clickhouseClient, workspaceRepo, database)
+	exportSvc := analyticsService.NewExportService(analyticsSvc, database, "")
+	outboxDispatcher := analyticsService.NewOutboxDispatcher(database, natsClient)
+	go outboxDispatcher.Run(deliveryContext)
+	go exportSvc.Run(deliveryContext)
+
+	analyticshandler := &analyticsHandler.AnalyticsHandler{
+		Service: analyticsSvc,
+		GeoIP:   countryResolver,
+		Limiter: config.RedisClient,
+		Exports: exportSvc,
+	}
 	favoritehandler := &favoriteHandler.Handler{Service: favorites}
 	channelhandler := &channelHandler.Handler{Service: channels}
 

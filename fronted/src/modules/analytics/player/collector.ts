@@ -1,3 +1,5 @@
+import { detectClientCountry, resolveClientCountry } from "../lib/detect-country";
+
 export type Properties = Record<string, string | number | boolean>;
 export interface PlayerEvent {
   playback_token?: string;
@@ -17,6 +19,7 @@ export interface PlayerEvent {
   device_type: string;
   browser: string;
   os: string;
+  country?: string;
   position_ms: number;
   duration_ms: number;
   properties: Properties;
@@ -65,6 +68,7 @@ export class PlayerCollector {
     }
     const url = new URL(location.href);
     const ua = navigator.userAgent;
+    const detectedCountry = detectClientCountry();
     this.context = {
       page_url: safeOrigin(location.href),
       referrer: safeOrigin(document.referrer),
@@ -96,7 +100,20 @@ export class PlayerCollector {
               : /Linux/.test(ua)
                 ? "Linux"
                 : "Other",
+      country: detectedCountry || undefined,
     };
+
+    // Asynchronously resolve network/VPN country and update context & unflushed queue
+    if (typeof window !== "undefined") {
+      void resolveClientCountry().then((freshCountry) => {
+        if (freshCountry && freshCountry !== this.context.country) {
+          this.context.country = freshCountry;
+          for (const ev of this.queue) {
+            ev.country = freshCountry;
+          }
+        }
+      });
+    }
   }
   event(
     name: string,
@@ -110,9 +127,7 @@ export class PlayerCollector {
       !!video &&
       !video.paused &&
       !video.ended &&
-      !video.seeking &&
-      video.readyState >= 3 &&
-      document.visibilityState === "visible";
+      !video.seeking;
     const event: PlayerEvent = {
       ...this.context,
       event_id: uuid(),
@@ -162,7 +177,10 @@ export class PlayerCollector {
       const response = await fetch(endpoint, {
         method: "POST",
         body,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(this.context.country ? { "X-Country-Code": this.context.country } : {}),
+        },
         credentials: "omit",
         keepalive: true,
         signal: AbortSignal.timeout(8000),

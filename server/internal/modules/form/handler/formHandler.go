@@ -6,6 +6,7 @@ import (
 
 	"github.com/ajaysingh2003/vortex-stream/internal/modules/form/dto"
 	services "github.com/ajaysingh2003/vortex-stream/internal/modules/form/service"
+	"github.com/ajaysingh2003/vortex-stream/internal/shared/geoip"
 	"github.com/ajaysingh2003/vortex-stream/internal/shared/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -34,6 +35,7 @@ type CreateOptionReq struct {
 
 type FormHandler struct {
 	FormService services.FormServiceInterface
+	GeoIP       *geoip.Resolver
 }
 
 func (f *FormHandler) UpsertForm(c *gin.Context) {
@@ -200,6 +202,27 @@ func (h *FormHandler) Submit(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid form submission"})
 		return
 	}
+	country := "Unknown"
+	countrySource := "unresolved"
+	if h.GeoIP != nil {
+		country = h.GeoIP.Country(c.Request)
+		if country != "" && country != "Unknown" {
+			countrySource = "geoip"
+		}
+	}
+	if (country == "" || country == "Unknown") && req.Country != "" {
+		if norm := geoip.NormalizeCountry(req.Country); norm != "" {
+			country = norm
+			countrySource = "client_hint"
+		}
+	}
+	if country == "" {
+		country = "Unknown"
+		countrySource = "unresolved"
+	}
+	req.Country = country
+	req.CountrySource = countrySource
+
 	if err := h.FormService.Submit(c.Request.Context(), videoID, &req); err != nil {
 		if appErr, ok := err.(*utils.ApiError); ok {
 			c.JSON(appErr.Code, gin.H{"message": appErr.Message})

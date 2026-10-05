@@ -24,11 +24,6 @@ const fontHeading = Instrument_Sans({
   weight: ["400", "500", "600", "700"],
 });
 
-const fontSubHeading = Inter({
-  variable: "--font-subheading",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
 
 export const metadata: Metadata = {
   title: "Rowley",
@@ -46,7 +41,7 @@ export default function RootLayout({
       className={cn(
         fontContent.variable,
         fontHeading.variable,
-        fontSubHeading.variable
+        "[--font-subheading:var(--font-content)]"
       )}
     >
       <body className="font-content antialiased">

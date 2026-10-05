@@ -47,12 +47,12 @@ function ConsoleLayout({ children }: { children: React.ReactNode }) {
 
           <div className="flex-1 min-w-0 w-full relative">
             {/* Header Navbar */}
-            <header className="sticky top-0 z-40 w-full bg-white px-4 py-3 border-b border-stone-200 flex items-center justify-between gap-4">
+            <header className="sticky top-0 z-40 w-full bg-white px-4 py-1 border-b border-stone-200 flex items-center justify-between gap-4">
               {/* Left Section: Trigger & Breadcrumbs */}
-              <div className="flex items-center gap-3">
-                <SidebarTrigger />
+              <div className="flex items-center gap-3 min-w-0">
+                <SidebarTrigger className="shrink-0" />
                 <div
-                  className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-700"
+                  className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-700 shrink-0"
                   aria-hidden="true"
                 />
                 <BreadCumbConsole />
@@ -70,7 +70,7 @@ function ConsoleLayout({ children }: { children: React.ReactNode }) {
             </header>
 
             {/* Main Content Area */}
-            <main className="p-4 sm:p-6 w-full h-full">{children}</main>
+            <main className="sm:p-6 w-full h-full">{children}</main>
           </div>
         </section>
       </SidebarProvider>

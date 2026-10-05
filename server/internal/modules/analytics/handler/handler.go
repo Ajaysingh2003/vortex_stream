@@ -16,6 +16,7 @@ type AnalyticsHandler struct {
 	Service *services.AnalyticsService
 	Limiter *redis.Client
 	GeoIP   *geoip.Resolver
+	Exports *services.ExportService
 }
 
 func (h *AnalyticsHandler) Ingest(c *gin.Context) {
@@ -39,8 +40,11 @@ func (h *AnalyticsHandler) Ingest(c *gin.Context) {
 		country = h.GeoIP.Country(c.Request)
 	}
 	for index := range batch.Events {
-		// Country is server-derived. Ignore any client-supplied value.
-		batch.Events[index].Country = country
+		if country != "" {
+			batch.Events[index].Country = country
+		} else if batch.Events[index].Country != "" {
+			batch.Events[index].Country = geoip.NormalizeCountry(batch.Events[index].Country)
+		}
 	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)

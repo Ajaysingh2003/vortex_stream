@@ -73,6 +73,9 @@ type LiveReport struct {
 }
 type LiveRow struct {
 	Key            string `json:"key"`
+	Title          string `json:"title,omitempty"`
+	Country        string `json:"country,omitempty"`
+	VideoID        string `json:"video_id,omitempty"`
 	ActiveSessions uint64 `json:"active_sessions"`
 	UniqueViewers  uint64 `json:"unique_viewers"`
 }

@@ -115,8 +115,8 @@ func (c *Client) Engagement(ctx context.Context, workspace, video uuid.UUID, r d
 }
 func (c *Client) Live(ctx context.Context, workspace uuid.UUID, video *uuid.UUID) (*dto.LiveReport, error) {
 	now := time.Now().UTC()
-	r := dto.DateRange{From: now.Add(-90 * time.Second), To: now}
-	query, args := scopedQuery(`SELECT toString(video_id),playback_session_id,argMax(anonymous_id,event_time),argMax(country,event_time),argMax(JSONExtractBool(properties,'active'),tuple(event_time,event_id)) AS active FROM analytics_events FINAL WHERE event_time >= ? AND event_time < ? AND JSONHas(properties,'active')
+	r := dto.DateRange{From: now.Add(-120 * time.Second), To: now.Add(2 * time.Minute)}
+	query, args := scopedQuery(`SELECT toString(video_id),playback_session_id,argMax(anonymous_id,event_time),argMax(country,tuple(country != '' AND country != 'Unknown',event_time)),argMax(JSONExtractBool(properties,'active'),tuple(event_time,event_id)) AS active FROM analytics_events FINAL WHERE event_time >= ? AND event_time <= ? AND JSONHas(properties,'active')
 GROUP BY video_id,playback_session_id
 HAVING active=true`, workspace, video, r)
 	rows, err := c.Conn.Query(ctx, query, args...)
@@ -124,7 +124,7 @@ HAVING active=true`, workspace, video, r)
 		return nil, err
 	}
 	defer rows.Close()
-	result := &dto.LiveReport{AsOf: now, WindowSeconds: 90, Countries: []dto.LiveRow{}, Videos: []dto.LiveRow{}}
+	result := &dto.LiveReport{AsOf: now, WindowSeconds: 120, Countries: []dto.LiveRow{}, Videos: []dto.LiveRow{}}
 	unique := map[string]bool{}
 	countries := map[string]*dto.LiveRow{}
 	videos := map[string]*dto.LiveRow{}
@@ -158,15 +158,17 @@ HAVING active=true`, workspace, video, r)
 	}
 	result.UniqueViewers = uint64(len(unique))
 	for _, v := range countries {
+		v.Country = v.Key
 		result.Countries = append(result.Countries, *v)
 	}
 	for _, v := range videos {
+		v.VideoID = v.Key
 		result.Videos = append(result.Videos, *v)
 	}
 	return result, rows.Err()
 }
 func (c *Client) Concurrency(ctx context.Context, workspace uuid.UUID, video *uuid.UUID, r dto.DateRange) ([]dto.LiveRow, error) {
-	query, args := scopedQuery(`SELECT formatDateTime(toStartOfMinute(event_time),'%Y-%m-%dT%H:%i:%SZ','UTC') AS bucket,uniqExact(tuple(video_id,playback_session_id)),uniqExact(anonymous_id) FROM analytics_events FINAL WHERE event_time >= ? AND event_time < ? AND event_name='playback_heartbeat' AND JSONExtractBool(properties,'active')=true
+	query, args := scopedQuery(`SELECT formatDateTime(toStartOfMinute(event_time),'%Y-%m-%dT%H:%i:%SZ','UTC') AS bucket,uniqExact(tuple(video_id,playback_session_id)),uniqExact(anonymous_id) FROM analytics_events FINAL WHERE event_time >= ? AND event_time <= ? AND ((event_name='playback_heartbeat' AND JSONExtractBool(properties,'active')=true) OR event_name IN ('play_started', 'play_resumed'))
 GROUP BY bucket
 ORDER BY bucket`, workspace, video, r)
 	rows, err := c.Conn.Query(ctx, query, args...)

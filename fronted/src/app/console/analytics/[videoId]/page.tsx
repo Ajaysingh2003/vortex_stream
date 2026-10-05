@@ -1,10 +1,17 @@
-import VideoAnalyticView from '@/modules/analytics/view/VideoAnalyticView'
-import React from 'react'
+import VideoAnalyticView from "@/modules/analytics/view/VideoAnalyticView";
+import { AnalyticsLoading } from "@/modules/analytics/components/AnalyticsLoading";
+import React, { Suspense } from "react";
 
-function page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ videoId: string }>;
+}) {
+  const { videoId } = await params;
+
   return (
-    <VideoAnalyticView/>
-  )
+    <Suspense fallback={<AnalyticsLoading />}>
+      <VideoAnalyticView videoId={videoId} tab="overview" />
+    </Suspense>
+  );
 }
-
-export default page

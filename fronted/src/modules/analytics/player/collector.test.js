@@ -17,3 +17,41 @@ describe("watch time", () => {
     expect(safeOrigin("javascript:alert(1)")).toBe("");
   });
 });
+
+describe("player active state", () => {
+  test("active is true when video is playing, and false when paused or ended", () => {
+    const videoPlaying = {
+      paused: false,
+      ended: false,
+      seeking: false,
+      currentTime: 10,
+      duration: 60,
+    };
+    const videoPaused = {
+      paused: true,
+      ended: false,
+      seeking: false,
+      currentTime: 10,
+      duration: 60,
+    };
+    const videoEnded = {
+      paused: false,
+      ended: true,
+      seeking: false,
+      currentTime: 60,
+      duration: 60,
+    };
+
+    const isPlayingActive =
+      !videoPlaying.paused && !videoPlaying.ended && !videoPlaying.seeking;
+    const isPausedActive =
+      !videoPaused.paused && !videoPaused.ended && !videoPaused.seeking;
+    const isEndedActive =
+      !videoEnded.paused && !videoEnded.ended && !videoEnded.seeking;
+
+    expect(isPlayingActive).toBe(true);
+    expect(isPausedActive).toBe(false);
+    expect(isEndedActive).toBe(false);
+  });
+});
+

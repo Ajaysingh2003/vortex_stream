@@ -18,7 +18,7 @@ import (
 var viewerEvents = map[string]bool{}
 
 func init() {
-	for _, name := range strings.Fields("player_loaded play_started play_resumed play_paused playback_heartbeat video_progress video_25_percent video_50_percent video_75_percent video_90_percent video_completed video_replayed video_abandoned seek_forward seek_backward quality_changed playback_speed_changed mute_enabled mute_disabled fullscreen_entered fullscreen_exited pip_entered pip_exited captions_enabled captions_disabled chapter_clicked thumbnail_clicked video_load_started video_load_completed first_frame_rendered buffer_started buffer_ended video_error quality_switch_failed cdn_error cta_displayed cta_clicked cta_dismissed lead_form_opened lead_form_started lead_form_submitted lead_form_skipped lead_form_failed end_screen_displayed end_screen_clicked share_clicked download_clicked") {
+	for _, name := range strings.Fields("player_loaded play_started play_resumed play_paused playback_heartbeat video_progress video_25_percent video_50_percent video_75_percent video_90_percent video_completed video_replayed video_abandoned seek_forward seek_backward quality_changed playback_speed_changed mute_enabled mute_disabled fullscreen_entered fullscreen_exited pip_entered pip_exited captions_enabled captions_disabled chapter_clicked thumbnail_clicked video_load_started video_load_completed first_frame_rendered buffer_started buffer_ended video_error quality_switch_failed cdn_error cta_displayed cta_clicked cta_dismissed lead_form_opened lead_form_started lead_form_submitted lead_form_skipped lead_form_failed end_screen_displayed end_screen_clicked share_clicked download_clicked playback_segments subtitle_track_selected") {
 		viewerEvents[name] = true
 	}
 }
@@ -34,7 +34,14 @@ func sanitizeURL(raw string) string {
 }
 func ValidateViewerEvent(e *events.Event, now time.Time) error {
 	bad := func() error { return &utils.ApiError{Code: 400, Message: "Invalid player event or identity"} }
-	if !viewerEvents[e.EventName] || e.EventID == uuid.Nil || e.VideoID == nil || *e.VideoID == uuid.Nil || e.EventVersion != 1 {
+	// Public ingestion MUST reject server-owned outbox events
+	if e.EventName == "lead_submission_saved" {
+		return bad()
+	}
+	if !viewerEvents[e.EventName] || e.EventID == uuid.Nil || e.VideoID == nil || *e.VideoID == uuid.Nil {
+		return bad()
+	}
+	if e.EventVersion != 1 && e.EventVersion != 2 {
 		return bad()
 	}
 	for _, id := range []string{e.AnonymousID, e.SessionID, e.PlaybackSessionID} {
@@ -58,6 +65,23 @@ func ValidateViewerEvent(e *events.Event, now time.Time) error {
 			return bad()
 		}
 	}
+
+	// Version 2 fields validation
+	if len(e.MediaRevisionID) > 100 || len(e.ExperienceRevisionID) > 100 || len(e.CTAID) > 100 || len(e.ChapterID) > 100 || len(e.SubtitleTrackID) > 100 || len(e.Surface) > 50 || len(e.Visibility) > 50 {
+		return bad()
+	}
+	if len(e.Segments) > 50 {
+		return bad()
+	}
+	for _, s := range e.Segments {
+		if s.StartMS < 0 || s.EndMS < s.StartMS || s.PlaybackMS < 0 || s.PlaybackMS > 86400000 {
+			return bad()
+		}
+		if len(s.Visibility) > 50 || len(s.SubtitleTrackID) > 100 {
+			return bad()
+		}
+	}
+
 	var properties map[string]interface{}
 	if len(e.Properties) > 4096 || json.Unmarshal(e.Properties, &properties) != nil || properties == nil {
 		return bad()
@@ -78,7 +102,7 @@ func ValidateViewerEvent(e *events.Event, now time.Time) error {
 	if v, ok := properties["active"].(bool); ok {
 		clean["active"] = v
 	}
-	for _, key := range []string{"cta_id", "chapter_id", "form_id", "submission_id", "surface", "language", "error_code", "quality", "action"} {
+	for _, key := range []string{"cta_id", "chapter_id", "form_id", "submission_id", "surface", "language", "error_code", "quality", "action", "source"} {
 		if v, ok := properties[key].(string); ok && len(v) <= 100 {
 			clean[key] = v
 		}
@@ -87,6 +111,7 @@ func ValidateViewerEvent(e *events.Event, now time.Time) error {
 	e.UserID = nil
 	e.PageURL = sanitizeURL(e.PageURL)
 	e.Referrer = sanitizeURL(e.Referrer)
+	e.IsPreview = false // Public unauthenticated preview claims are rejected; preview exclusion requires server authorization
 	return nil
 }
 func (s *AnalyticsService) PrepareViewerBatch(ctx context.Context, batch []events.Event) error {
@@ -106,7 +131,7 @@ func (s *AnalyticsService) PrepareViewerBatch(ctx context.Context, batch []event
 		return &utils.ApiError{Code: 503, Message: "Analytics unavailable"}
 	}
 	var videos []model.Video
-	if err := s.DB.WithContext(ctx).Where("id IN ? AND status = ?", ids, model.StatusReady).Find(&videos).Error; err != nil {
+	if err := s.DB.WithContext(ctx).Where("id IN ? AND status != ?", ids, model.StatusFailed).Find(&videos).Error; err != nil {
 		return err
 	}
 	if len(videos) != len(ids) {

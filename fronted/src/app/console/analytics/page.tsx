@@ -1,10 +1,11 @@
-import AnalyticsView from '@/modules/analytics/view/AnalyticsView'
-import React from 'react'
+import AnalyticsView from "@/modules/analytics/view/AnalyticsView";
+import { AnalyticsLoading } from "@/modules/analytics/components/AnalyticsLoading";
+import React, { Suspense } from "react";
 
-function page() {
+export default function Page() {
   return (
-    <AnalyticsView/>
-  )
+    <Suspense fallback={<AnalyticsLoading />}>
+      <AnalyticsView tab="overview" />
+    </Suspense>
+  );
 }
-
-export default page

@@ -25,11 +25,18 @@ export async function POST(request: Request) {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-    if (process.env.ANALYTICS_TRUST_EDGE_HEADERS === "true")
-      for (const name of ["cf-ipcountry", "x-forwarded-for", "x-real-ip"]) {
-        const value = request.headers.get(name);
-        if (value) headers[name] = value;
-      }
+    for (const name of [
+      "cf-ipcountry",
+      "x-vercel-ip-country",
+      "cloudfront-viewer-country",
+      "x-country-code",
+      "x-forwarded-country",
+      "x-forwarded-for",
+      "x-real-ip",
+    ]) {
+      const value = request.headers.get(name);
+      if (value) headers[name] = value;
+    }
     const response = await fetch(
       `${process.env.BASE_API}/v1/analytics/events`,
       {
@@ -40,11 +47,16 @@ export async function POST(request: Request) {
         signal: AbortSignal.timeout(7000),
       },
     );
-    return new Response(null, {
+    const respBody = response.status >= 400 ? await response.text() : null;
+    return new Response(respBody, {
       status: response.status,
-      headers: { "Cache-Control": "no-store" },
+      headers: {
+        "Cache-Control": "no-store",
+        ...(respBody ? { "Content-Type": "application/json" } : {}),
+      },
     });
-  } catch {
+  } catch (error) {
+    console.error("[Analytics Ingest Proxy Error]:", error);
     return new Response(null, { status: 503 });
   }
 }

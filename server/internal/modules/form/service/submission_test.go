@@ -52,3 +52,21 @@ func TestValidateSubmission(t *testing.T) {
 		})
 	}
 }
+
+func TestHelpers(t *testing.T) {
+	if safeOrigin("https://example.com/path?arg=1#frag") != "https://example.com" {
+		t.Fatal("safeOrigin should extract scheme://host")
+	}
+	if safeOrigin("ftp://example.com") != "" {
+		t.Fatal("safeOrigin should reject non-http(s)")
+	}
+	if safeOrigin("bad url") != "" {
+		t.Fatal("safeOrigin should reject invalid url")
+	}
+	if sanitizeString("   hello   ", 10) != "hello" {
+		t.Fatal("sanitizeString should trim space")
+	}
+	if sanitizeString("1234567890extra", 10) != "1234567890" {
+		t.Fatal("sanitizeString should truncate to maxLen")
+	}
+}

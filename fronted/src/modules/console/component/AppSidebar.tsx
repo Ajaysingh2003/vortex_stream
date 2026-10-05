@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import {
   Users,
   Home,
@@ -25,6 +25,7 @@ import {
   Link2,
   BookMarked,
   MousePointerClick,
+  Database,
 } from "lucide-react";
 
 import { AnalyticsUpIcon, SubtitleIcon } from "@hugeicons/core-free-icons";
@@ -46,45 +47,65 @@ import { cn } from "@/lib/utils";
 import SidebarStorage from "./SidebarStorage";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
-import { WorkspaceType } from "@/modules/types";
 import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  getAnalyticsTabFromPath,
+  getVideoIdFromPath,
+  getAnalyticsUrl,
+} from "@/modules/analytics/lib/routes";
+import type { AnalyticsTab } from "@/modules/analytics/types";
 
 export function AppSidebar() {
   const trpc = useTRPC();
-  const { data: workspace } = useSuspenseQuery(
-    trpc.user.getWorkspace.queryOptions(),
-  );
-  const workspaceData = workspace as WorkspaceType;
+  useSuspenseQuery(trpc.user.getWorkspace.queryOptions());
 
   const { open } = useSidebar();
+  const params = useParams();
   const pathName = usePathname();
   const searchParams = useSearchParams();
 
+  // Video ID resolution across both /console/content-library/video/[id] and /console/analytics/[videoId]
+  const currentVideoId =
+    (params?.id as string) ||
+    (params?.videoId as string) ||
+    pathName.match(/\/video\/([^/?#]+)/i)?.[1] ||
+    getVideoIdFromPath(pathName);
+
   const currentScope = searchParams.get("setting_scope") || "thumbnail";
-  const currentAnalyticsScope = searchParams.get("scope") || "overview";
+  const currentAnalyticsScope = getAnalyticsTabFromPath(pathName, searchParams);
+  const currentAnalyticsVideoId = currentVideoId || getVideoIdFromPath(pathName);
 
   // Route matchers
   const isVideoRoute = /\/video(\/.*)?$/i.test(pathName);
   const isAnalyticsRoute = /\/analytics(\/.*)?$/i.test(pathName);
 
   const createScopeUrl = (scope: string) => {
-    const params = new URLSearchParams(
+    if (scope === "analytics") {
+      return currentVideoId
+        ? `/console/analytics/${currentVideoId}`
+        : "/console/analytics";
+    }
+    if (scope === "leads") {
+      const videoPath = pathName.replace(/\/leads\/?$/, "");
+      return `${videoPath}/leads`;
+    }
+    const search = new URLSearchParams(
       searchParams ? searchParams.toString() : "",
     );
-    params.set("setting_scope", scope);
+    search.set("setting_scope", scope);
     const videoPath = pathName.replace(/\/leads\/?$/, "");
-    return scope === "leads"
-      ? `${videoPath}/leads`
-      : `${videoPath}?${params.toString()}`;
+    return `${videoPath}?${search.toString()}`;
   };
 
   const createAnalyticsUrl = (scope: string) => {
-    const params = new URLSearchParams(
-      searchParams ? searchParams.toString() : "",
+    return getAnalyticsUrl(
+      scope as AnalyticsTab,
+      currentAnalyticsVideoId,
+      searchParams,
     );
-    params.set("scope", scope);
-    return `${pathName.split("?")[0]}?${params.toString()}`;
   };
+
+
 
   const menuItems = [
     { title: "Home", href: "/console", icon: Home, exact: true },
@@ -94,6 +115,7 @@ export function AppSidebar() {
       icon: Library,
     },
     { title: "Videos", href: "/console/videos", icon: TvMinimalPlay },
+    { title: "Analytics", href: "/console/analytics", icon: Database },
     { title: "Channels", href: "/console/channels", icon: TvMinimal },
     { title: "Favorites", href: "/console/favorites", icon: Star },
     {
@@ -190,7 +212,9 @@ export function AppSidebar() {
                 {TABS.map((item) => {
                   const isActive = pathName.endsWith("/leads")
                     ? item.value === "leads"
-                    : currentScope === item.value;
+                    : item.value === "analytics"
+                      ? pathName.startsWith("/console/analytics")
+                      : currentScope === item.value;
 
                   return (
                     <SidebarMenuItem key={item.value}>
@@ -208,9 +232,9 @@ export function AppSidebar() {
                           scroll={false}
                           className="flex items-center gap-4 w-full"
                         >
-                          {item.icon === "hugeicons" ? (
+                          {item.icon === "hugeicons" && "hugeIcon" in item ? (
                             <HugeiconsIcon
-                              icon={(item as any).hugeIcon}
+                              icon={item.hugeIcon}
                               size={18}
                               strokeWidth={1.6}
                               className={cn(
@@ -218,8 +242,8 @@ export function AppSidebar() {
                                 isActive && "text-slate-900",
                               )}
                             />
-                          ) : (
-                            React.createElement((item as any).lucideIcon, {
+                          ) : item.icon === "lucide" && "lucideIcon" in item ? (
+                            React.createElement(item.lucideIcon, {
                               size: 15,
                               strokeWidth: 1.6,
                               className: cn(
@@ -227,7 +251,7 @@ export function AppSidebar() {
                                 isActive && "text-slate-900",
                               ),
                             })
-                          )}
+                          ) : null}
                           <span
                             className={cn(
                               "tracking-wide font-heading",
@@ -340,7 +364,7 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        <SidebarGroup className="mt-10 md:mt-24 pl-4">
+        <SidebarGroup className="mt-10 md:mt-16 pl-4">
           <SidebarStorage />
         </SidebarGroup>
       </SidebarContent>

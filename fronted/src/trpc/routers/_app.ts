@@ -11,6 +11,7 @@ import { channelRouter } from "@/modules/channel/server/procedures";
 import { bandwidthRouter } from "@/modules/bandwidth/server/procedures";
 import { formRouter } from "@/modules/form/server/procedures";
 import { leadsRouter } from "@/modules/leads/server/procedures";
+import { analyticsRouter } from "@/modules/analytics/server/procedures";
 export const appRouter = createTRPCRouter({
 
   upload:uploadsRouter,
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   bandwidth: bandwidthRouter,
   form: formRouter,
   leads: leadsRouter,
+  analytics: analyticsRouter,
 });
 
 export type AppRouter = typeof appRouter;

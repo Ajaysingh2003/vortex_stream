@@ -63,13 +63,15 @@ export function usePlayerAnalytics(
       last = now;
       previousPosition = video.currentTime;
     };
-    const heartbeat = (active?: boolean) => {
+    const heartbeat = (activeOverride?: boolean) => {
       sample();
+      const isActive =
+        activeOverride !== undefined
+          ? activeOverride
+          : !!video && !video.paused && !video.ended && (playing || video.currentTime > 0);
       emit("playback_heartbeat", {
         watch_ms: Math.round(Math.min(15000, watched)),
-        active:
-          active ??
-          (playing && !video.paused && document.visibilityState === "visible"),
+        active: isActive,
       });
       watched = 0;
       void c.flush();
@@ -108,7 +110,7 @@ export function usePlayerAnalytics(
           ended = false;
           emit("video_replayed");
         } else emit("play_resumed");
-        heartbeat();
+        heartbeat(true);
       },
       pause: () => {
         sample();
@@ -119,12 +121,14 @@ export function usePlayerAnalytics(
       },
       waiting: () => {
         sample();
-        playing = false;
         if (everPlayed && !video.paused && !bufferAt) {
           bufferAt = performance.now();
           emit("buffer_started");
         }
-        heartbeat(false);
+        if (video.paused) {
+          playing = false;
+          heartbeat(false);
+        }
       },
       seeking: () => {
         beforeSeek = previousPosition;
@@ -195,15 +199,15 @@ export function usePlayerAnalytics(
     );
     observer.observe(video);
     const visibility = () => {
-      if (document.visibilityState === "hidden") {
-        heartbeat(false);
-        void c.flush(true);
-      } else {
+      if (document.visibilityState === "visible") {
         visible();
         last = performance.now();
         previousPosition = video.currentTime;
-        heartbeat();
       }
+      const isCurrentlyPlaying =
+        !!video && !video.paused && !video.ended && (playing || video.currentTime > 0);
+      heartbeat(isCurrentlyPlaying);
+      void c.flush(true);
     };
     const fullscreen = () => {
       if (
@@ -231,7 +235,7 @@ export function usePlayerAnalytics(
       if (everPlayed) emit("video_progress");
     }, 10000);
     const flushTimer = setInterval(() => void c.flush(), 3000);
-    if (!video.paused && video.readyState >= 3)
+    if (!video.paused && !video.ended && video.readyState >= 2)
       handlers.playing(new Event("playing"));
     return () => {
       sample();

@@ -151,7 +151,32 @@ func (s *AnalyticsService) Live(ctx context.Context, w uuid.UUID, v *uuid.UUID) 
 	if err != nil {
 		return nil, err
 	}
-	return c.Live(ctx, w, v)
+	report, err := c.Live(ctx, w, v)
+	if err != nil {
+		return nil, err
+	}
+	if len(report.Videos) > 0 {
+		ids := []string{}
+		for _, row := range report.Videos {
+			ids = append(ids, row.Key)
+		}
+		var videos []model.Video
+		if err := s.DB.WithContext(ctx).Unscoped().Where("id IN ? AND workspace_id=?", ids, w).Find(&videos).Error; err != nil {
+			return nil, err
+		}
+		for i := range report.Videos {
+			report.Videos[i].Title = "Untitled video"
+			for _, vid := range videos {
+				if vid.ID.String() == report.Videos[i].Key {
+					if vid.Title != "" {
+						report.Videos[i].Title = vid.Title
+					}
+					break
+				}
+			}
+		}
+	}
+	return report, nil
 }
 func (s *AnalyticsService) Concurrency(ctx context.Context, w uuid.UUID, v *uuid.UUID, r dto.DateRange) ([]dto.LiveRow, error) {
 	c, err := s.queryClient()

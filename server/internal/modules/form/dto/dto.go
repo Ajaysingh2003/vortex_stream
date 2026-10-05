@@ -132,4 +132,17 @@ type SubmitFormReq struct {
 	SessionID   uuid.UUID         `json:"sessionId" binding:"required"`
 	Skipped     bool              `json:"skipped"`
 	Answers     map[string]string `json:"answers"`
+
+	// Part 2 Attribution snapshot context
+	PlaybackSessionID    *uuid.UUID `json:"playbackSessionId"`
+	MediaRevisionID      string     `json:"mediaRevisionId"`
+	ExperienceRevisionID string     `json:"experienceRevisionId"`
+	PageURL              string     `json:"pageUrl"`
+	Referrer             string     `json:"referrer"`
+	UTMSource            string     `json:"utmSource"`
+	UTMMedium            string     `json:"utmMedium"`
+	UTMCampaign          string     `json:"utmCampaign"`
+	Surface              string     `json:"surface"`
+	Country              string     `json:"-"`
+	CountrySource        string     `json:"-"`
 }
