@@ -185,26 +185,8 @@ export const userRouter = createTRPCRouter({
     } catch (error) {
     }
   }),
-  profile:protectedProcedure(["Admin","User"]).query(async({ctx})=>{
-    try {
-      return ctx.user
-    } 
-    catch (error:any) {
-
-  if (axios.isAxiosError(error)) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: error.response?.data?.message || "Login failed",
-      cause: error.response?.data,
-    });
-  }
-
-  throw new TRPCError({
-    code: "INTERNAL_SERVER_ERROR",
-    message: "Something went wrong",
-  });
-    }
-
+  profile: getUserProcedure.query(async ({ ctx }) => {
+    return ctx.user ? ctx.user : null;
   }),
   logout: protectedProcedure(["Admin", "User"]).mutation(async ({ ctx }) => {
     const cookieStore = await cookies();

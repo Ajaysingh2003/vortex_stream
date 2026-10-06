@@ -53,7 +53,7 @@ export default function VideoInfraDashboard() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-black/[0.08] bg-white shadow-[25px_0_20px_-20px_#00000040,-25px_0_20px_-20px_rgba(0,0,0,0.25)]   select-none"
+      className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-black/[0.08] bg-white shadow-[-25px_0_35px_-10px_rgb(0_0_0/0.25),25px_0_35px_-10px_rgb(0_0_0/0.25)] zshadow-[25px_0_20px_-20px_#00000040,-25px_0_20px_-20px_rgba(0,0,0,0.25)]   select-none"
       style={{
         // Locks proportionate height only when scaled down on smaller screens
         height: isScaled ? `${VIRTUAL_HEIGHT * scale}px` : "auto",

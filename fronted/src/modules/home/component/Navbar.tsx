@@ -45,6 +45,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useTRPC } from "@/trpc/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { UserDataType } from "@/modules/types";
 
 /* -------------------------------------------------------------------------- */
 /* Navigation Data                                                            */
@@ -53,13 +56,15 @@ import {
 const platformItems = [
   {
     title: "Video Streaming",
-    description: "Low-latency adaptive playback across web, mobile, and smart TVs.",
+    description:
+      "Low-latency adaptive playback across web, mobile, and smart TVs.",
     href: "/platform/streaming",
     icon: PlayCircle,
   },
   {
     title: "Transcoding Pipeline",
-    description: "Cloud-native multi-rendition HLS & AV1 encoding with zero wait.",
+    description:
+      "Cloud-native multi-rendition HLS & AV1 encoding with zero wait.",
     href: "/platform/transcoding",
     icon: Cpu,
   },
@@ -71,19 +76,22 @@ const platformItems = [
   },
   {
     title: "Viewer Telemetry",
-    description: "Per-frame retention heatmaps, rebuffering stats, and geo metrics.",
+    description:
+      "Per-frame retention heatmaps, rebuffering stats, and geo metrics.",
     href: "/platform/analytics",
     icon: BarChart3,
   },
   {
     title: "Security & DRM",
-    description: "Signed token gating, AES-128 keys, and dynamic forensic watermarks.",
+    description:
+      "Signed token gating, AES-128 keys, and dynamic forensic watermarks.",
     href: "/platform/security",
     icon: ShieldCheck,
   },
   {
     title: "Modern Player",
-    description: "Under 18kB gzip runtime with custom theme tokens and speed controls.",
+    description:
+      "Under 18kB gzip runtime with custom theme tokens and speed controls.",
     href: "/platform/player",
     icon: Video,
   },
@@ -92,7 +100,8 @@ const platformItems = [
 const developerItems = [
   {
     title: "Documentation",
-    description: "Architectural quickstarts, API manuals, and integration guides.",
+    description:
+      "Architectural quickstarts, API manuals, and integration guides.",
     href: "/docs",
     icon: BookOpen,
   },
@@ -104,13 +113,15 @@ const developerItems = [
   },
   {
     title: "Client Libraries",
-    description: "First-party SDKs for React, Next.js, Node.js, Python, and Go.",
+    description:
+      "First-party SDKs for React, Next.js, Node.js, Python, and Go.",
     href: "/docs/sdks",
     icon: Code2,
   },
   {
     title: "Webhooks",
-    description: "Idempotent event dispatch for upload and transcode milestones.",
+    description:
+      "Idempotent event dispatch for upload and transcode milestones.",
     href: "/docs/webhooks",
     icon: Radio,
   },
@@ -119,19 +130,22 @@ const developerItems = [
 const solutionItems = [
   {
     title: "SaaS Platforms",
-    description: "Native white-labeled video processing and custom player embeds.",
+    description:
+      "Native white-labeled video processing and custom player embeds.",
     href: "/solutions/saas",
     icon: Cloud,
   },
   {
     title: "Online Education",
-    description: "Anti-piracy session gating, student watermarks, and progress sync.",
+    description:
+      "Anti-piracy session gating, student watermarks, and progress sync.",
     href: "/solutions/education",
     icon: BookOpen,
   },
   {
     title: "Media & Creators",
-    description: "High-throughput delivery with zero buffer delays and HDR color.",
+    description:
+      "High-throughput delivery with zero buffer delays and HDR color.",
     href: "/solutions/media",
     icon: Video,
   },
@@ -144,6 +158,11 @@ const solutionItems = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
+  const trpc = useTRPC();
+
+  const { data: user } = useSuspenseQuery(trpc.user.profile.queryOptions());
+
+  const userData = user as UserDataType;
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     handleScroll();
@@ -157,7 +176,7 @@ export default function Navbar() {
         "fixed inset-x-0 top-0 z-[100] w-full transition-all duration-300 ease-out",
         scrolled
           ? "border-b border-black/[0.06] bg-[#faf9f5]/80 shadow-[0_8px_30px_-15px_rgba(20,22,16,0.08)] backdrop-blur-xl"
-          : "border-b border-transparent bg-transparent"
+          : "border-b border-transparent bg-transparent",
       )}
     >
       <nav className="mx-auto flex h-[70px] w-full max-w-[1240px] items-center justify-between px-5 sm:px-8">
@@ -165,7 +184,10 @@ export default function Navbar() {
         {/* Brand & Left Navigation Links                                     */}
         {/* ================================================================= */}
         <div className="flex items-center gap-8">
-          <Link href="/" className="group flex items-center gap-2.5 select-none">
+          <Link
+            href="/"
+            className="group flex items-center gap-2.5 select-none"
+          >
             <div className="flex size-8.5 items-center justify-center overflow-hidden rounded-xl border border-black/[0.08] bg-white shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-black/20">
               <Image
                 src="/intigration/dropbox.png"
@@ -228,34 +250,42 @@ export default function Navbar() {
         {/* ================================================================= */}
         {/* Right CTA Dock                                                    */}
         {/* ================================================================= */}
-        <div className="hidden items-center gap-3 lg:flex">
-          <Link
-            href="/docs"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#64675e] transition-colors hover:text-[#171812]"
-          >
-            <Terminal className="size-3.5" />
-            <span>API Docs</span>
-          </Link>
-
-          <Button
-            // variant="ghost"
-            asChild
-            className="h-9 rounded-xl px-3.5 text-xs font-medium secondary-btn"
-          >
-            <Link href="/sign-in">Sign in</Link>
-          </Button>
-
-          <Button
-            asChild
-            className="group h-9 rounded-xl  px-4 text-xs font-bold text-[#151c04] shadow-2xs transition-all  primary-btn   hover:shadow-xs active:scale-[0.98]"
-          >
-            <Link href="/login">
-              <span>Start Building</span>
-              <ArrowRight className="ml-1.5 size-3 transition-transform duration-200 group-hover:translate-x-0.5" />
+        {!userData && (
+          <div className="hidden items-center gap-3 lg:flex">
+            <Link
+              href="/docs"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#64675e] transition-colors hover:text-[#171812]"
+            >
+              <Terminal className="size-3.5" />
+              <span>API Docs</span>
             </Link>
-          </Button>
-        </div>
 
+            <Button
+              // variant="ghost"
+              asChild
+              className="h-9 rounded-xl px-3.5 text-xs font-medium secondary-btn"
+            >
+              <Link href="/login">Log in</Link>
+            </Button>
+
+            <Button
+              asChild
+              className="group h-9 rounded-xl  px-4 text-xs font-bold text-[#151c04] shadow-2xs transition-all  primary-btn   hover:shadow-xs active:scale-[0.98]"
+            >
+              <Link href="/login">
+                <span>Start at free</span>
+                <ArrowRight className="ml-1.5 size-3 transition-transform duration-200 group-hover:translate-x-0.5" />
+              </Link>
+            </Button>
+          </div>
+        )}
+        {userData && (
+          <div className="hidden items-center gap-3 lg:flex">
+            <Link href="/console" className=" primary-btn">
+              Dashboard
+            </Link>
+          </div>
+        )}
         {/* ================================================================= */}
         {/* Mobile Navigation Trigger & Drawer                                */}
         {/* ================================================================= */}
@@ -294,13 +324,19 @@ export default function Navbar() {
 
               <div className="flex h-[calc(100dvh-65px)] flex-col justify-between">
                 <div className="flex-1 overflow-y-auto px-4 py-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                  <MobileNavGroup title="Platform Capabilities" items={platformItems} />
+                  <MobileNavGroup
+                    title="Platform Capabilities"
+                    items={platformItems}
+                  />
                   <MobileNavGroup title="Solutions" items={solutionItems} />
                   <MobileNavGroup title="Developers" items={developerItems} />
 
                   <div className="mt-4 border-t border-black/[0.06] pt-3">
                     <MobileSimpleRow href="/pricing" label="Pricing" />
-                    <MobileSimpleRow href="/docs" label="Documentation & Guides" />
+                    <MobileSimpleRow
+                      href="/docs"
+                      label="Documentation & Guides"
+                    />
                   </div>
                 </div>
 
@@ -330,6 +366,7 @@ export default function Navbar() {
             </SheetContent>
           </Sheet>
         </div>
+        
       </nav>
     </header>
   );
@@ -375,7 +412,8 @@ function PlatformMenu() {
               Distributed Engine
             </h4>
             <p className="mt-1.5 text-[11px] leading-relaxed text-[#73766d]">
-              Upload source files and stream multi-bitrate HLS ladders backed by Anycast edge PoPs.
+              Upload source files and stream multi-bitrate HLS ladders backed by
+              Anycast edge PoPs.
             </p>
           </div>
 
@@ -396,9 +434,13 @@ function PlatformMenu() {
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
           </span>
-          <span className="font-subheading font-medium">All edge systems operational</span>
+          <span className="font-subheading font-medium">
+            All edge systems operational
+          </span>
         </div>
-        <span className="font-subheading text-neutral-400">310+ Global PoPs Active</span>
+        <span className="font-subheading text-neutral-400">
+          310+ Global PoPs Active
+        </span>
       </div>
     </div>
   );

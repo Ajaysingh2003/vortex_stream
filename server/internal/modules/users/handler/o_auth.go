@@ -128,25 +128,37 @@ func (h *UserHandler) GoogleCallback(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "jwt failed"})
 		return
 	}
+
+	cookieDomain := ""
+	if os.Getenv("APP_ENV") == "production" {
+		cookieDomain = os.Getenv("COOKIE_DOMAIN")
+	}
+
 	c.SetCookie(
-	"access_token",
-	access_token,
-	60*90,
-	"/",
-	"localhost",
-	false,         // set true in production (HTTPS)
-	true,          // HttpOnly
-	)
-	
-	c.SetCookie(
-	"workspace_id",
-	activeWorkspace.ID.String(),
-	60*90,    // 90 minutes
-	"/",
-	"localhost",
-	false,         // set true in production (HTTPS)
-	true,          // HttpOnly
+		"access_token",
+		access_token,
+		60*90,
+		"/",
+		cookieDomain,
+		os.Getenv("APP_ENV") == "production",
+		true,
 	)
 
-	c.Redirect(http.StatusTemporaryRedirect,fronted_url)
+	workspaceID := ""
+	if activeWorkspace != nil {
+		workspaceID = activeWorkspace.ID.String()
+	}
+	if workspaceID != "" {
+		c.SetCookie(
+			"workspace_id",
+			workspaceID,
+			60*90,
+			"/",
+			cookieDomain,
+			os.Getenv("APP_ENV") == "production",
+			true,
+		)
+	}
+
+	c.Redirect(http.StatusTemporaryRedirect, fronted_url)
 }

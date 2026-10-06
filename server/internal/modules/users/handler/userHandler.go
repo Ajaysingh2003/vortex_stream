@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/ajaysingh2003/vortex-stream/internal/api/domain"
@@ -144,14 +145,19 @@ func (h *UserHandler) VerifyOTP (c *gin.Context) {
 		return
 	}
 
+	cookieDomain := ""
+	if os.Getenv("APP_ENV") == "production" {
+		cookieDomain = os.Getenv("COOKIE_DOMAIN")
+	}
+
 	c.SetCookie(
-	"access_token",
-	access_token,
-	60*90,    // 90 minutes
-	"/",
-	"localhost",
-	false,         // set true in production (HTTPS)
-	true,          // HttpOnly
+		"access_token",
+		access_token,
+		60*90, // 90 minutes
+		"/",
+		cookieDomain,
+		os.Getenv("APP_ENV") == "production",
+		true, // HttpOnly
 	)
 
 	// c.JSON(http.StatusOK, gin.H{"success":true,"message": "User Registed Successfully","access_token":access_token})
@@ -209,24 +215,29 @@ func (h *UserHandler) Login (c *gin.Context){
 		return
 	}
 
+	cookieDomain := ""
+	if os.Getenv("APP_ENV") == "production" {
+		cookieDomain = os.Getenv("COOKIE_DOMAIN")
+	}
+
 	c.SetCookie(
-	"access_token",
-	access_token,
-	60*90,    
-	"/",
-	"localhost",
-	false,         
-	true,          
+		"access_token",
+		access_token,
+		60*90,
+		"/",
+		cookieDomain,
+		os.Getenv("APP_ENV") == "production",
+		true,
 	)
 
 	c.SetCookie(
-	"workspace_id",
-	activeWorkspace.ID.String(),
-	60*90,    // 90 minutes
-	"/",
-	"localhost",
-	false,         // set true in production (HTTPS)
-	true,          // HttpOnly
+		"workspace_id",
+		activeWorkspace.ID.String(),
+		60*90, // 90 minutes
+		"/",
+		cookieDomain,
+		os.Getenv("APP_ENV") == "production",
+		true,
 	)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful!","token":access_token,"data":access_claims,"workspace_id":activeWorkspace.ID})

@@ -132,9 +132,9 @@ const TRIAL_POINTS = ["14-day free trial", "No credit card", "Cancel anytime"];
 /* Main Section                                                               */
 /* -------------------------------------------------------------------------- */
 
-export default function ContactUs() {
+export default function FinalCta() {
   const reduce = useReducedMotion();
-
+  
   const [modalOpen, setModalOpen] = useState(false);
 
   const closeModal = useCallback(() => {
