@@ -152,6 +152,8 @@ export function OverlayButton({
 export function LogoOverlay({ branding }: { branding: brandingType }) {
   if (!branding.logoUrl) return null;
 
+  const normalizedPosition = (branding.logoPosition || "top-right").replace("_", "-");
+
   const positionClass: Record<string, string> = {
     "top-left": "left-4 top-4",
     "top-right": "right-4 top-4",
@@ -162,12 +164,15 @@ export function LogoOverlay({ branding }: { branding: brandingType }) {
   return (
     <img
       className={cx(
-        "pointer-events-none absolute z-20 h-auto max-w-[22%] drop-shadow-[0_5px_12px_rgba(0,0,0,0.35)]",
-        positionClass[branding.logoPosition] || positionClass["top-right"],
+        "pointer-events-none absolute z-20 h-auto max-w-[22%] drop-shadow-[0_5px_12px_rgba(0,0,0,0.35)] object-contain",
+        positionClass[normalizedPosition] || positionClass["top-right"],
       )}
       src={branding.logoUrl}
-      alt=""
-      style={{ width: Math.max(32, branding.logoWidth || 80) }}
+      alt="Player brand logo"
+      style={{ width: Math.max(24, branding.logoWidth || 60) }}
+      onError={(e) => {
+        (e.target as HTMLElement).style.display = "none";
+      }}
     />
   );
 }

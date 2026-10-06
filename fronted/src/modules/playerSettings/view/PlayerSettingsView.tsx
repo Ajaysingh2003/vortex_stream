@@ -1,91 +1,166 @@
 "use client";
-import { Button } from "@/components/ui/button";
+
 import React, { useState } from "react";
-import { Save, RotateCcw } from "lucide-react";
-// import Settings from '../component/Settings'
+import { Button } from "@/components/ui/button";
+import { Save, RotateCcw, Loader2 } from "lucide-react";
 import Preview from "../component/Preview";
-import { Settings } from "../component/Settings";
+import Settings from "../component/Settings";
 import {
+  VideoListType,
   VideoPlayerMetaData,
   VideoPlayerSettings,
   WorkspaceType,
 } from "@/modules/types";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import toast from "react-hot-toast";
-function PlayerSettingsView() {
-  // const {playerSettings,setPlayerSettings}=useSetting()!
+import TopHeader from "@/modules/console/component/TopHeader";
 
+const DEFAULT_SETTINGS: VideoPlayerSettings = {
+  general: {
+    ctaEnabled: false,
+    autoplay: false,
+    preload: true,
+    loop: false,
+    captions: false,
+  },
+  controls: {
+    disableSeekbar: false,
+    downloadButton: false,
+    showControls: true,
+    skipForward: false,
+    skipBackward: true,
+    fullScreen: true,
+    volume: true,
+    playbackRate: false,
+    pipButton: false,
+    muteButton: false,
+  },
+  branding: {
+    logoUrl: "",
+    logoPosition: "top_right",
+    logoWidth: 50,
+    backgroundColor: "#050608",
+    primaryColor: "#ffffff",
+    accentColor: "#B3E61D",
+    iconColor: "#ffffff",
+  },
+  security: {
+    watermarkEnabled: false,
+    watermarkTextType: "none",
+    watermarkImage: "",
+  },
+};
+
+export default function PlayerSettingsView() {
   const trpc = useTRPC();
+
+  const { data: workspace } = useSuspenseQuery(
+    trpc.user.getWorkspace.queryOptions(),
+  );
+  const workspaceData = workspace as WorkspaceType;
+
+  // Retrieve optional video for preview (fallback to verified sample video)
+  const { data: videoData } = useQuery(
+    trpc.video.videoListFromWorkspace.queryOptions({
+      workspaceId: workspaceData?.id || "",
+      limit: 1,
+      cursor: "",
+      date: "any",
+      visibility: "all",
+      sort: "created_desc",
+    }),
+  );
+  const videos = (videoData as VideoListType | undefined)?.items ?? [];
+  const previewVideoId =
+    videos[0]?.id || "6c82db12-723a-4678-a31f-9cb214a91d06";
 
   const { data: player } = useSuspenseQuery(
     trpc.videoPlayer.getPlayerMetaDataServer.queryOptions(),
   );
 
-  // A workspace may not have saved player settings yet. Keep the editor usable
-  // with its built-in defaults until settings are saved for the first time.
   const playerSettingData = player as Partial<VideoPlayerMetaData> | null;
   const generalSettings = playerSettingData?.general_settings;
   const controlSettings = playerSettingData?.control_settings;
   const brandingSettings = playerSettingData?.branding_settings;
   const securitySettings = playerSettingData?.security_settings;
+
   const [playerSettings, setPlayerSettings] = useState<VideoPlayerSettings>({
     general: {
-      ctaEnabled: generalSettings?.ctaEnabled ?? false,
-      autoplay: generalSettings?.autoplay ?? false,
-      preload: generalSettings?.preload ?? true,
-      loop: generalSettings?.loop ?? false,
-      captions: generalSettings?.captions ?? false,
+      ctaEnabled:
+        generalSettings?.ctaEnabled ?? DEFAULT_SETTINGS.general.ctaEnabled,
+      autoplay: generalSettings?.autoplay ?? DEFAULT_SETTINGS.general.autoplay,
+      preload: generalSettings?.preload ?? DEFAULT_SETTINGS.general.preload,
+      loop: generalSettings?.loop ?? DEFAULT_SETTINGS.general.loop,
+      captions: generalSettings?.captions ?? DEFAULT_SETTINGS.general.captions,
     },
     controls: {
       disableSeekbar:
-      controlSettings?.disableSeekbar ?? false,
+        controlSettings?.disableSeekbar ??
+        DEFAULT_SETTINGS.controls.disableSeekbar,
       downloadButton:
-      controlSettings?.downloadButton ?? false,
-      showControls: controlSettings?.showControls ?? true,
-      skipForward: controlSettings?.skipForward ?? false,
-      skipBackward: controlSettings?.skipBackward ?? true,
-      fullScreen: controlSettings?.fullScreen ?? true,
-      volume: controlSettings?.volume ?? true,
-
-      playbackRate: controlSettings?.playbackRate ?? false,
-      pipButton: controlSettings?.pipButton ?? false,
-      muteButton: controlSettings?.muteButton ?? false,
+        controlSettings?.downloadButton ??
+        DEFAULT_SETTINGS.controls.downloadButton,
+      showControls:
+        controlSettings?.showControls ?? DEFAULT_SETTINGS.controls.showControls,
+      skipForward:
+        controlSettings?.skipForward ?? DEFAULT_SETTINGS.controls.skipForward,
+      skipBackward:
+        controlSettings?.skipBackward ?? DEFAULT_SETTINGS.controls.skipBackward,
+      fullScreen:
+        controlSettings?.fullScreen ?? DEFAULT_SETTINGS.controls.fullScreen,
+      volume: controlSettings?.volume ?? DEFAULT_SETTINGS.controls.volume,
+      playbackRate:
+        controlSettings?.playbackRate ?? DEFAULT_SETTINGS.controls.playbackRate,
+      pipButton:
+        controlSettings?.pipButton ?? DEFAULT_SETTINGS.controls.pipButton,
+      muteButton:
+        controlSettings?.muteButton ?? DEFAULT_SETTINGS.controls.muteButton,
     },
     branding: {
-      logoUrl: brandingSettings?.logoUrl ?? "",
-      logoPosition: brandingSettings?.logoPosition ?? "top_right",
-      logoWidth: brandingSettings?.logoWidth ?? 50,
-      backgroundColor: brandingSettings?.backgroundColor ?? "#000000",
-      primaryColor: brandingSettings?.primaryColor ?? "#000000",
-      accentColor: brandingSettings?.accentColor ?? "#000000",
-      iconColor: brandingSettings?.iconColor ?? "#000000",
+      logoUrl: brandingSettings?.logoUrl ?? DEFAULT_SETTINGS.branding.logoUrl,
+      logoPosition:
+        brandingSettings?.logoPosition ??
+        DEFAULT_SETTINGS.branding.logoPosition,
+      logoWidth:
+        brandingSettings?.logoWidth ?? DEFAULT_SETTINGS.branding.logoWidth,
+      backgroundColor:
+        brandingSettings?.backgroundColor ??
+        DEFAULT_SETTINGS.branding.backgroundColor,
+      primaryColor:
+        brandingSettings?.primaryColor ??
+        DEFAULT_SETTINGS.branding.primaryColor,
+      accentColor:
+        brandingSettings?.accentColor ?? DEFAULT_SETTINGS.branding.accentColor,
+      iconColor:
+        brandingSettings?.iconColor ?? DEFAULT_SETTINGS.branding.iconColor,
     },
     security: {
-      watermarkEnabled: securitySettings?.watermarkEnabled ?? false,
-      watermarkTextType: securitySettings?.watermarkTextType ?? "none",
-      watermarkImage: securitySettings?.watermarkImage ?? "",
+      watermarkEnabled:
+        securitySettings?.watermarkEnabled ??
+        DEFAULT_SETTINGS.security.watermarkEnabled,
+      watermarkTextType:
+        securitySettings?.watermarkTextType ??
+        DEFAULT_SETTINGS.security.watermarkTextType,
+      watermarkImage:
+        securitySettings?.watermarkImage ??
+        DEFAULT_SETTINGS.security.watermarkImage,
     },
   });
 
-  // const trpc = useTRPC();
-  const { data: workspace } = useSuspenseQuery(
-    trpc.user.getWorkspace.queryOptions(),
-  );
-  const workspaceData = workspace as WorkspaceType;
   const playerMutate = useMutation(
     trpc.videoPlayer.createVideoPlayerSettings.mutationOptions({
       onError: (err) => {
-        toast.error(err.message || "Something went wrong");
+        toast.error(err.message || "Failed to save settings");
       },
       onSuccess: () => {
-        toast.success("Changes Saved.");
+        toast.success("Player settings saved successfully");
       },
     }),
   );
 
-  const handleChanges = async () => {
-    if (!workspaceData.id) return;
+  const handleSaveChanges = async () => {
+    if (!workspaceData?.id) return;
     await playerMutate.mutateAsync({
       workspace_id: workspaceData.id,
       general: playerSettings.general,
@@ -95,51 +170,66 @@ function PlayerSettingsView() {
     });
   };
 
+  const handleReset = () => {
+    setPlayerSettings(DEFAULT_SETTINGS);
+    toast.success("Reset settings to default");
+  };
+
   return (
-    <div className=" w-full h-full px-4  p-3 md:px-8  md:py-4">
-      {/* {JSON.stringify(playerSettingData, null, 2)} */}
-      <div className="flex items-center justify-between  my-2 md:my-4">
-        <div className="right ">
-          <h3 className="font-heading leading-8 font-bold tracking-wider text-lg md:text-xl lg:2xl capitalize">
-            Player Settings
-          </h3>
-          <p className="font-content text-sm md:text-[15px]">
-            build the perfect experience for your audience
-          </p>
+    <div className="w-full min-h-screen px-4 py-6 md:px-8 md:py-8 max-w-7xl mx-auto flex flex-col gap-6">
+      {/* Top Action Bar */}
+
+      <TopHeader
+      otherLine={true}
+        Header="Player Settings"
+        Btnchild={
+          <div className="flex flex-row gap-3">
+            <div className="flex items-center gap-3 self-end sm:self-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleReset}
+                className="h-9 px-3 rounded-lg secondary-btn border border-black/10 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <RotateCcw className="size-3.5 text-zinc-500 mr-1.5" />
+                <span className="font-subheading text-xs font-medium text-zinc-700 dark:text-zinc-200">
+                  Reset to default
+                </span>
+              </Button>
+
+              <button
+                type="button"
+                disabled={playerMutate.isPending}
+                onClick={handleSaveChanges}
+                className="h-9 px-4 rounded-lg primary-btn  font-subheadingz text-xs shadow-xs transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {playerMutate.isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Save className="size-3.5" />
+                )}
+                <span>Save Changes</span>
+              </button>
+            </div>
+          </div>
+        }
+      />
+
+      {/* Main Two-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start w-full">
+        {/* Left Column: Real-time Video Preview */}
+        <div className="lg:col-span-7 xl:col-span-8 w-full lg:sticky lg:top-6">
+          <Preview videoId={previewVideoId} playerSettings={playerSettings} />
         </div>
-        <div className="left flex items-center gap-4">
-          <Button variant={"outline"} font-heading className="rounded-lg">
-            <RotateCcw className="size-4" />{" "}
-            <span className="text-sm tracking-tight">Reset to default</span>
-          </Button>
-          <Button
-            disabled={playerMutate.isPending}
-            onClick={handleChanges}
-            style={{ padding: "10px" }}
-            className="rounded-lg font-heading font-bold text-sm md:text-sm tracking-wide md:-tracking-wide bg-[#7067f3]  bg-primary-btn px-2"
-          >
-            {" "}
-            <Save className="size-4" /> Save Changes
-          </Button>
-        </div>
-      </div>
-      <div className=" grid grid-cols-1 md:grid-cols-12 gap-3  h-full w-full">
-        <div className=" col-span-7  h-full     w-full">
+
+        {/* Right Column: Player Settings Panel */}
+        <div className="lg:col-span-5 xl:col-span-4 w-full">
           <Settings
             playerSettings={playerSettings}
             setPlayerSettings={setPlayerSettings}
-          >
-            <Settings.Menu />
-            <Settings.Content />
-          </Settings>
-        </div>
-        <div className=" col-span-5 w-full">
-          <Preview />
+          />
         </div>
       </div>
     </div>
   );
-  
 }
-
-export default PlayerSettingsView;

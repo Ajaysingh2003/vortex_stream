@@ -44,7 +44,7 @@ export default async function Page({
   }
 
   return (
-    <div className="h-screen w-full overflow-hidden bg-transparent">
+    <div className="fixed inset-0 h-full w-full overflow-hidden bg-transparent border-0 outline-none">
       <EmbedView asset={video} />
     </div>
   );

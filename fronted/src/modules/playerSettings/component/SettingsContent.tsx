@@ -1,29 +1,22 @@
-import React from 'react'
-import GeneralSetting from './GeneralSetting'
-import ControlsSettings from './ControlsSettings'
-import Branding from './Branding'
-// import SubTitle from './SubTitle'
-import Security from './Security'
-import Advance from './Advance'
-// import Cta from './Cta'
+"use client";
 
-function SettingsContent({activeOption}:{activeOption:string | undefined}) {
+import React from "react";
+import PlayerTab from "./PlayerTab";
+import AppearanceTab from "./AppearanceTab";
+import AdvancedTab from "./AdvancedTab";
 
-    
-    
-
-  switch (activeOption){
-    case 'general':
-        return <GeneralSetting/>
-    case 'controls':
-        return <ControlsSettings/>
-    case 'branding':
-        return <Branding/>
-    case 'security':
-        return <Security/>
-    // case 'cta':
-    //     return <Cta/>
+export default function SettingsContent({
+  activeOption,
+}: {
+  activeOption: "player" | "appearance" | "advanced" | string | undefined;
+}) {
+  switch (activeOption) {
+    case "appearance":
+      return <AppearanceTab />;
+    case "advanced":
+      return <AdvancedTab />;
+    case "player":
+    default:
+      return <PlayerTab />;
   }
 }
-
-export default SettingsContent

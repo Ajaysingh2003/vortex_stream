@@ -24,26 +24,72 @@ function VideoPlayer({ asset }: { asset: VideoAsset }) {
     }),
   );
 
+  const [liveSettings, setLiveSettings] = React.useState<Partial<VideoPlayerMetaData> | null>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: "PLAYER_EMBED_READY" }, "*");
+    }
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "UPDATE_PLAYER_SETTINGS" && event.data.settings) {
+        const s = event.data.settings;
+        setLiveSettings({
+          general_settings: s.general,
+          control_settings: s.controls,
+          branding_settings: s.branding,
+          security_settings: s.security,
+        });
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
   const experience = useQuery(trpc.videoPlayer.getExperience.queryOptions({ videoId: asset.id, workspaceId: asset.WorkspaceId }));
 
   const playerMetaData = {
     ...defaultPlayer,
     ...(player as Partial<VideoPlayerMetaData> | null),
-    general_settings: { ...defaultPlayer.general_settings, ...(player as Partial<VideoPlayerMetaData> | null)?.general_settings },
-    control_settings: { ...defaultPlayer.control_settings, ...(player as Partial<VideoPlayerMetaData> | null)?.control_settings },
-    branding_settings: { ...defaultPlayer.branding_settings, ...(player as Partial<VideoPlayerMetaData> | null)?.branding_settings },
-    security_settings: { ...defaultPlayer.security_settings, ...(player as Partial<VideoPlayerMetaData> | null)?.security_settings },
+    ...(liveSettings || {}),
+    general_settings: {
+      ...defaultPlayer.general_settings,
+      ...(player as Partial<VideoPlayerMetaData> | null)?.general_settings,
+      ...(liveSettings?.general_settings || {}),
+    },
+    control_settings: {
+      ...defaultPlayer.control_settings,
+      ...(player as Partial<VideoPlayerMetaData> | null)?.control_settings,
+      ...(liveSettings?.control_settings || {}),
+    },
+    branding_settings: {
+      ...defaultPlayer.branding_settings,
+      ...(player as Partial<VideoPlayerMetaData> | null)?.branding_settings,
+      ...(liveSettings?.branding_settings || {}),
+    },
+    security_settings: {
+      ...defaultPlayer.security_settings,
+      ...(player as Partial<VideoPlayerMetaData> | null)?.security_settings,
+      ...(liveSettings?.security_settings || {}),
+    },
   };
   
-  if (experience.isPending) return <div role="status" className="grid h-full place-items-center bg-black text-sm text-white/70">Loading video…</div>;
-  if (experience.isError) return <div role="alert" className="flex h-full flex-col items-center justify-center gap-3 bg-black p-6 text-center text-sm text-white"><p>Unable to load this video’s settings.</p><button className="rounded-lg bg-primary px-4 py-2 text-neutral-950" onClick={() => void experience.refetch()}>Try again</button></div>;
+  const fallbackExperience = React.useMemo(() => ({
+    form: null,
+    chapters: [],
+    ctas: [],
+    subtitles: [],
+    endScreen: null,
+  }), []);
+
+  const experienceData = experience.data || fallbackExperience;
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full overflow-hidden border-0 outline-none">
       <ProductionVideoPlayer
         key={asset.id}
         asset={asset}
-        experience={experience.data}
+        experience={experienceData}
         player={playerMetaData}
         cdnBaseUrl={process.env.NEXT_PUBLIC_CDN_URL || ""}
       />

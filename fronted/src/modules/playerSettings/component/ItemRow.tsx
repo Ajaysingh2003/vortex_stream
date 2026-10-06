@@ -1,40 +1,58 @@
-import { Switch } from "@/components/ui/switch";
-import React from "react";
+"use client";
 
-interface RowType {
+import React from "react";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+
+interface ItemRowProps {
   label: string;
-  description: string;
-  onChange: (checked: boolean) => void;
-  icon: React.ReactNode;
+  description?: string;
+  icon?: React.ReactNode;
   checked: boolean;
+  onChange: (checked: boolean) => void;
+  className?: string;
 }
-function ItemRow({ label, description, onChange, icon, checked }: RowType) {
-    
+
+export default function ItemRow({
+  label,
+  description,
+  icon,
+  checked,
+  onChange,
+  className,
+}: ItemRowProps) {
   return (
-    <section className="w-full border-b-[0.5px] border-stone-200">
-      <div className="w-full grid grid-cols-[40px_1fr_20px] pb-3 gap-3">
-        <div className="flex items-center justify-center">
-          <div className="bg-stone-100  rounded-md px-2 py-2">{icon}</div>
-        </div>
-        <div className=" flex items-scenter justify-center  flex-col space-y-0.5 ">
-          <h3 className="text-[14px] font-medium text-stone-800 capitalize leading-none">
+    <div
+      className={cn(
+        "flex items-center justify-between py-1.5 px-1 rounded-lg transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03]",
+        className,
+      )}
+    >
+      <div className="flex items-center gap-2.5 min-w-0 pr-3">
+        {icon && (
+          <div className="flex size-4 items-center justify-center text-zinc-400 dark:text-zinc-500 shrink-0">
+            {icon}
+          </div>
+        )}
+        <div className="flex flex-col min-w-0">
+          <span className="font-subheading text-[13px] font-medium text-zinc-800 dark:text-zinc-200 tracking-tight truncate">
             {label}
-          </h3>
-          <p className=" capitalize text-stone-500 text-[13px] leading-relaxed">
-            {description}
-          </p>
-        </div>
-        <div className=" flex items-center justify-center  pr-4">
-          <Switch
-            onCheckedChange={onChange}
-            checked={checked}
-            className="data-[state=checked]:bg-indigo-600"
-            value={"yes"}
-          />
+          </span>
+          {description && (
+            <span className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">
+              {description}
+            </span>
+          )}
         </div>
       </div>
-    </section>
+
+      <div className="flex items-center shrink-0">
+        <Switch
+          checked={checked}
+          onCheckedChange={onChange}
+          className="cursor-pointer data-checked:!bg-[#B3E61D] data-[state=checked]:!bg-[#B3E61D] border-transparent shadow-none"
+        />
+      </div>
+    </div>
   );
 }
-
-export default ItemRow;

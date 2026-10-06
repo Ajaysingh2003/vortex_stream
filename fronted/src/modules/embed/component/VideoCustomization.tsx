@@ -401,6 +401,8 @@ export default function ProductionVideoPlayer({
         justify-center
         overflow-hidden
         bg-transparent
+        border-0
+        outline-none
         `,
         className,
       )}
@@ -417,6 +419,8 @@ export default function ProductionVideoPlayer({
           w-full
           overflow-visible
           font-sans
+          border-0
+          outline-none
         "
         style={{
           ["--media-background-color" as string]:
@@ -497,6 +501,8 @@ export default function ProductionVideoPlayer({
             bg-transparent
             object-contain
             object-center
+            border-0
+            outline-none
           "
         >
           {selectedSource?.type !==

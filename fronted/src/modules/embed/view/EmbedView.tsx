@@ -7,8 +7,8 @@ import { VideoAsset } from "@/modules/types";
 function EmbedView({ asset }: { asset: VideoAsset }) {
   
   return (
-    <div className="relative h-full w-full overflow-hidden bg-transparent">
-      <div className="h-full w-full">
+    <div className="relative h-full w-full overflow-hidden bg-transparent border-0 outline-none">
+      <div className="h-full w-full border-0 outline-none">
         <VideoPlayer asset={asset} />
       </div>
     </div>
